@@ -41,7 +41,30 @@ function int Main(string[] Args)
 }
 ```
 
-4. Structs
+4. Forward Declarations - forward declared structs are defined natively
+```C++
+// ...
+MyStruct* pKlass = MyStructCreate(pCtx, "FwdDecl", MY_STRUCT_ATTR_NONE);
+MyStructAddFieldAutoOffset(pKlass, "Dummy", My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_NONE); // At least one field must be defined!
+// ...
+MyAssembly* pAss = Compiler::Build(pCtx, "path/to/script.ns", {}, { pKlass });
+// ...
+```
+then on the scripting side:
+```C#
+struct FwdDecl;
+
+function int Main(string[] Args)
+{
+    // ...
+    var FwdDecl fd = new FwdDecl();
+    // access fd.Dummy as usual
+    // ...
+}
+
+```
+
+5. Structs
 ```C#
 // POD (Plain Old Data) structs contain no reference types, and *should* be stack allocated (not working at the moment)
 struct pod Float2
@@ -54,7 +77,7 @@ struct pod Float2
 // Non-POD structs are heap allocated (currently all structs are heap allocated)
 struct Person
 {
-    // When the struct is instantaited, the memory is zero-initialized; so trying to access non-primitive members will result in crashes
+    // When the struct is instantaited, the memory is zero-initialized; so trying to access reference type members will result in crashes
     var int    YOB; 
     var string ID; 
     var string Name; 
@@ -157,6 +180,7 @@ function int Main(string[] Args)
 - Inheritance, Polymorphism, Encapsulation (visibility)
 - Templates (or *Generics*)
 - Stack allocation of pod structs
+- Shift to using a register-based VM
 - Support for 32-bit types
 - Better garbage collection
 - Proper scripting API

@@ -749,6 +749,8 @@ public:
 
 	void BindDeclarations(const List<MyStruct*>& UserStructs)
 	{
+		// These *UserStructs* will be used when we forward declare them. The types will be removed 
+		// from s_ForwardedTypes and added to s_UserDefinedTypes in BindForwardDeclaration()
 		for (MyStruct* pKlass : UserStructs)
 		{
 			MyType* pType = MyTypeCreate(0u, pKlass, MY_TYPE_ATTR_NONE);
@@ -890,7 +892,6 @@ public:
 
 public:
 	static Pair<char*, MyType*>* const& GetUserDefinedTypes() noexcept { return s_UserDefinedTypes; }
-	static Pair<char*, MyType*>* const& GetForwardedTypes()   noexcept { return s_ForwardedTypes; }
 
 private:
 	/// Expressions
@@ -981,26 +982,10 @@ private:
 
 	BoundExpression* BindNameExpression(Expression* pName)
 	{
-		/*static const auto& IsWhiteSpace = [](char* const& lpText) -> bool
-		{
-			for (size_t k = 0; k < strlen(lpText); k++)
-			{
-				if (!isspace(lpText[k]))
-				{
-					return false;
-				}
-			}
-			return true;
-		};*/
-
 		NameExpression& name = pName->name;
 
 		char* const& lpName = name.Identifier.Id;
 
-		/*if (IsWhiteSpace(lpName))
-		{
-			return MakeBoundExpression_Error();
-		}*/
 		if (const auto[bFound, pVar] = m_Scope->LookupVariable(lpName); bFound)
 		{
 			return MakeBoundExpression_Name(pVar);
@@ -1683,8 +1668,8 @@ private:
 		}
 
 		BoundExpression* pValue = nullptr;
-		MyType*         pType  = nullptr;
-		MySymbol*       pVariable = nullptr;
+		MyType*          pType  = nullptr;
+		MySymbol*        pVariable = nullptr;
 		const bool       bIsLocal  = m_Function != nullptr;
 
 		if (!(pType = BindTypeSpec(VarDecl.Type)))
@@ -1746,8 +1731,8 @@ private:
 			return;
 		}
 
-		MyType**          ppParamTypes = nullptr;
-		MySymbol**        ppParamSyms  = nullptr;
+		MyType**           ppParamTypes = nullptr;
+		MySymbol**         ppParamSyms  = nullptr;
 		Pair<char*, bool>* pSeenParams  = nullptr;
 		{
 			static constexpr Pair<char*, bool> sp = {};
@@ -1967,11 +1952,6 @@ private:
 			}
 
 			MyStruct* pMemberKlass = GetStructFromType(pMemberType);
-			if (!pMemberKlass)
-			{
-				m_Diagnostics.ReportUndefinedType(GetLocation(vds.Type), GetTypeName(vds.Type));
-				goto Error;
-			}
 			MyStructAddFieldAutoOffset(pKlass, vds.Identifier.Id, pMemberType, pMemberKlass, kFieldAttribs);
 
 			FieldSymbol fs = { vds.Identifier.Id, pMemberType, nullptr };
@@ -2099,11 +2079,6 @@ private:
 			return pType;
 		}
 		
-		if (MyType* pType = stbds_shget(s_ForwardedTypes, lpName); pType != nullptr)
-		{
-			return pType;
-		}
-
 		return nullptr;
 	}
 
