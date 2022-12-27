@@ -1,0 +1,5 @@
+@Reference
+.vs
+bin-int
+bin
+**.user

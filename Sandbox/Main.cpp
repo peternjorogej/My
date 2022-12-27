@@ -1,0 +1,360 @@
+﻿
+/// Major problems that will be fixed in due time
+///  1. Array types T[]...[] - I want them to be a contiguous block of memory
+///     even with multi-dimensional arrays, i.e, T[2][2] translates to:
+///     { t, t, t, t } instead of { { t, t }, { t, t } }
+///  2. Passing functions (pointers/addresses) as parameters to functions so that
+///     we can have callbacks
+///  3. Proper FFI with C/C++. Something like P/Invoke in C# would (kind of) work,
+///     but is there a way to implement internal calls (defined as extern here)?
+///  4. Structs:
+///     - Implementing trivial structs
+///     - Using the defined methods
+///  5. Proper type serialization (Maybe Relfection in (distant) future?)
+///  6. const should modify the type and not the variable itself. This means that
+///     we can't assign to variables that have a const modifier on their types
+///  7. Initializers/(implicit)constructors: sth to initialize struct members
+///  8. Improve some of the instructions (e.g ldfld, stfld, ldelem, stelem), they do
+///     a lot and slow down the vm. Also think about inplace operations, especially
+///     in loops, e.q clt 0, 1 means cmp less than between local 0 & 1 (not pushing
+///     into evaluation stack then setting it back)
+///  9. Remove the stack size checks *? Binder and emitter should have done all the
+///     sanity checks
+/// 10. Compile time functions:
+///     - static_assert, ...
+/// 11. Better type registration. Currently I'd need to know the indices of the types
+///     of all the fields of the struct (in short, disaster). Have a name, and a list
+///     types for the fields, then create a typeinfo to be registered
+/// 12. Debugging *?
+/// 
+/// Type Serialization:
+/// - No problem with primitives, string and most struct types
+/// - The problem is when a struct has a member with an array type.
+/// - Consider:
+///     + array type T[N] (rank: 1) or T[N, ...] (rank: 1+len(...)) is serializable as:
+///           >> name
+///           >> len(dims)
+///           >> for (dim in dims) dim
+///	    + Array types to have a base type, rank and dimensions (where rank == len(dimensions)).
+///     + This way it's easier to serialize arrays, all we need it its base type and it's
+///       dimensions
+///     + Creating array types will therefore be easy:
+///           >> n = 1
+///           >> for (dim in dims) n *= dim
+///           >> for (dim in dims) n *= dim
+/// 
+/// 
+/// 
+
+#include <My/Base/IO.h>
+#include <My/Object.h>
+#include <My/VM/VM.h>
+#include <My/Utils/Utils.h>
+#include <Stb/stb_ds.h>
+#include <My/VM/Compiler.h>
+
+static void DataTypeSizes() noexcept;
+static void TestNewAPI(MyContext* pContext) noexcept;
+
+struct Complex
+{
+	double Real = 0.0;
+	double Imag = 0.0;
+};
+
+int main(int iArgc, char** ppArgv)
+{
+	MyContext* pContext = MyInitialize();
+
+	if constexpr (false)
+	{
+		DataTypeSizes();
+	}
+	if constexpr (false)
+	{
+		TestNewAPI(pContext);
+	}
+
+	MyAssembly* pAss = Compiler::Build(pContext, "Samples/Hello.ns");
+	if (pAss)
+	{
+		MyDecompile(pAss);
+		int64_t kResult = Compiler::Run(pContext, pAss, iArgc, ppArgv);
+		{
+			Console::Color Color = Console::Color::Green;
+			if (kResult != MY_RC_SUCCESS)
+			{
+				Color = Console::Color::Red;
+			}
+			Console::WriteLine(Color, "\nProgram exited with code %I64d (%s)\n", kResult, ReturnCodeString(kResult));
+		}
+	}
+
+	MyUninitialize(pContext);
+	return 0;
+}
+
+
+#if 0
+static bool AssertOkay(UniRuntimeSignal Signal) noexcept
+{
+	if (Signal != UniRuntimeSignal::Okay)
+	{
+		DebugLog::Error("Error: %s", RuntimeSignalString(Signal));
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+class InternalFunctions
+{
+public:
+	static bool PrintMessage(InternalCallbackContext* pICC) noexcept;
+	static bool FetchMessage(InternalCallbackContext* pICC) noexcept;
+};
+
+class ScriptSandbox
+{
+public:
+	ScriptSandbox()
+		: m_Context()
+	{
+		m_Context = UniInitialize();
+	}
+
+	~ScriptSandbox() noexcept
+	{
+		UniUninitialize(m_Context);
+	}
+
+	void LoadScript(const char* lpScriptFilepath) noexcept
+	{
+		MyAssembly* pAss = Compiler::Build(m_Context, lpScriptFilepath,
+		{
+			{ "PrintMessage", InternalFunctions::PrintMessage, 1 },
+			{ "FetchMessage", InternalFunctions::FetchMessage, 0 },
+		});
+		(void)pAss;
+	}
+
+	void Run() noexcept
+	{
+		bool bIsValid = false;
+
+		Console::Write("Given a positive integer N, calculate 1+2+3+4+...+N\n");
+
+		Console::Write("Enter a number: ");
+		const int64_t iMax = Console::ReadInt64();
+		MyObject oMax = MakeObject_Int64(iMax);
+
+		Call("ScriptFunction", { oMax });
+
+		Console::WriteLine("Sum([1, %I64d]) = %I64d\n", iMax, (int64_t)m_Context->VM->Pop());
+	}
+
+	bool Call(const char* lpFunction, const List<MyObject>& Argv) noexcept
+	{
+		UniRuntimeSignal Signal = MyVM::Invoke(m_Context, lpFunction, Argv);
+		return AssertOkay(Signal);
+	}
+
+private:
+	MyContext* m_Context = nullptr;
+};
+
+class Sandbox
+{
+public:
+	Sandbox()
+		: m_Context()
+	{
+		m_Context = UniInitialize();
+	}
+
+	~Sandbox() noexcept
+	{
+		UniUninitialize(m_Context);
+	}
+
+	void Init(const char* const lpScriptFilepath) noexcept
+	{
+		MyAssembly* pAss = Compiler::Build(m_Context, lpScriptFilepath,
+		{
+			{ "PrintMessage", InternalFunctions::PrintMessage, 1 },
+			{ "FetchMessage", InternalFunctions::FetchMessage, 0 },
+		});
+	}
+
+	bool Run(int iArgc, char** ppArgv) noexcept
+	{
+		if (!m_Context->Assembly)
+		{
+			return false;
+		}
+		UniRuntimeSignal Signal = Compiler::Run(m_Context, m_Context->Assembly, iArgc, ppArgv);
+		return AssertOkay(Signal);
+	}
+
+private:
+	MyContext* m_Context = nullptr;
+};
+
+
+int main(int iArgc, char** ppArgv)
+{
+	Console::WriteLine(Console::Color::Cyan, "Uni says 'Hello, World'");
+	
+	constexpr bool bRunInScriptingMode = true;
+	if constexpr (bRunInScriptingMode)
+	{
+		ScriptSandbox ssb{};
+		ssb.LoadScript("Samples/Script.ns");
+		ssb.Run();
+		return 0;
+	}
+	else
+	{
+		Sandbox sb{};
+		sb.Init("Samples/Basic.ns");
+		return sb.Run(iArgc, ppArgv) ? -1 : 0;
+	}
+}
+
+bool InternalFunctions::PrintMessage(InternalCallbackContext* pICC) noexcept
+{
+	MY_ASSERT(pICC->Argc == 1, "Invalid argument count");
+	pICC->Argv[0].Print();
+	Console::WriteLine();
+	return false;
+}
+
+bool InternalFunctions::FetchMessage(InternalCallbackContext* pICC) noexcept
+{
+	MY_ASSERT(pICC->Argc == 0, "Invalid argument count");
+
+	pICC->Out->Kind = MyObjectKind::String;
+	pICC->Out->Str  = MyStringNew(pICC->Context, "Peter Njoroge");
+	return true;
+}
+#endif // 0
+
+void DataTypeSizes() noexcept
+{
+	Console::WriteLine(Console::Color::Magenta, "Hello, World from Uni\n");
+
+	Console::WriteLine("sizeof(MyGuid)              = %I64u", sizeof(MyGuid));
+	Console::WriteLine("sizeof(MyAssembly)          = %I64u", sizeof(MyAssembly));
+	Console::WriteLine("sizeof(UniGC)                = %I64u", sizeof(MyGC));
+	Console::WriteLine("sizeof(MyStack)             = %I64u", sizeof(MyStack));
+	Console::WriteLine("sizeof(MyVM)                = %I64u", sizeof(MyVM));
+	Console::WriteLine("sizeof(MyContext)           = %I64u", sizeof(MyContext));
+
+	Console::WriteLine("sizeof(MyFunctionSignature) = %I64u", sizeof(MyFunctionSignature));
+	Console::WriteLine("sizeof(MyFunction)          = %I64u", sizeof(MyFunction));
+	Console::WriteLine("sizeof(MyMethod)            = %I64u", sizeof(MyMethod));
+	Console::WriteLine("sizeof(MyField)             = %I64u", sizeof(MyField));
+	Console::WriteLine("sizeof(MyStruct)            = %I64u", sizeof(MyStruct));
+	Console::WriteLine("sizeof(MyArrayType)         = %I64u", sizeof(MyArrayType));
+	Console::WriteLine("sizeof(MyType)              = %I64u", sizeof(MyType));
+
+	Console::WriteLine("sizeof(UniValue)             = %I64u", sizeof(MyValue));
+	Console::WriteLine("sizeof(MyObject)            = %I64u", sizeof(MyObject));
+	Console::WriteLine("sizeof(MyString)            = %I64u", sizeof(MyString));
+	Console::WriteLine("sizeof(MyArrayStride)       = %I64u", sizeof(MyArrayStride));
+	Console::WriteLine("sizeof(MyArray)             = %I64u", sizeof(MyArray));
+	
+	Console::WriteLine();
+}
+
+void TestNewAPI(MyContext* pContext) noexcept
+{
+	{
+		Console::WriteLine(Console::Color::Green, "Testing array of strings");
+
+		MyArrayStride stride = { 3ul, 0ul, 0ul, 0ul };
+		MyArray* pNames = MyArrayNew(pContext, My_Defaults.StringStruct, stride);
+		MyArraySet2(pNames, MyString*, 0, MyStringNew(pContext, "Peter"));
+		MyArraySet2(pNames, MyString*, 1, MyStringNew(pContext, "Njoroge"));
+		MyArraySet2(pNames, MyString*, 2, MyStringNew(pContext, "Julius"));
+
+		for (size_t k = 0; k < MyArrayCount(pNames); k++)
+		{
+			MyString* pName = MyArrayGet(pNames, MyString*, k);
+			Console::WriteLine(pName->Chars);
+		}
+	}
+	{
+		Console::WriteLine(Console::Color::Green, "Testing array of objects(T = Complex)");
+
+		MyArrayStride stride = { 3ul, 0ul, 0ul, 0ul };
+		MyArray* pNums = MyArrayNew(pContext, My_Defaults.ComplexStruct, stride);
+		for (size_t k = 0; k < MyArrayCount(pNums); k++)
+		{
+			const Complex Z = Complex{ Random::Float(1, 10), Random::Float(1, 10) };
+			Console::WriteLine("Complex{ %.4g, %.4gi }", Z.Real, Z.Imag);
+			MyArraySet2(pNums, Complex, k, Z);
+		}
+
+		for (size_t k = 0; k < MyArrayCount(pNums); k++)
+		{
+			const Complex& Z = MyArrayGet(pNums, Complex, k);
+			Console::WriteLine("Complex{ %.4g, %.4gi }", Z.Real, Z.Imag);
+		}
+	}
+	{
+		Console::WriteLine(Console::Color::Green, "Testing object(T = File)");
+
+		MyObject* pFile = MyObjectNew(pContext, My_Defaults.FileStruct);
+		{
+			const uint64_t kHandle = Random::Uint();
+			MyString* pPath = MyStringNew(pContext, __FILE__);
+			Console::WriteLine("File{ %I64u, %s }", kHandle, pPath->Chars);
+			MyObjectFieldSetValueAs<uint64_t>(pFile, MyObjectGetField(pFile, "Handle"), kHandle);
+			MyObjectFieldSetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "Filepath"), pPath);
+		}
+		{
+			const uint64_t& kHandle = MyObjectFieldGetValueAs<uint64_t>(pFile, MyObjectGetField(pFile, "Handle"));
+			const MyString* const& pPath = MyObjectFieldGetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "Filepath"));
+			Console::WriteLine("File{ %I64u, %s }", kHandle, pPath->Chars);
+		}
+	}
+	{
+		Console::WriteLine(Console::Color::Green, "Testing type creation & instantiation(T = MyData)");
+
+		MyStruct* pMyDataStruct = MyStructCreate(pContext, "MyData", MY_STRUCT_ATTR_NONE);
+		MyStructAddFieldAutoOffset(pMyDataStruct, "ID", My_Defaults.UintType, My_Defaults.UintStruct);
+		MyStructAddFieldAutoOffset(pMyDataStruct, "Key", My_Defaults.StringType, My_Defaults.StringStruct);
+		MyStructAddFieldAutoOffset(pMyDataStruct, "W", My_Defaults.ComplexType, My_Defaults.ComplexStruct);
+		MyStructAddFieldAutoOffset(pMyDataStruct, "Z", My_Defaults.ComplexType, My_Defaults.ComplexStruct);
+		Console::WriteLine("struct ['%s'] MyData (%uB):", pMyDataStruct->Guid.AsString(), pMyDataStruct->Size);
+		{
+			for (size_t k = 0; k < stbds_arrlenu(pMyDataStruct->Fields); k++)
+			{
+				const MyField& field = pMyDataStruct->Fields[k];
+				Console::WriteLine("   - %.2u %s [%s]", field.Offset, field.Name, field.Klass->Name);
+			}
+		}
+
+		MyObject* pMyData = MyObjectNew(pContext, pMyDataStruct);
+		{
+			const uint64_t kId = Random::Uint();
+			MyString* pKey = MyStringNew(pContext, pMyDataStruct->Guid.AsString());
+
+			MyObjectFieldSetValueAs<uint64_t>(pMyData, MyObjectGetField(pMyData, "ID"), kId);
+			MyObjectFieldSetValueAs<MyString*>(pMyData, MyObjectGetField(pMyData, "Key"), pKey);
+			MyObjectFieldSetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "W"), Complex{ 1.234, 5.678 });
+			MyObjectFieldSetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "Z"), Complex{ 9.123, 4.567 });
+		}
+		{
+			const uint64_t& kId = MyObjectFieldGetValueAs<uint64_t>(pMyData, MyObjectGetField(pMyData, "ID"));
+			MyString* const& pKey = MyObjectFieldGetValueAs<MyString*>(pMyData, MyObjectGetField(pMyData, "Key"));
+			const auto& [Wx, Wy] = MyObjectFieldGetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "W"));
+			const auto& [Zx, Zy] = MyObjectFieldGetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "Z"));
+			Console::WriteLine("MyData{ %I64u, '%s', Complex{ %.4g, %.4g }, Complex{ %.4g, %.4g } }", kId, pKey->Chars, Wx, Wy, Zx, Zy);
+}
+	}
+	Console::WriteLine();
+}

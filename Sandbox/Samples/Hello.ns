@@ -1,0 +1,14 @@
+
+extern function void Print(string Text);
+extern function void WriteLine(string Fmt, object[] Args);
+
+function static int Go() nogc
+{
+	return 0;
+}
+
+function int Main(const string[] Argv)
+{
+	Print("Hello, World from N#");
+	return Go();
+}

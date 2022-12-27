@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{AB745900-9700-880B-00AF-880BEC59880B}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>My</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>..\bin\Debug-windows-x86_64\My\</OutDir>
+    <IntDir>..\bin-int\Debug-windows-x86_64\My\</IntDir>
+    <TargetName>My</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>..\bin\Release-windows-x86_64\My\</OutDir>
+    <IntDir>..\bin-int\Release-windows-x86_64\My\</IntDir>
+    <TargetName>My</TargetName>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MY_WIN32;MY_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Source;Vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>MY_WIN32;MY_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Source;Vendor;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\My\Base\Config.h" />
+    <ClInclude Include="Source\My\Base\Core.h" />
+    <ClInclude Include="Source\My\Base\IO.h" />
+    <ClInclude Include="Source\My\Binding\BoundTree.h" />
+    <ClInclude Include="Source\My\Binding\ControlFlowGraph.h" />
+    <ClInclude Include="Source\My\Binding\Lowerer.h" />
+    <ClInclude Include="Source\My\My.h" />
+    <ClInclude Include="Source\My\Object.h" />
+    <ClInclude Include="Source\My\Syntax\Text.h" />
+    <ClInclude Include="Source\My\Syntax\Tree.h" />
+    <ClInclude Include="Source\My\Utils\Utils.h" />
+    <ClInclude Include="Source\My\VM\Builtins.h" />
+    <ClInclude Include="Source\My\VM\Compiler.h" />
+    <ClInclude Include="Source\My\VM\Emitter.h" />
+    <ClInclude Include="Source\My\VM\VM.h" />
+    <ClInclude Include="Vendor\Serializer\PnBinarySerializer.hpp" />
+    <ClInclude Include="Vendor\Stb\stb_ds.h" />
+    <ClInclude Include="Vendor\Tools\string_builder.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\My\Base\Core.cpp" />
+    <ClCompile Include="Source\My\Base\IO.cpp" />
+    <ClCompile Include="Source\My\Binding\Bind.cpp" />
+    <ClCompile Include="Source\My\Binding\ControlFlowGraph.cpp" />
+    <ClCompile Include="Source\My\Binding\Lowerer.cpp" />
+    <ClCompile Include="Source\My\My.cpp" />
+    <ClCompile Include="Source\My\Object.cpp" />
+    <ClCompile Include="Source\My\Syntax\Parse.cpp" />
+    <ClCompile Include="Source\My\Syntax\Text.cpp" />
+    <ClCompile Include="Source\My\Utils\Utils.cpp" />
+    <ClCompile Include="Source\My\VM\Builtins.cpp" />
+    <ClCompile Include="Source\My\VM\Compiler.cpp" />
+    <ClCompile Include="Source\My\VM\Emitter.cpp" />
+    <ClCompile Include="Source\My\VM\VM.cpp" />
+    <ClCompile Include="Vendor\Serializer\PnBinarySerializer.cpp" />
+    <ClCompile Include="Vendor\Stb\stb_ds.cpp" />
+    <ClCompile Include="Vendor\Tools\string_builder.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

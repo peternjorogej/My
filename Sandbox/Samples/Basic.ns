@@ -1,0 +1,41 @@
+
+extern function static void Print(string Message);
+extern function static void WriteLine(string Format, object[] vArgs);
+
+struct /*pod*/ Float3
+{
+	var float X;
+	var float Y;
+	var float Z;
+};
+
+struct Player
+{
+	var Float3 Position;
+	var Float3 Velocity;
+	var string Name;
+};
+
+const string s_Name = "Peter Njoroge Julius";
+
+function int Main(const string[] Argv)
+{
+	const string Message = Argv[0]; // "Hello, World";
+	Print(Message);
+	
+	var Player p = new Player();
+	p.Position = new Float3();
+	p.Velocity = new Float3();
+	p.Name     = s_Name;
+	{
+		auto[x, y, z] = p.Position;
+		WriteLine("Float3{ %f, %f, %f }", { x, y, z });
+	}
+	{
+		auto[x, y, z] = p.Velocity;
+		WriteLine("Float3{ %f, %f, %f }", { x, y, z });
+	}
+	Print(p.Name);
+	
+	return 0;
+}
