@@ -234,11 +234,11 @@ MyMethod*   MyMethodCreate(
 	uint32_t                   kAddress = MY_INVALID_ADDR,
 	bool                       bIsCtor = false
 ) noexcept;
-MyStruct*   MyStructCreate(MyContext* pContext, char* lpName, uint32_t kAttribs) noexcept;
+MyStruct*   MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAttribs) noexcept;
 bool        MyStructIsReference(MyStruct* pKlass) noexcept;
-void        MyStructAddField(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs = 0ul) noexcept;
-void        MyStructAddFieldAutoOffset(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs = 0ul) noexcept;
-MyField*    MyStructGetField(MyStruct* pKlass, char* const& lpField);
+void        MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs = 0ul) noexcept;
+void        MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs = 0ul) noexcept;
+MyField*    MyStructGetField(MyStruct* pKlass, const char* lpField);
 MyType*     MyTypeCreate(uint8_t kKind, void* pData, uint32_t kFlags = 0ul) noexcept;
 const char* MyTypeGetName(const MyType* pType) noexcept;
 

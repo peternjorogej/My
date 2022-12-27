@@ -11,7 +11,7 @@ static MyContext* s_CurrentContext = nullptr;
 
 static MyContext* _My_ContextCreate() noexcept;
 static void       _My_ContextDestroy(MyContext* pContext) noexcept;
-static void       _My_StructAddField(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept;
+static void       _My_StructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept;
 
 
 MyGuid::MyGuid()
@@ -196,7 +196,7 @@ MyMethod* MyMethodCreate(
     return pMeth;
 }
 
-MyStruct* MyStructCreate(MyContext* pContext, char* lpName, uint32_t kAttribs) noexcept
+MyStruct* MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAttribs) noexcept
 {
     MyStruct* pKlass = new MyStruct{};
     pKlass->Name       = UniStrdup(lpName);
@@ -235,7 +235,7 @@ bool MyStructIsReference(MyStruct* pKlass) noexcept
     }
 }
 
-void MyStructAddField(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs) noexcept
+void MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs) noexcept
 {
     MY_ASSERT(kOffset == pKlass->Size, "Error: Invalid field offset");
 
@@ -248,7 +248,7 @@ void MyStructAddField(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* p
     pKlass->Size += pFieldKlass->Size;
 }
 
-void MyStructAddFieldAutoOffset(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs) noexcept
+void MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs) noexcept
 {
     _My_StructAddField(pKlass, lpName, pType, pFieldKlass);
     
@@ -268,13 +268,15 @@ void MyStructAddFieldAutoOffset(MyStruct* pKlass, char* lpName, MyType* pType, M
     pKlass->Size += kFieldSize;
 }
 
-MyField* MyStructGetField(MyStruct* pKlass, char* const& lpField)
+MyField* MyStructGetField(MyStruct* pKlass, const char* lpField)
 {
+    char* const lpFieldName = UniStrdup(lpField);
+
     const size_t kCount = stbds_arrlenu(pKlass->Fields);
     for (size_t k = 0; k < kCount; k++)
     {
         MyField* const& pField = pKlass->Fields + k;
-        if (pField->Name == lpField)
+        if (pField->Name == lpFieldName)
         {
             return pField;
         }
@@ -434,7 +436,7 @@ void _My_ContextDestroy(MyContext* pContext) noexcept
     delete pContext;
 }
 
-void _My_StructAddField(MyStruct* pKlass, char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept
+void _My_StructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept
 {
     MyField field = {};
     field.Name   = UniStrdup(lpName);
