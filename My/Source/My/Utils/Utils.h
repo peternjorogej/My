@@ -120,6 +120,7 @@ public:
 	void ReportTypeDoesNotHaveAttributes(const TextLocation& Location, MyType* pType) noexcept;
 	void ReportInvalidUseOfVoid(const TextLocation& Location) noexcept;
 	void ReportUnknownType(const TextLocation& Location, char* const& lpTypename) noexcept;
+	void ReportUndefinedType(const TextLocation& Location, char* const& lpTypename) noexcept;
 	void ReportInvalidExpressionStatement(const TextLocation& Location) noexcept;
 	void ReportInvalidBreakOrContinue(const TextLocation& Location, const char* const lpText) noexcept;
 	void ReportInvalidReturn(const TextLocation& Location) noexcept;

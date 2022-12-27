@@ -75,7 +75,12 @@ int main(int iArgc, char** ppArgv)
 		TestNewAPI(pContext);
 	}
 
-	MyAssembly* pAss = Compiler::Build(pContext, "Samples/Hello.ns");
+	// Try to register a type natively
+	MyStruct* pKlass = MyStructCreate(pContext, "MyStruct", MY_STRUCT_ATTR_NONE);
+	MyStructAddFieldAutoOffset(pKlass, "__Dummy0", My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_NONE);
+	MyStructAddFieldAutoOffset(pKlass, "__Dummy1", My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_NONE);
+
+	MyAssembly* pAss = Compiler::Build(pContext, "Samples/Hello.ns", {}, { pKlass });
 	if (pAss)
 	{
 		MyDecompile(pAss);

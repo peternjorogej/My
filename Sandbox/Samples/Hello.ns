@@ -2,6 +2,13 @@
 extern function void Print(string Text);
 extern function void WriteLine(string Fmt, object[] Args);
 
+struct MyStruct;
+
+struct YourStruct
+{
+	var MyStruct Handler;
+};
+
 function static int Go() nogc
 {
 	return 0;
@@ -10,5 +17,12 @@ function static int Go() nogc
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from N#");
+	
+	const YourStruct ys = new YourStruct();
+	ys.Handler = new MyStruct();
+	
+	auto[d0, d1] = ys.Handler;
+	WriteLine("MyStruct{ Dummy0: %d, Dummy1: %d }", { d0, d1 });
+	
 	return Go();
 }

@@ -461,6 +461,12 @@ void DiagnosticBag::ReportInvalidUseOfVoid(const TextLocation& Location) noexcep
 
 void DiagnosticBag::ReportUnknownType(const TextLocation& Location, char* const& lpTypename) noexcept
 {
+	const std::string Message = Console::Format("Unknown type '%s'", lpTypename);
+	Report(Location, Message);
+}
+
+void DiagnosticBag::ReportUndefinedType(const TextLocation& Location, char* const& lpTypename) noexcept
+{
 	const std::string Message = Console::Format("Type '%s' is undefined", lpTypename);
 	Report(Location, Message);
 }

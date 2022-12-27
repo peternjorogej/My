@@ -6,19 +6,34 @@
 #include "My/VM/Emitter.h"
 #include "My/VM/VM.h"
 
-static MyAssembly* _My_Compiler_Build(MyContext* pContext, SyntaxTree* pTree, const List<InternalFunction>& Internals) noexcept;
+static MyAssembly* _My_Compiler_Build(
+	MyContext*  pContext,
+	SyntaxTree* pTree,
+	const List<InternalFunction>& Internals,
+	const List<MyStruct*>& UserStructs
+) noexcept;
 
 
-MyAssembly* Compiler::Build(MyContext* pContext, const char* lpFilename, const List<InternalFunction>& Internals) noexcept
+MyAssembly* Compiler::Build(
+	MyContext*  pContext,
+	const char* lpFilename,
+	const List<InternalFunction>& Internals,
+	const List<MyStruct*>&        UserStructs
+) noexcept
 {
 	SyntaxTree* pTree = SyntaxTree::Load(pContext, lpFilename);
-	return _My_Compiler_Build(pContext, pTree, Internals);
+	return _My_Compiler_Build(pContext, pTree, Internals, UserStructs);
 }
 
-MyAssembly* Compiler::BuildSource(MyContext* pContext, const char* lpSource, const List<InternalFunction>& Internals) noexcept
+MyAssembly* Compiler::BuildSource(
+	MyContext*  pContext,
+	const char* lpSource,
+	const List<InternalFunction>& Internals,
+	const List<MyStruct*>&        UserStructs
+) noexcept
 {
 	SyntaxTree* pTree = SyntaxTree::Parse(pContext, lpSource);
-	return _My_Compiler_Build(pContext, pTree, Internals);
+	return _My_Compiler_Build(pContext, pTree, Internals, UserStructs);
 }
 
 int64_t Compiler::Run(MyContext* pContext, MyAssembly* pAssembly, int iArgc, char** ppArgv)
@@ -54,7 +69,12 @@ bool Compiler::Dump(MyContext* pContext, const MyAssembly* pAssembly, const char
 }
 
 
-MyAssembly* _My_Compiler_Build(MyContext* pContext, SyntaxTree* pTree, const List<InternalFunction>& Internals) noexcept
+MyAssembly* _My_Compiler_Build(
+	MyContext*  pContext,
+	SyntaxTree* pTree,
+	const List<InternalFunction>& Internals,
+	const List<MyStruct*>&        UserStructs
+) noexcept
 {
 	if (pTree->GetDiagnostics().Any())
 	{
@@ -62,7 +82,7 @@ MyAssembly* _My_Compiler_Build(MyContext* pContext, SyntaxTree* pTree, const Lis
 		return nullptr;
 	}
 
-	BoundGlobalScope GlobalScope = Binder::BindGlobalScope(pContext, pTree);
+	BoundGlobalScope GlobalScope = Binder::BindGlobalScope(pContext, pTree, UserStructs);
 	if (GlobalScope.Diagnostics.Any())
 	{
 		PrintDiagnostics(pTree, GlobalScope.Diagnostics);

@@ -494,6 +494,7 @@ enum class DeclarationKind
 	BitFlags,
 	Variable,
 	Function,
+	Forward,
 	Struct,
 };
 
@@ -574,10 +575,16 @@ struct FunctionDeclaration
 	uint32_t          Attributes      = 0u;
 };
 
+struct ForwardDeclaration
+{
+	Token StructKeyword = {};
+	Token Name          = {};
+};
+
 struct StructDeclaration
 {
 	Token         StructKeyword  = {};
-	Token*        PodKeyword = {}; // Optional
+	Token*        PodKeyword     = {}; // Optional
 	Token         Name           = {};
 	Token         LbraceToken    = {};
 	Statement**   Members        = nullptr;
@@ -599,6 +606,7 @@ struct Declaration
 		BitFlagsDeclaration bflagsdecl;
 		VariableDeclaration vardecl;
 		FunctionDeclaration funcdecl;
+		ForwardDeclaration  forward;
 		StructDeclaration   structdecl;
 	};
 

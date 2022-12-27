@@ -193,6 +193,7 @@ static Declaration* MakeDeclaration_Function(
 	Statement*               pBody,
 	uint32_t                 kAttributes
 );
+static Declaration* MakeDeclaration_Forward(const Token& StructKeyword, const Token& Name);
 static Declaration* MakeDeclaration_Struct(
 	const Token&      StructKeyword,
 	Token*            pTrivialKeyword,
@@ -2080,6 +2081,13 @@ private:
 		{
 			goto Error;
 		}
+
+		if (Current().Kind == TokenKind::Semicolon)
+		{
+			// This is a forward declaration
+			NextToken();
+			return MakeDeclaration_Forward(StructKeyword, Name);
+		}
 		
 		const Token& LbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LBrace))
@@ -2925,6 +2933,17 @@ Declaration* MakeDeclaration_Function(const Token& FunctionKeyword, const Functi
 	Declaration* pFuncDecl = Allocator::Create<Declaration>(Allocator::Stage::Parser, DeclarationKind::Function);
 	new(&pFuncDecl->funcdecl) FunctionDeclaration{ FunctionKeyword, Signature, pBody, kAttributes };
 	return pFuncDecl;
+}
+
+Declaration* MakeDeclaration_Forward(const Token& StructKeyword, const Token& Name)
+{
+	Declaration* pForwardDecl = Allocator::Create<Declaration>(Allocator::Stage::Parser, DeclarationKind::Forward);
+	new(&pForwardDecl->forward) ForwardDeclaration
+	{
+		StructKeyword,
+		Name,
+	};
+	return pForwardDecl;
 }
 
 Declaration* MakeDeclaration_Struct(const Token& StructKeyword, Token* pTrivialKeyword, const Token& Name, const Token& LbraceToken, Statement** ppMembers, Declaration** ppMethods, const Token& RbraceToken, uint32_t kAttributes)

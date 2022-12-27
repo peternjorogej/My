@@ -659,7 +659,7 @@ public:
 	InternalBinder(MyContext* pContext)
 		: m_Tree(), m_Scope(), m_Function(), m_LoopStack(), m_Globals(), m_Diagnostics()
 	{
-		MyDefaults& ud = My_Defaults;
+		MyDefaults& md = My_Defaults;
 
 		m_Scope = Allocator::Create<BoundScope>(Allocator::Stage::Binder);
 		if (!s_Context)
@@ -672,38 +672,43 @@ public:
 			stbds_shdefault(s_UserDefinedTypes, nullptr);
 			stbds_shdefaults(s_UserDefinedTypes, kvp);
 
-			MyDefaults& ud = My_Defaults;
-			stbds_shput(s_UserDefinedTypes, ud.ObjectStruct->Name,        ud.ObjectType);
-			stbds_shput(s_UserDefinedTypes, ud.BooleanStruct->Name,       ud.BooleanType);
-			stbds_shput(s_UserDefinedTypes, ud.IntStruct->Name,           ud.IntType);
-			stbds_shput(s_UserDefinedTypes, ud.UintStruct->Name,          ud.UintType);
-			stbds_shput(s_UserDefinedTypes, ud.FloatStruct->Name,         ud.FloatType);
-			stbds_shput(s_UserDefinedTypes, ud.StringStruct->Name,        ud.StringType);
-			stbds_shput(s_UserDefinedTypes, ud.StringBuilderStruct->Name, ud.StringBuilderType);
-			stbds_shput(s_UserDefinedTypes, ud.ComplexStruct->Name,       ud.ComplexType);
-			stbds_shput(s_UserDefinedTypes, ud.FileStruct->Name,          ud.FileType);
+			stbds_shput(s_UserDefinedTypes, md.ObjectStruct->Name,        md.ObjectType);
+			stbds_shput(s_UserDefinedTypes, md.BooleanStruct->Name,       md.BooleanType);
+			stbds_shput(s_UserDefinedTypes, md.IntStruct->Name,           md.IntType);
+			stbds_shput(s_UserDefinedTypes, md.UintStruct->Name,          md.UintType);
+			stbds_shput(s_UserDefinedTypes, md.FloatStruct->Name,         md.FloatType);
+			stbds_shput(s_UserDefinedTypes, md.StringStruct->Name,        md.StringType);
+			stbds_shput(s_UserDefinedTypes, md.StringBuilderStruct->Name, md.StringBuilderType);
+			stbds_shput(s_UserDefinedTypes, md.ComplexStruct->Name,       md.ComplexType);
+			stbds_shput(s_UserDefinedTypes, md.FileStruct->Name,          md.FileType);
+		}
+		if (!s_ForwardedTypes)
+		{
+			static constexpr Pair<char*, MyType*> kvp = { nullptr, nullptr };
+			stbds_shdefault(s_ForwardedTypes, nullptr);
+			stbds_shdefaults(s_ForwardedTypes, kvp);
 		}
 		{
 			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsValue = { UniStrdup("Value"), ud.StringType, nullptr };
+			const FieldSymbol fsValue = { UniStrdup("Value"), md.StringType, nullptr };
 			stbds_arrpush(pFields, fsValue);
-			m_Scope->DeclareStruct(MakeSymbol_Struct(ud.StringBuilderStruct->Name, ud.StringBuilderType, pFields));
+			m_Scope->DeclareStruct(MakeSymbol_Struct(md.StringBuilderStruct->Name, md.StringBuilderType, pFields));
 		}
 		{
 			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsReal = { UniStrdup("Real"), ud.FloatType, nullptr };
-			const FieldSymbol fsImag = { UniStrdup("Imag"), ud.FloatType, nullptr };
+			const FieldSymbol fsReal = { UniStrdup("Real"), md.FloatType, nullptr };
+			const FieldSymbol fsImag = { UniStrdup("Imag"), md.FloatType, nullptr };
 			stbds_arrpush(pFields, fsReal);
 			stbds_arrpush(pFields, fsImag);
-			m_Scope->DeclareStruct(MakeSymbol_Struct(ud.ComplexStruct->Name, ud.ComplexType, pFields));
+			m_Scope->DeclareStruct(MakeSymbol_Struct(md.ComplexStruct->Name, md.ComplexType, pFields));
 		}
 		{
 			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsHandle   = { UniStrdup("Handle"),   ud.UintType, nullptr };
-			const FieldSymbol fsFilepath = { UniStrdup("Filepath"), ud.StringType, nullptr };
+			const FieldSymbol fsHandle   = { UniStrdup("Handle"),   md.UintType, nullptr };
+			const FieldSymbol fsFilepath = { UniStrdup("Filepath"), md.StringType, nullptr };
 			stbds_arrpush(pFields, fsHandle);
 			stbds_arrpush(pFields, fsFilepath);
-			m_Scope->DeclareStruct(MakeSymbol_Struct(ud.FileStruct->Name, ud.FileType, pFields));
+			m_Scope->DeclareStruct(MakeSymbol_Struct(md.FileStruct->Name, md.FileType, pFields));
 		}
 
 		_My_Initialize_StaticCalls();
@@ -742,16 +747,19 @@ public:
 	
 	~InternalBinder() noexcept = default;
 
-	void BindDeclarations()
+	void BindDeclarations(const List<MyStruct*>& UserStructs)
 	{
+		for (MyStruct* pKlass : UserStructs)
+		{
+			MyType* pType = MyTypeCreate(0u, pKlass, MY_TYPE_ATTR_NONE);
+			stbds_shput(s_ForwardedTypes, pKlass->Name, pType);
+		}
+		
 		Declaration** const& ppDecls = m_Tree->GetRoot().Decls;
 		for (size_t k = 0; k < stbds_arrlenu(ppDecls); k++)
 		{
 			BindDeclaration(ppDecls[k]);
 		}
-
-		// Bind the fields of all the structs
-		BindStructDefinitions();
 	}
 
 	/// Expressions
@@ -850,6 +858,7 @@ public:
 			case DeclarationKind::Enum:     BindEnumDeclaration(pDeclaration);     break;
 			case DeclarationKind::Variable: BindVariableDeclaration(pDeclaration); break;
 			case DeclarationKind::Function: BindFunctionDeclaration(pDeclaration); break;
+			case DeclarationKind::Forward:  BindForwardDeclaration(pDeclaration);   break;
 			case DeclarationKind::Struct:   BindStructDeclaration(pDeclaration);   break;
 			default:
 			{
@@ -875,12 +884,13 @@ public:
 	}
 
 	/// Accessors
-	const BoundScope*                          GetScope()       const { return m_Scope; }
-	const DiagnosticBag&                       GetDiagnostics() const { return m_Diagnostics; }
+	const BoundScope*                         GetScope()       const { return m_Scope; }
+	const DiagnosticBag&                      GetDiagnostics() const { return m_Diagnostics; }
 	Pair<MySymbol*, BoundExpression*>* const& GetGlobals()     const { return m_Globals; }
 
 public:
 	static Pair<char*, MyType*>* const& GetUserDefinedTypes() noexcept { return s_UserDefinedTypes; }
+	static Pair<char*, MyType*>* const& GetForwardedTypes()   noexcept { return s_ForwardedTypes; }
 
 private:
 	/// Expressions
@@ -1875,6 +1885,46 @@ private:
 		BindFunctionSignature(funcdecl.Signature, pFunc);
 	}
 
+	void BindForwardDeclaration(Declaration* pForward)
+	{
+		ForwardDeclaration& forward = pForward->forward;
+
+		if (const auto [bFound, _] = m_Scope->LookupStruct(forward.Name.Id); bFound)
+		{
+			m_Diagnostics.ReportSymbolRedeclaration(GetLocation(forward.Name), forward.Name.Id);
+			goto Error;
+		}
+		if (const auto [bFound, _] = m_Scope->LookupFunction(forward.Name.Id); bFound)
+		{
+			m_Diagnostics.ReportSymbolRedeclaredDifferently(GetLocation(forward.Name), forward.Name.Id);
+			goto Error;
+		}
+
+		if (MyType* const& pType = stbds_shget(s_ForwardedTypes, forward.Name.Id); pType != nullptr)
+		{
+			FieldSymbol* pFields = nullptr;
+			for (size_t k = 0; k < stbds_arrlenu(pType->Klass->Fields); k++)
+			{
+				MyField* pField = pType->Klass->Fields + k;
+				MyType* pFieldType = GetTypeFromStruct(pField->Klass);
+
+				FieldSymbol fs = { pField->Name, pFieldType, nullptr };
+				stbds_arrpush(pFields, fs);
+			}
+
+			MySymbol* pSymbol = MakeSymbol_Struct(pType->Klass->Name, pType, pFields, nullptr);
+
+			if (m_Scope->DeclareStruct(pSymbol))
+			{
+				stbds_shdel(s_ForwardedTypes, pType->Klass->Name);
+				stbds_shput(s_UserDefinedTypes, pType->Klass->Name, pType);
+			}
+		}
+
+	Error:
+		return;
+	}
+
 	void BindStructDeclaration(Declaration* pStruct)
 	{
 		// TODO: Not *fully* complete
@@ -1917,6 +1967,11 @@ private:
 			}
 
 			MyStruct* pMemberKlass = GetStructFromType(pMemberType);
+			if (!pMemberKlass)
+			{
+				m_Diagnostics.ReportUndefinedType(GetLocation(vds.Type), GetTypeName(vds.Type));
+				goto Error;
+			}
 			MyStructAddFieldAutoOffset(pKlass, vds.Identifier.Id, pMemberType, pMemberKlass, kFieldAttribs);
 
 			FieldSymbol fs = { vds.Identifier.Id, pMemberType, nullptr };
@@ -1950,12 +2005,6 @@ private:
 
 	Error:
 		return;
-	}
-
-	void BindStructDefinitions()
-	{
-		// Bind the structs' fields after binding all the global symbols
-		DebugLog::Warn("[DEBUG]: NotImplemented: %s", __FUNCSIG__);
 	}
 
 	/// Types
@@ -2046,6 +2095,11 @@ private:
 		}
 
 		if (MyType* pType = stbds_shget(s_TypedefedTypes, lpName); pType != nullptr)
+		{
+			return pType;
+		}
+		
+		if (MyType* pType = stbds_shget(s_ForwardedTypes, lpName); pType != nullptr)
 		{
 			return pType;
 		}
@@ -2285,6 +2339,7 @@ private:
 	static MyContext* s_Context;
 	static Pair<char*, MyType*>*   s_UserDefinedTypes;
 	static Pair<char*, MyType*>*   s_TypedefedTypes;
+	static Pair<char*, MyType*>*   s_ForwardedTypes;
 	static Pair<char*, MySymbol*>* s_BuiltinMethods;
 
 private:
@@ -2305,14 +2360,15 @@ private:
 MyContext* InternalBinder::s_Context = nullptr;
 Pair<char*, MyType*>*   InternalBinder::s_UserDefinedTypes = nullptr;
 Pair<char*, MyType*>*   InternalBinder::s_TypedefedTypes   = nullptr;
+Pair<char*, MyType*>*   InternalBinder::s_ForwardedTypes   = nullptr;
 Pair<char*, MySymbol*>* InternalBinder::s_BuiltinMethods   = nullptr;
 
 #pragma endregion
 
-BoundGlobalScope Binder::BindGlobalScope(MyContext* pContext, const SyntaxTree* pTree) noexcept
+BoundGlobalScope Binder::BindGlobalScope(MyContext* pContext, const SyntaxTree* pTree, const List<MyStruct*>& UserStructs) noexcept
 {
 	InternalBinder binder = InternalBinder(pContext, pTree);
-	binder.BindDeclarations();
+	binder.BindDeclarations(UserStructs);
 
 	MySymbol** ppVariables = binder.GetScope()->GetDeclaredVariables();
 	MySymbol** ppFunctions = binder.GetScope()->GetDeclaredFunctions();
