@@ -41,17 +41,9 @@ function int Main(string[] Args)
 }
 ```
 
-4. Forward Declarations - forward declared structs are defined natively
-```C++
-// ...
-MyStruct* pKlass = MyStructCreate(pCtx, "FwdDecl", MY_STRUCT_ATTR_NONE);
-MyStructAddFieldAutoOffset(pKlass, "Dummy", My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_NONE); // At least one field must be defined!
-// ...
-MyAssembly* pAss = Compiler::Build(pCtx, "path/to/script.ns", {}, { pKlass });
-// ...
-```
-then on the scripting side:
+4. Forward Declarations - forward declared structs are defined natively (kind of like internal functions)
 ```C#
+// Defined with a single field 'Dummy' of type int
 struct FwdDecl;
 
 function int Main(string[] Args)
