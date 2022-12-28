@@ -199,7 +199,7 @@ MyMethod* MyMethodCreate(
 MyStruct* MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAttribs) noexcept
 {
     MyStruct* pKlass = new MyStruct{};
-    pKlass->Name       = UniStrdup(lpName);
+    pKlass->Name       = MyGetCachedString(lpName);
     pKlass->Guid       = MyGuidCreate(pContext);
     pKlass->Fields     = nullptr;
     pKlass->Methods    = nullptr;
@@ -270,7 +270,7 @@ void MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pT
 
 MyField* MyStructGetField(MyStruct* pKlass, const char* lpField)
 {
-    char* const lpFieldName = UniStrdup(lpField);
+    char* const lpFieldName = MyGetCachedString(lpField);
 
     const size_t kCount = stbds_arrlenu(pKlass->Fields);
     for (size_t k = 0; k < kCount; k++)
@@ -380,7 +380,7 @@ char* MyGuidCreateStringRepr(MyContext* pContext, const MyGuid& Guid) noexcept
             k++;
         }
 
-        lpGuidString = UniStrdup(ss.str());
+        lpGuidString = MyGetCachedString(ss.str());
     }
     stbds_hmput(pContext->Guids, Guid, lpGuidString);
     return lpGuidString;
@@ -439,7 +439,7 @@ void _My_ContextDestroy(MyContext* pContext) noexcept
 void _My_StructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept
 {
     MyField field = {};
-    field.Name   = UniStrdup(lpName);
+    field.Name   = MyGetCachedString(lpName);
     field.Type   = pType;
     field.Klass  = pFieldKlass;
     stbds_arrpush(pKlass->Fields, field);

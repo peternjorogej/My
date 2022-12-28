@@ -291,7 +291,7 @@ File::File(const std::string_view& Path, Mode OpenMode)
 		return;
 	}
 
-	m_Path = UniStrdup(Path);
+	m_Path = MyGetCachedString(Path);
 
 	char lpMode[3] = { 'r', 't', '\0' };
 	if (m_Mode & Mode::Write)  { lpMode[0] = 'w'; }

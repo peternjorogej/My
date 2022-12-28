@@ -6,39 +6,39 @@
 static char* NextUpperBoundVariableName() noexcept
 {
 	static int32_t iNextUpperBound = 0;
-	return UniStrdupV("__UpperBound%d", iNextUpperBound++);
+	return MyGetCachedStringV("__UpperBound%d", iNextUpperBound++);
 }
 
 static char* NextStepVariableName() noexcept
 {
 	static int32_t iNextStep = 0;
-	return UniStrdupV("__Step%d", iNextStep++);
+	return MyGetCachedStringV("__Step%d", iNextStep++);
 }
 
 // NextIterableVariableName(), NextCounterVariableName(), NextLengthVariableName() Used by foreach loops
 static char* NextIterableVariableName() noexcept
 {
 	static int32_t iNextIterable = 0;
-	return UniStrdupV("__Iterable%d", iNextIterable++);
+	return MyGetCachedStringV("__Iterable%d", iNextIterable++);
 }
 
 static char* NextCounterVariableName() noexcept
 {
 	static int32_t iNextCounter = 0;
-	return UniStrdupV("__Counter%d", iNextCounter++);
+	return MyGetCachedStringV("__Counter%d", iNextCounter++);
 }
 
 static char* NextLengthVariableName() noexcept
 {
 	static int32_t iNextLength = 0;
-	return UniStrdupV("__Length%d", iNextLength++);
+	return MyGetCachedStringV("__Length%d", iNextLength++);
 }
 
 // General lables
 static BoundLabel NextLabel() noexcept
 {
 	static int32_t iNextLabel = 0;
-	return BoundLabel{ UniStrdupV("__label_%d", iNextLabel++) };
+	return BoundLabel{ MyGetCachedStringV("__label_%d", iNextLabel++) };
 }
 
 
@@ -752,9 +752,9 @@ protected:
 			stbds_arrpush(ppParamSyms, pParamSym);
 
 			pLengthFunction = MakeSymbol_Function(
-				UniStrdup("length"),
+				MyStrdup("length"),
 				MakeType_Function(
-					Uni_Defaults.UintType,
+					My_Defaults.UintType,
 					ppParamTypes
 				),
 				ppParamSyms,
@@ -766,9 +766,9 @@ protected:
 		}
 		
 		MySymbol* pIterableVariable = MakeSymbol_Variable(NextIterableVariableName(), fes.Iterable->Type(), true, true);
-		MySymbol* pCounterVariable = MakeSymbol_Variable(NextCounterVariableName(), Uni_Defaults.UintType, false, true);
-		MySymbol* pLengthVariable = MakeSymbol_Variable(NextLengthVariableName(), Uni_Defaults.UintType, true, true);
-		MySymbol* pStepVariable = MakeSymbol_Variable(NextStepVariableName(), Uni_Defaults.UintType, true, true);
+		MySymbol* pCounterVariable = MakeSymbol_Variable(NextCounterVariableName(), My_Defaults.UintType, false, true);
+		MySymbol* pLengthVariable = MakeSymbol_Variable(NextLengthVariableName(), My_Defaults.UintType, true, true);
+		MySymbol* pStepVariable = MakeSymbol_Variable(NextStepVariableName(), My_Defaults.UintType, true, true);
 
 		BoundStatement* pIterableDecl = MakeBoundStatement_VariableDeclaration(pIterableVariable, fes.Iterable);
 		BoundExpression* pIterable = MakeBoundExpression_Name(pIterableVariable);
@@ -793,11 +793,11 @@ protected:
 
 		BoundStatement* pStepDecl = MakeBoundStatement_VariableDeclaration(
 			pStepVariable,
-			MakeBoundExpression_Literal(Uni_Defaults.UintType, MakeValue_Uint64(1ull))
+			MakeBoundExpression_Literal(My_Defaults.UintType, MakeValue_Uint64(1ull))
 		);
 		BoundExpression* pStep = MakeBoundExpression_Name(pStepVariable);
 
-		pOperator = Binder::BindBinaryOperator(TokenKind::Plus, Uni_Defaults.UintType, Uni_Defaults.UintType);
+		pOperator = Binder::BindBinaryOperator(TokenKind::Plus, My_Defaults.UintType, My_Defaults.UintType);
 
 		BoundStatement* pIncrement = nullptr;
 		if constexpr (false)
@@ -827,7 +827,7 @@ protected:
 			MakeBoundExpression_Index(pIterable, pArrayItemType, ppIndices)
 		);
 
-		pOperator = Binder::BindBinaryOperator(TokenKind::Less, Uni_Defaults.UintType, Uni_Defaults.UintType);
+		pOperator = Binder::BindBinaryOperator(TokenKind::Less, My_Defaults.UintType, My_Defaults.UintType);
 		BoundExpression* pCondition = MakeBoundExpression_Binary(pCounter, pOperator, pLength);
 		BoundStatement* pContinueLabelStatement = MakeBoundStatement_Label(fes.Loop.ContinueLabel);
 

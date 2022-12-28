@@ -690,22 +690,22 @@ public:
 		}
 		{
 			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsValue = { UniStrdup("Value"), md.StringType, nullptr };
+			const FieldSymbol fsValue = { MyGetCachedString("Value"), md.StringType, nullptr };
 			stbds_arrpush(pFields, fsValue);
 			m_Scope->DeclareStruct(MakeSymbol_Struct(md.StringBuilderStruct->Name, md.StringBuilderType, pFields));
 		}
 		{
 			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsReal = { UniStrdup("Real"), md.FloatType, nullptr };
-			const FieldSymbol fsImag = { UniStrdup("Imag"), md.FloatType, nullptr };
+			const FieldSymbol fsReal = { MyGetCachedString("Real"), md.FloatType, nullptr };
+			const FieldSymbol fsImag = { MyGetCachedString("Imag"), md.FloatType, nullptr };
 			stbds_arrpush(pFields, fsReal);
 			stbds_arrpush(pFields, fsImag);
 			m_Scope->DeclareStruct(MakeSymbol_Struct(md.ComplexStruct->Name, md.ComplexType, pFields));
 		}
 		{
 			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsHandle   = { UniStrdup("Handle"),   md.UintType, nullptr };
-			const FieldSymbol fsFilepath = { UniStrdup("Filepath"), md.StringType, nullptr };
+			const FieldSymbol fsHandle   = { MyGetCachedString("Handle"),   md.UintType, nullptr };
+			const FieldSymbol fsFilepath = { MyGetCachedString("Filepath"), md.StringType, nullptr };
 			stbds_arrpush(pFields, fsHandle);
 			stbds_arrpush(pFields, fsFilepath);
 			m_Scope->DeclareStruct(MakeSymbol_Struct(md.FileStruct->Name, md.FileType, pFields));
@@ -1157,7 +1157,7 @@ private:
 			}
 			/*else
 			{
-				UniValue null = UniValue(MyValueKind::Null);
+				MyValue null = MyValue(MyValueKind::Null);
 				pExpression = MakeBoundExpression_Literal(pType, null);
 			}*/
 		}
@@ -1646,8 +1646,8 @@ private:
 	{
 		static uint32_t iLoopBodyCounter = 0;
 
-		BoundLabel BreakLabel    = BoundLabel{ UniStrdupV("__break_%u",    iLoopBodyCounter) };
-		BoundLabel ContinueLabel = BoundLabel{ UniStrdupV("__continue_%u", iLoopBodyCounter) };
+		BoundLabel BreakLabel    = BoundLabel{ MyGetCachedStringV("__break_%u",    iLoopBodyCounter) };
+		BoundLabel ContinueLabel = BoundLabel{ MyGetCachedStringV("__continue_%u", iLoopBodyCounter) };
 		iLoopBodyCounter++;
 
 		Pair<BoundLabel, BoundLabel> loop = { BreakLabel, ContinueLabel };
@@ -1967,7 +1967,7 @@ private:
 		if (!pFields)
 		{
 			// Empty struct
-			char* const lpName = UniStrdup("__padding");
+			char* const lpName = MyGetCachedString("__padding");
 			MyStructAddFieldAutoOffset(pKlass, lpName, My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_CONST);
 		}
 		MySymbol* pSymbol = MakeSymbol_Struct(Name.Id, pType, pFields, pStruct);
@@ -2412,7 +2412,7 @@ BoundProgram Binder::BindProgram(MyContext* pContext, BoundGlobalScope* pGlobalS
 		StructSymbol& ss = pGlobalScope->Structs[k]->structsym;
 
 		MySymbol** ppParamSyms = nullptr;
-		MySymbol* pArgSym = MakeSymbol_Parameter(UniStrdup("Self"), ss.Type, false, true);
+		MySymbol* pArgSym = MakeSymbol_Parameter(MyGetCachedString("Self"), ss.Type, false, true);
 		stbds_arrpush(ppParamSyms, pArgSym);
 		MySymbol* pCtorSym = MakeSymbol_Function(ss.Type->Fullname, ss.Type, ppParamSyms, false, false, false, nullptr);
 

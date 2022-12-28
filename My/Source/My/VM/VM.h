@@ -127,19 +127,6 @@ struct MyVM
     int64_t  Run();
     int64_t  Execute(bool& bRunning);
     
-    /*void     Push(const UniValue& Value);
-    void	 Push(bool Value);
-    void	 Push(int64_t Value);
-    void	 Push(uint64_t Value);
-    void	 Push(double Value);
-    void	 Push(MyString* Value);
-    void	 Push(MyArray* Value);
-    void	 Push(MyObject* Value);
-    uint8_t  PopU8();
-    int64_t  PopI64();
-    uint64_t PopU64();
-    double   PopF64();*/
-
     const uint8_t*          GetStack()     const noexcept;
     const FunctionCallInfo* GetCallStack() const noexcept;
 

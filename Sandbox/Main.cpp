@@ -99,160 +99,13 @@ int main(int iArgc, char** ppArgv)
 	return 0;
 }
 
-
-#if 0
-static bool AssertOkay(UniRuntimeSignal Signal) noexcept
-{
-	if (Signal != UniRuntimeSignal::Okay)
-	{
-		DebugLog::Error("Error: %s", RuntimeSignalString(Signal));
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
-class InternalFunctions
-{
-public:
-	static bool PrintMessage(InternalCallbackContext* pICC) noexcept;
-	static bool FetchMessage(InternalCallbackContext* pICC) noexcept;
-};
-
-class ScriptSandbox
-{
-public:
-	ScriptSandbox()
-		: m_Context()
-	{
-		m_Context = UniInitialize();
-	}
-
-	~ScriptSandbox() noexcept
-	{
-		UniUninitialize(m_Context);
-	}
-
-	void LoadScript(const char* lpScriptFilepath) noexcept
-	{
-		MyAssembly* pAss = Compiler::Build(m_Context, lpScriptFilepath,
-		{
-			{ "PrintMessage", InternalFunctions::PrintMessage, 1 },
-			{ "FetchMessage", InternalFunctions::FetchMessage, 0 },
-		});
-		(void)pAss;
-	}
-
-	void Run() noexcept
-	{
-		bool bIsValid = false;
-
-		Console::Write("Given a positive integer N, calculate 1+2+3+4+...+N\n");
-
-		Console::Write("Enter a number: ");
-		const int64_t iMax = Console::ReadInt64();
-		MyObject oMax = MakeObject_Int64(iMax);
-
-		Call("ScriptFunction", { oMax });
-
-		Console::WriteLine("Sum([1, %I64d]) = %I64d\n", iMax, (int64_t)m_Context->VM->Pop());
-	}
-
-	bool Call(const char* lpFunction, const List<MyObject>& Argv) noexcept
-	{
-		UniRuntimeSignal Signal = MyVM::Invoke(m_Context, lpFunction, Argv);
-		return AssertOkay(Signal);
-	}
-
-private:
-	MyContext* m_Context = nullptr;
-};
-
-class Sandbox
-{
-public:
-	Sandbox()
-		: m_Context()
-	{
-		m_Context = UniInitialize();
-	}
-
-	~Sandbox() noexcept
-	{
-		UniUninitialize(m_Context);
-	}
-
-	void Init(const char* const lpScriptFilepath) noexcept
-	{
-		MyAssembly* pAss = Compiler::Build(m_Context, lpScriptFilepath,
-		{
-			{ "PrintMessage", InternalFunctions::PrintMessage, 1 },
-			{ "FetchMessage", InternalFunctions::FetchMessage, 0 },
-		});
-	}
-
-	bool Run(int iArgc, char** ppArgv) noexcept
-	{
-		if (!m_Context->Assembly)
-		{
-			return false;
-		}
-		UniRuntimeSignal Signal = Compiler::Run(m_Context, m_Context->Assembly, iArgc, ppArgv);
-		return AssertOkay(Signal);
-	}
-
-private:
-	MyContext* m_Context = nullptr;
-};
-
-
-int main(int iArgc, char** ppArgv)
-{
-	Console::WriteLine(Console::Color::Cyan, "Uni says 'Hello, World'");
-	
-	constexpr bool bRunInScriptingMode = true;
-	if constexpr (bRunInScriptingMode)
-	{
-		ScriptSandbox ssb{};
-		ssb.LoadScript("Samples/Script.ns");
-		ssb.Run();
-		return 0;
-	}
-	else
-	{
-		Sandbox sb{};
-		sb.Init("Samples/Basic.ns");
-		return sb.Run(iArgc, ppArgv) ? -1 : 0;
-	}
-}
-
-bool InternalFunctions::PrintMessage(InternalCallbackContext* pICC) noexcept
-{
-	MY_ASSERT(pICC->Argc == 1, "Invalid argument count");
-	pICC->Argv[0].Print();
-	Console::WriteLine();
-	return false;
-}
-
-bool InternalFunctions::FetchMessage(InternalCallbackContext* pICC) noexcept
-{
-	MY_ASSERT(pICC->Argc == 0, "Invalid argument count");
-
-	pICC->Out->Kind = MyObjectKind::String;
-	pICC->Out->Str  = MyStringNew(pICC->Context, "Peter Njoroge");
-	return true;
-}
-#endif // 0
-
 void DataTypeSizes() noexcept
 {
-	Console::WriteLine(Console::Color::Magenta, "Hello, World from Uni\n");
+	Console::WriteLine(Console::Color::Magenta, "Hello, World from My\n");
 
 	Console::WriteLine("sizeof(MyGuid)              = %I64u", sizeof(MyGuid));
 	Console::WriteLine("sizeof(MyAssembly)          = %I64u", sizeof(MyAssembly));
-	Console::WriteLine("sizeof(UniGC)                = %I64u", sizeof(MyGC));
+	Console::WriteLine("sizeof(MyGC)                = %I64u", sizeof(MyGC));
 	Console::WriteLine("sizeof(MyStack)             = %I64u", sizeof(MyStack));
 	Console::WriteLine("sizeof(MyVM)                = %I64u", sizeof(MyVM));
 	Console::WriteLine("sizeof(MyContext)           = %I64u", sizeof(MyContext));
@@ -265,7 +118,7 @@ void DataTypeSizes() noexcept
 	Console::WriteLine("sizeof(MyArrayType)         = %I64u", sizeof(MyArrayType));
 	Console::WriteLine("sizeof(MyType)              = %I64u", sizeof(MyType));
 
-	Console::WriteLine("sizeof(UniValue)             = %I64u", sizeof(MyValue));
+	Console::WriteLine("sizeof(MyValue)             = %I64u", sizeof(MyValue));
 	Console::WriteLine("sizeof(MyObject)            = %I64u", sizeof(MyObject));
 	Console::WriteLine("sizeof(MyString)            = %I64u", sizeof(MyString));
 	Console::WriteLine("sizeof(MyArrayStride)       = %I64u", sizeof(MyArrayStride));

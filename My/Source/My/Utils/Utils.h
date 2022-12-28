@@ -142,6 +142,6 @@ private:
 void PrintDiagnostics(const class SyntaxTree* pTree, const DiagnosticBag& Diagnostics = DiagnosticBag{}) noexcept;
 
 
-char* UniStrdup(const char* lpString, size_t kLength) noexcept;
-char* UniStrdup(const std::string_view& Str) noexcept;
-char* UniStrdupV(const char* lpFmt, ...) noexcept;
+char* MyGetCachedString(const char* lpString, size_t kLength) noexcept;
+char* MyGetCachedString(const std::string_view& Str) noexcept;
+char* MyGetCachedStringV(const char* lpFormat, ...) noexcept;

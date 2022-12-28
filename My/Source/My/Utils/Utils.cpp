@@ -581,7 +581,7 @@ void PrintDiagnostics(const class SyntaxTree* pTree, const DiagnosticBag& Diagno
 }
 #pragma endregion
 
-char* UniStrdup(const char* lpString, size_t kLength) noexcept
+char* MyGetCachedString(const char* lpString, size_t kLength) noexcept
 {
 	MyContext* pContext = MyContextGet();
 	MY_ASSERT(pContext != nullptr, "Cannot intern strings without an active context");
@@ -608,20 +608,20 @@ char* UniStrdup(const char* lpString, size_t kLength) noexcept
 	}
 }
 
-char* UniStrdup(const std::string_view& Str) noexcept
+char* MyGetCachedString(const std::string_view& Str) noexcept
 {
-	return UniStrdup(Str.data(), Str.length());
+	return MyGetCachedString(Str.data(), Str.length());
 }
 
-char* UniStrdupV(const char* lpFmt, ...) noexcept
+char* MyGetCachedStringV(const char* lpFormat, ...) noexcept
 {
 	static constexpr uint64_t kSize = 2048ull;
 	static char lpBuffer[kSize] = { 0 };
 
 	va_list vArgs;
-	va_start(vArgs, lpFmt);
-	vsnprintf(lpBuffer, kSize, lpFmt, vArgs);
+	va_start(vArgs, lpFormat);
+	vsnprintf(lpBuffer, kSize, lpFormat, vArgs);
 	va_end(vArgs);
 
-	return UniStrdup(lpBuffer, strlen(lpBuffer));
+	return MyGetCachedString(lpBuffer, strlen(lpBuffer));
 }

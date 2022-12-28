@@ -16,7 +16,7 @@ function static int Go() nogc
 
 function int Main(const string[] Argv)
 {
-	Print("Hello, World from N#");
+	Print("Hello, World from M#");
 	
 	const YourStruct ys = new YourStruct();
 	ys.Handler = new MyStruct();

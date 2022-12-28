@@ -118,7 +118,6 @@ struct Token
 	Token& operator=(const Token& Other);
 
 	TextLocation Location(uint32_t kLine, const std::string_view& Filename) const noexcept;
-	// bool		 Equals(const UniToken& Other) const noexcept;
 };
 #pragma endregion
 

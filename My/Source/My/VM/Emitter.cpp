@@ -69,7 +69,7 @@ void MyBytecodeProcessor::Emit(MyOpCode Code, const MyString* pValue)
 
 void MyBytecodeProcessor::Emit(MyOpCode Code, char* const& lpValue)
 {
-    char* const& lpCachedValue = UniStrdup(lpValue);
+    char* const& lpCachedValue = MyGetCachedString(lpValue);
     switch (Code)
     {
         case MyOpCode::Ldfld:
@@ -219,7 +219,7 @@ void MyBytecodeProcessor::RegisterStruct(MyStruct* const& pKlass)
 
 void MyBytecodeProcessor::RegisterFunction(char* const& lpName, pfnMyInternalFunction pfnInternal)
 {
-    char* const& lpCachedName = UniStrdup(lpName);
+    char* const& lpCachedName = MyGetCachedString(lpName);
     if (!IsRegistered(lpCachedName))
     {
         const InternalFunction ifunc = { lpCachedName, pfnInternal };
@@ -239,7 +239,7 @@ bool MyBytecodeProcessor::IsRegistered(char* const& lpName)
 
 void MyBytecodeProcessor::BeginFunction(char* const& lpName)
 {
-    char* const& lpCachedName = UniStrdup(lpName);
+    char* const& lpCachedName = MyGetCachedString(lpName);
 
     stbds_shfree(m_Assembly->Variables);
     {
@@ -855,8 +855,8 @@ void Emitter::EmitTernaryExpression(MyBytecodeProcessor& bp, BoundExpression* pT
 
     BoundTernaryExpression& te = pTernary->ternary;
 
-    char* const& lpEndLabel     = UniStrdupV("__tern_%d", iNextTernaryLabel++);
-    char* const& lpIfFalseLabel = UniStrdupV("__tern_%d", iNextTernaryLabel++);
+    char* const& lpEndLabel     = MyGetCachedStringV("__tern_%d", iNextTernaryLabel++);
+    char* const& lpIfFalseLabel = MyGetCachedStringV("__tern_%d", iNextTernaryLabel++);
 
     EmitExpression(bp, te.Condition);
     bp.Emit(MyOpCode::Jz, lpIfFalseLabel);
@@ -1001,7 +1001,7 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
     {
         if (pTypeFrom == My_Defaults.StringType)
         {
-            bp.Emit(MyOpCode::Calli, UniStrdup("__cvtoint"));
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvtoint"));
         }
         else if (pTypeFrom == My_Defaults.FloatType)
         {
@@ -1017,7 +1017,7 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
     {
         if (pTypeFrom == My_Defaults.StringType)
         {
-            bp.Emit(MyOpCode::Calli, UniStrdup("__cvtouint"));
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvtouint"));
         }
         else if (pTypeFrom == My_Defaults.FloatType)
         {
@@ -1033,7 +1033,7 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
     {
         if (pTypeFrom == My_Defaults.StringType)
         {
-            bp.Emit(MyOpCode::Calli, UniStrdup("__cvtofloat"));
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvtofloat"));
         }
         else
         {
@@ -1068,11 +1068,11 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
     {
         if (pType == My_Defaults.FloatType)
         {
-            bp.Emit(MyOpCode::Calli, UniStrdup("__cvfloattostring"));
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvfloattostring"));
         }
         else
         {
-            bp.Emit(MyOpCode::Calli, UniStrdup("__cvtostring"));
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvtostring"));
         }
     }
     else
@@ -1283,7 +1283,7 @@ namespace PnBS
             Out << Method.Flags;
             Out << Method.Address;
             Out << Method.IsCtor;
-            Out << UniGetElementIndex(Assembly->Klasses, Method.Klass);
+            Out << MyGetElementIndex(Assembly->Klasses, Method.Klass);
         }
     };*/
 
@@ -1406,7 +1406,7 @@ namespace PnBS
             In >> Field.Attributes;
             In >> kIndex;
 
-            Field.Name = UniStrdup(s);
+            Field.Name = MyGetCachedString(s);
             Field.Klass = Assembly->Klasses[kIndex];
         }
     };
@@ -1554,7 +1554,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         const bool bIsValidBytecodeFile = Meta.MagicOne == s_MagicNumber_One &&
                                           Meta.MagicTwo == s_MagicNumber_Two &&
                                           Meta.Version  == MY_VERSION;
-        MY_ASSERT(bIsValidBytecodeFile, "Fatal Error: '%s' is not a valid Uni Bytecode File!", Path.c_str());
+        MY_ASSERT(bIsValidBytecodeFile, "Fatal Error: '%s' is not a valid My# Bytecode File!", Path.c_str());
     }
 
     uint32_t uSize = 0;
@@ -1567,7 +1567,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         AddressMap am = {};
         std::string Field;
         In >> Field;
-        am.key = UniStrdup(Field);
+        am.key = MyGetCachedString(Field);
         In >> am.value;
         stbds_shput(pAssembly->Fields, am.key, am.value);
     }
@@ -1596,7 +1596,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         AddressMap am = {};
         std::string Name;
         In >> Name;
-        am.key = UniStrdup(Name);
+        am.key = MyGetCachedString(Name);
         In >> am.value;
         stbds_shput(pAssembly->Globals, am.key, am.value);
     }
@@ -1607,7 +1607,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         InternalFunction ifunc = {};
         std::string Name;
         In >> Name;
-        ifunc.key = UniStrdup(Name);
+        ifunc.key = MyGetCachedString(Name);
         In >> *(uint64_t*)&ifunc.value;
         stbds_shputs(pAssembly->Internals, ifunc);
     }
@@ -1618,7 +1618,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         AddressMap am = {};
         std::string Name;
         In >> Name;
-        am.key = UniStrdup(Name);
+        am.key = MyGetCachedString(Name);
         In >> am.value;
         stbds_shput(pAssembly->Labels, am.key, am.value);
     }
@@ -1629,7 +1629,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         AddressMap am = {};
         std::string Name;
         In >> Name;
-        am.key = UniStrdup(Name);
+        am.key = MyGetCachedString(Name);
         In >> am.value;
         stbds_shput(pAssembly->Functions, am.key, am.value);
     }
@@ -1648,7 +1648,7 @@ void _My_Initialize_BuiltinsMap() noexcept
 {
     static const auto RegisterBuiltin = [&](char* const& lpName, pfnMyInternalFunction pfnBuiltin, int32_t iArgc) -> void
     {
-        const InternalFunction ifunc = { UniStrdup(lpName), pfnBuiltin };
+        const InternalFunction ifunc = { MyGetCachedString(lpName), pfnBuiltin };
         stbds_shputs(s_Builtins, ifunc);
     };
 

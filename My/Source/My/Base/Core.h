@@ -57,7 +57,7 @@ struct MyVM;
 struct MyContext;
 
 /// <summary>
-/// Used by macros defined in UniStbDs.h (previously stb_ds.h)
+/// Used by macros defined in stb_ds.h
 /// </summary>
 /// <typeparam name="K">Key Type</typeparam>
 /// <typeparam name="V">Value Type</typeparam>

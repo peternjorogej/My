@@ -932,17 +932,6 @@ int64_t MyVM::Execute(bool& bRunning)
             const InternalFunction& nm = Assembly->Internals[IP->Arg0];
             nm.value(Context, this);
 
-            /*if (nm.Argc > 0)
-            {
-                _My_VM_CheckUnderflow((uint16_t)nm.Argc);
-                Scope.SP -= nm.Argc;
-            }
-
-            InternalCallbackContext icc = { Context, nullptr, -1, nullptr, nullptr };
-            if (((pfnUniInternalFunction)nm.value)(&icc))
-            {
-                Scope.SP++;
-            }*/
             IP++;
             break;
         }
@@ -1011,7 +1000,7 @@ int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyV
 {
     MY_NOT_IMPLEMENTED();
 
-    char* const& lpName = UniStrdup(lpFunction);
+    char* const& lpName = MyGetCachedString(lpFunction);
 
     uint32_t kAddress = stbds_shget(pContext->Assembly->Functions, lpName);
     if (kAddress == MY_INVALID_ADDR)

@@ -329,30 +329,26 @@ bool MyArrayIsEqual(const MyArray* pLhsArray, const MyArray* pRhsArray)
     MY_ASSERT(pLhsArray != nullptr && pRhsArray != nullptr, "Invalid arrays");
     if (pLhsArray == pRhsArray)
     {
-        // Same object
         return true;
     }
     if (pLhsArray->Data == pRhsArray->Data)
     {
-        // If an array has been created, then we are guaranteed that MyArray.Data != nullptr
-        // Point to the same block of memory
         return true;
+    }
+    if (pLhsArray->Object.Klass != pRhsArray->Object.Klass)
+    {
+        return false;
     }
     if (MyArrayCount(pLhsArray) != MyArrayCount(pRhsArray))
     {
         return false;
     }
-    /*for (size_t k = 0; k < MyArrayCount(pLhsArray); k++)
-    {
-        const UniValue& Lhs = pLhsArray->Data[k];
-        const UniValue& Rhs = pRhsArray->Data[k];
 
-        if (!Lhs.Equals(Rhs))
-        {
-            return false;
-        }
-    }*/
-    MY_ASSERT(false, "NotImplemented");
+    const uint32_t kBufferSize = MyArrayCount(pLhsArray) * pLhsArray->Object.Klass->Size;
+    if (memcmp(pLhsArray->Data, pRhsArray->Data, kBufferSize))
+    {
+        return false;
+    }
 
     return true;
 }

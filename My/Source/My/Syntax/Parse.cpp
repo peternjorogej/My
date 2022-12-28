@@ -534,7 +534,7 @@ private:
 			m_Position++;
 		}
 
-		m_Token.Id   = UniStrdup(m_Text.ToString(m_Start, m_Position - m_Start));
+		m_Token.Id   = MyGetCachedString(m_Text.ToString(m_Start, m_Position - m_Start));
 		m_Token.Kind = stbds_shget(s_KeywordMap, m_Token.Id);
 
 		if (m_Token.Kind == TokenKind::Invalid)
