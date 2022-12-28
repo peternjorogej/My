@@ -58,7 +58,8 @@ function int Main(string[] Args)
 
 5. Structs
 ```C#
-// POD (Plain Old Data) structs contain no reference types, and *should* be stack allocated (not working at the moment)
+// POD (Plain Old Data) structs contain no reference types, and *should* be
+// stack allocated (not working at the moment)
 struct pod Float2
 {
     // Both default to zero
@@ -69,12 +70,13 @@ struct pod Float2
 // Non-POD structs are heap allocated (currently all structs are heap allocated)
 struct Person
 {
-    // When the struct is instantaited, the memory is zero-initialized; so trying to access reference type members will result in crashes
+    // When the struct is instantaited, the memory is zero-initialized;
+    // so trying to access reference type members will result in crashes
     var int    YOB; 
     var string ID; 
     var string Name; 
 
-    // Structs can have methods but they are neither bound (i.e typechecked) nor emitted
+    // Structs can have methods (API not complete)
     function int GetYOB()
     {
         return this.YOB;
@@ -106,17 +108,15 @@ int main(int iArgc, char** ppArgv)
 	MyAssembly* pAss = Compiler::Build(pCtx, lpPath, internals);
 	if (pAss)
 	{
-		// MyDecompile(pAss);
-		int64_t kResult = Compiler::Run(pCtx, pAss, iArgc, ppArgv);
-		{
-            Console::Color color = Console::Color::Green;
-            if (kResult != 0ll)
-            {
-                color = Console::Color::Red;
-            }
+		// MyDecompile(pAss); // To see what the emitted bytecode does
+		int64_t iResult = Compiler::Run(pCtx, pAss, iArgc, ppArgv);
+        Console::Color color = Console::Color::Green;
+        if (iResult != 0ll)
+        {
+            color = Console::Color::Red;
+        }
 
-			Console::WriteLine(color, "\nProgram exited with code %I64d\n", kResult);
-		}
+        Console::WriteLine(color, "\nProgram exited with code %I64d\n", iResult);
 	}
 
 	MyUninitialize(pCtx);
