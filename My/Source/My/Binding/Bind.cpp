@@ -753,7 +753,7 @@ public:
 		// from s_ForwardedTypes and added to s_UserDefinedTypes in BindForwardDeclaration()
 		for (MyStruct* pKlass : UserStructs)
 		{
-			MyType* pType = MyTypeCreate(0u, pKlass, MY_TYPE_ATTR_NONE);
+			MyType* pType = MyTypeCreate(MY_TYPE_KIND_STRUCT, pKlass, MY_TYPE_ATTR_NONE);
 			stbds_shput(s_ForwardedTypes, pKlass->Name, pType);
 		}
 		
@@ -1375,7 +1375,7 @@ private:
 
 		uint32_t* pCounts = nullptr;
 		stbds_arrpush(pCounts, (uint32_t)stbds_arrlenu(ppItems));
-		MyType* pType = MyTypeCreate(1u, new MyArrayType{ pFirstItemType->Klass, pCounts });
+		MyType* pType = MyTypeCreate(MY_TYPE_KIND_ARRAY, new MyArrayType{ pFirstItemType->Klass, pCounts });
 
 		return MakeBoundExpression_Array(pType, ppItems);
 	}
@@ -1783,7 +1783,7 @@ private:
 		pFunction = MakeSymbol_Function(
 			Signature.Name.Id,
 			MyTypeCreate(
-				2u,
+				MY_TYPE_KIND_FUNCTION,
 				new MyFunctionSignature{ Signature.Name.Id, pReturnType, ppParamTypes },
 				kFlags
 			),
@@ -1932,7 +1932,7 @@ private:
 		}
 
 		MyStruct* pKlass = MyStructCreate(s_Context, Name.Id, kAttribs);
-		MyType* pType = MyTypeCreate(0u, pKlass, MY_TYPE_ATTR_NONE);
+		MyType* pType = MyTypeCreate(MY_TYPE_KIND_STRUCT, pKlass, MY_TYPE_ATTR_NONE);
 
 		// Binding the members while binding the struct declaration means that, we can't have fields
 		// with types we haven't yet encountered

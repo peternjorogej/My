@@ -292,7 +292,7 @@ wchar_t* MyStringToUtf16(const MyString* pStr, bool bCopy)
 }
 
 // ARRAY
-MyArray* MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kStride, size_t kCount, size_t kCapacity)
+MyArray* MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kCount, size_t kCapacity)
 {
     MY_ASSERT(kCount != 0ull && kCapacity != 0ull, "Error: Invalid array item size");
     MyArrayStride stride;

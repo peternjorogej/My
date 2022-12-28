@@ -6,8 +6,15 @@
 
 enum tagMyTypeAttributes
 {
-	MY_TYPE_ATTR_NONE  = 0,
-	MY_TYPE_ATTR_CONST = 1 << 0,
+	MY_TYPE_ATTR_NONE   = 0,
+	MY_TYPE_ATTR_CONST  = 1 << 0,
+};
+
+enum tagMyTypeKind
+{
+	MY_TYPE_KIND_STRUCT   = 0,
+	MY_TYPE_KIND_ARRAY    = 1,
+	MY_TYPE_KIND_FUNCTION = 2,
 };
 
 enum tagMyFieldAttributes
@@ -118,13 +125,12 @@ struct MyStruct
 	MyMethod** Methods    = nullptr;
 	uint32_t   Attributes = 0ul;
 	uint32_t   Size       = 0ul;     // Of its instance
-	// bool        IsInitialized = false;   // ?
 };
 
 struct MyArrayType
 {
 	MyStruct* Klass   = nullptr;
-	uint32_t*  Lengths = nullptr;
+	uint32_t* Lengths = nullptr;
 };
 
 struct MyType
@@ -136,7 +142,7 @@ struct MyType
 		MyFunctionSignature* Signature;
 	};
 	uint32_t Flags = 0ul;
-	uint8_t  Kind  = 0u;  // 0-Struct, 1-Array, 2-Function
+	uint8_t  Kind  = 0u;  // MY_TYPE_KIND_X
 };
 
 #if 0
@@ -166,7 +172,6 @@ struct MyAssembly
 	AddressMap*       Functions = nullptr;
 	AddressMap*       Methods   = nullptr;
 	AddressMap*       Variables = nullptr;
-	// MyFunction*    Main      = nullptr;
 	InternalFunction* Internals = nullptr;
 
 	AddressMap*    Fields    = nullptr;

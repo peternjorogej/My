@@ -964,11 +964,7 @@ void Emitter::EmitFieldExpression(MyBytecodeProcessor& bp, BoundExpression* pFie
     BoundFieldExpression& fe = pField->field;
 
     EmitExpression(bp, fe.Object);
-    // TODO: Emitting a Ldstr op creates a new string object at runtime, just to know what field
-    //       we are accessing, something known at compile time.
-    //       consider a FieldMap (Pair<char*, uint32_t>)
     bp.Emit(MyOpCode::Ldfld, fe.Field);
-    // MY_ASSERT(false, "See // TODO above");
 }
 
 void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression* pOperatorNew)
@@ -991,7 +987,8 @@ void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression
         {
             kCount *= one.Type->Array->Lengths[k];
         }
-        bp.Emit(MyOpCode::Newarray, kCount);
+        uint32_t kIndex = MyGetElementIndex(pAssembly->Klasses, stbds_arrlenu(pAssembly->Klasses), one.Type->Array->Klass);
+        bp.Emit(MyOpCode::Newarray, kIndex, kCount);
     }
 }
 
@@ -1046,7 +1043,9 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
     EmitExpression(bp, ce.Expr);
     MyType* pType = ce.Expr->Type();
 
-    if (ce.Type == My_Defaults.ObjectType || (ce.Type->Kind == 1u && ce.Type->Array->Klass == My_Defaults.ObjectStruct))
+    if (ce.Type == My_Defaults.ObjectType)
+    { }
+    else if (ce.Type->Kind == MY_TYPE_KIND_ARRAY && pType->Kind == MY_TYPE_KIND_ARRAY)
     { }
     else if (ce.Type == My_Defaults.BooleanType)
     {
@@ -1145,6 +1144,8 @@ static char OpCodeHasArgument(MyOpCode Code) noexcept
 {
     switch (Code)
     {
+        case MyOpCode::Newarray:
+            return 2;
         case MyOpCode::Ldc:
         case MyOpCode::Ldcf:
         case MyOpCode::Ldstr:
@@ -1159,7 +1160,6 @@ static char OpCodeHasArgument(MyOpCode Code) noexcept
         case MyOpCode::Stelem:
         case MyOpCode::Ldfld:
         case MyOpCode::Stfld:
-        case MyOpCode::Newarray:
         case MyOpCode::Newobj:
         case MyOpCode::Inc:
         case MyOpCode::Incf:

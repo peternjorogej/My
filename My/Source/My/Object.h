@@ -122,7 +122,7 @@ uint64_t    MyStringGetLength(const MyString* pStr);
 char*       MyStringToUtf8(const MyString* pStr, bool bCopy = false);
 wchar_t*    MyStringToUtf16(const MyString* pStr, bool bCopy = false);
 
-MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kStride, size_t kCount, size_t kCapacity = 16ull);
+MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kCount, size_t kCapacity = 16ull);
 MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, const MyArrayStride& Stride, size_t kCapacity = 16ull);
 MyArray*    MyArrayCopy(MyContext* pContext, const MyArray* pArray);
 bool        MyArrayIsEqual(const MyArray* pLhsStr, const MyArray* pRhsStr);

@@ -669,7 +669,9 @@ int64_t MyVM::Execute(bool& bRunning)
         }
         case MyOpCode::Newarray:
         {
-            MY_NOT_IMPLEMENTED();
+            // MY_NOT_IMPLEMENTED();
+            MyArray* pArray = MyArrayNew(Context, Assembly->Klasses[IP->Arg0], IP->Arg1);
+            Stack.Push(pArray);
             IP++;
             break;
         }
@@ -1143,9 +1145,6 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 Console::WriteLine();
                 break;
             case MyOpCode::Ldarr:
-                /*Console::Write("%sldarr, ", Space.c_str());
-                Assembly.Constants[Inst.Arg0].Print(true);
-                Console::WriteLine();*/
                 Console::WriteLine("%sldarr, [%u, %u]", Space.c_str(), (Inst.Arg0 & 0xFFFFFF00)>>8, (Inst.Arg0 & 0x000000FF));
                 break;
             case MyOpCode::Ldobj:
@@ -1158,31 +1157,31 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 Console::WriteLine("%spop", Space.c_str());
                 break;
             case MyOpCode::Ldarg:
-                Console::WriteLine("%sldarg, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sldarg, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Ldloc:
-                Console::WriteLine("%sldloc, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sldloc, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Stloc:
-                Console::WriteLine("%sstloc, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sstloc, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Ldglo:
-                Console::WriteLine("%sldglo, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sldglo, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Stglo:
-                Console::WriteLine("%sstglo, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sstglo, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Newarray:
-                Console::WriteLine("%snewarray, %I64u", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%snewarray, [%s, %u]", Space.c_str(), Assembly.Klasses[Inst.Arg0]->Name, Inst.Arg1);
                 break;
             case MyOpCode::Newobj:
                 Console::WriteLine("%snewobj, [%s]", Space.c_str(), Assembly.Klasses[Inst.Arg0]->Name);
                 break;
             case MyOpCode::Ldelem:
-                Console::WriteLine("%sldelem, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sldelem, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Stelem:
-                Console::WriteLine("%sstelem, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sstelem, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Ldfld:
                 Console::WriteLine("%sldfld, %s", Space.c_str(), Assembly.Fields[Inst.Arg0].key);
@@ -1191,7 +1190,7 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 Console::WriteLine("%sstfld, %s", Space.c_str(), Assembly.Fields[Inst.Arg0].key);
                 break;
             case MyOpCode::Inc:
-                Console::WriteLine("%sinc, [%I64u]", Space.c_str(), Inst.Arg0);
+                Console::WriteLine("%sinc, [%u]", Space.c_str(), Inst.Arg0);
                 break;
                 // Conversion
             case MyOpCode::Cvtoi:  Console::WriteLine("%scvtoi",  Space.c_str()); break;
@@ -1287,7 +1286,7 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 goto EXIT;
                 break;
             default:
-                Console::WriteLine("%s[invalid opcode '%s' @ %I64u]", Space.c_str(), OpCodeString(Inst.Code), Inst.Arg0);
+                Console::WriteLine("%s[invalid opcode '%s' @ %u]", Space.c_str(), OpCodeString(Inst.Code), Inst.Arg0);
                 break;
         } /* end switch */
     } /* end while */

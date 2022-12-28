@@ -85,52 +85,52 @@ void MyInitializeStructs(MyContext* pContext)
 
     // Error
     ud.ErrorStruct = MyStructCreate(pContext, "Error", MY_STRUCT_ATTR_NONE);
-    ud.ErrorType = MyTypeCreate(0u, ud.ErrorStruct);
+    ud.ErrorType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.ErrorStruct);
     ud.ErrorStruct->Size = 0ul;
     // Void
     ud.VoidStruct = MyStructCreate(pContext, "Void", MY_STRUCT_ATTR_NONE);
-    ud.VoidType = MyTypeCreate(0u, ud.VoidStruct);
+    ud.VoidType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.VoidStruct);
     ud.VoidStruct->Size = 0ul;
     // Object
     ud.ObjectStruct = MyStructCreate(pContext, "Object", MY_STRUCT_ATTR_NONE);
-    ud.ObjectType = MyTypeCreate(0u, ud.ObjectStruct);
+    ud.ObjectType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.ObjectStruct);
     ud.ObjectStruct->Size = 8ul;
     // Boolean
     ud.BooleanStruct = MyStructCreate(pContext, "Boolean", MY_STRUCT_ATTR_POD);
-    ud.BooleanType = MyTypeCreate(0u, ud.BooleanStruct);
+    ud.BooleanType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.BooleanStruct);
     ud.BooleanStruct->Size = 8ul;
     // Int
     ud.IntStruct = MyStructCreate(pContext, "Int", MY_STRUCT_ATTR_POD);
-    ud.IntType = MyTypeCreate(0u, ud.IntStruct);
+    ud.IntType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.IntStruct);
     ud.IntStruct->Size = 8ul;
     // Uint
     ud.UintStruct = MyStructCreate(pContext, "Uint", MY_STRUCT_ATTR_POD);
-    ud.UintType = MyTypeCreate(0u, ud.UintStruct);
+    ud.UintType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.UintStruct);
     ud.UintStruct->Size = 8ul;
     // Float
     ud.FloatStruct = MyStructCreate(pContext, "Float", MY_STRUCT_ATTR_POD);
-    ud.FloatType = MyTypeCreate(0u, ud.FloatStruct);
+    ud.FloatType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.FloatStruct);
     ud.FloatStruct->Size = 8ul;
     // Complex
     ud.ComplexStruct = MyStructCreate(pContext, "Complex", MY_STRUCT_ATTR_POD);
-    ud.ComplexType = MyTypeCreate(0u, ud.ComplexStruct);
+    ud.ComplexType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.ComplexStruct);
     {
         MyStructAddFieldAutoOffset(ud.ComplexStruct, "Real", ud.FloatType, ud.FloatStruct);
         MyStructAddFieldAutoOffset(ud.ComplexStruct, "Imag", ud.FloatType, ud.FloatStruct);
     }
     // String
     ud.StringStruct = MyStructCreate(pContext, "String", MY_STRUCT_ATTR_NONE);
-    ud.StringType = MyTypeCreate(0u, ud.StringStruct);
+    ud.StringType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.StringStruct);
     ud.StringStruct->Size = 8ul;
     // StringBuilder
     ud.StringBuilderStruct = MyStructCreate(pContext, "StringBuilder", MY_STRUCT_ATTR_NONE);
-    ud.StringBuilderType = MyTypeCreate(0u, ud.StringBuilderStruct);
+    ud.StringBuilderType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.StringBuilderStruct);
     {
         MyStructAddFieldAutoOffset(ud.StringBuilderStruct, "Value", ud.StringType, ud.StringStruct);
     }
     // File
     ud.FileStruct = MyStructCreate(pContext, "File", MY_STRUCT_ATTR_NONE);
-    ud.FileType = MyTypeCreate(0u, ud.FileStruct);
+    ud.FileType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.FileStruct);
     {
         MyStructAddFieldAutoOffset(ud.FileStruct, "Handle",   ud.UintType,   ud.UintStruct, MY_FIELD_ATTR_CONST);
         MyStructAddFieldAutoOffset(ud.FileStruct, "Filepath", ud.StringType, ud.StringStruct);
