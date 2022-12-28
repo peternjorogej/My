@@ -100,7 +100,7 @@ int main(int iArgc, char** ppArgv)
 {
 	MyContext* pCtx = MyInitialize();
 
-    const char* lpPath = "your/path/to/script.ns";
+    const char* lpPath = "your/path/to/script.my";
     std::initializer_list<InternalFunction> internals = 
     {
         // ...
