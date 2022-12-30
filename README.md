@@ -161,6 +161,7 @@ function int Main(string[] Args)
 - Proper implementation of array types
 - Const-correctness
 - Better string management
+- More functionality (builtin functions etc)
 - Methods
     - Constructors
     - ToString(), Copy(), Write()
@@ -174,7 +175,7 @@ function int Main(string[] Args)
 - Stack allocation of pod structs
 - Shift to using a register-based VM
 - Support for 32-bit types
-- Better garbage collection
+- Better garbage collection algorithm(s)
 - Proper scripting API
     - FFI (C/C++)
     - Better internal function calls, FFI (with C/C++)
