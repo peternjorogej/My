@@ -11,11 +11,12 @@ function int Main(const string[] Argv)
 {
 	Print("Hello, World from My#");
 	
-	const float[] data = new float[5]();
-	WriteLine("{ %f, %f, %f, %f, %f }", data);
-	
 	const StringBuilder sb = new StringBuilder();
 	WriteLine("%p", { sb.Value });
 	
+	const float[] data = new float[5]();
+	WriteLine("{ %f, %f, %f, %f, %f }", data);
+	
 	return Go();
 }
+

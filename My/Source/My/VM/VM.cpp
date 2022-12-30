@@ -489,17 +489,16 @@ static inline void Pow(MyVM* pVM) noexcept
 {
     static_assert(std::is_arithmetic<Number>::value, "Pow<T>(MyVM*) expects T to be numeric");
 
-    const uint64_t Rhs = pVM->Stack.PopU64();
-    const uint64_t Lhs = pVM->Stack.PopU64();
-    
     if constexpr (std::is_integral<Number>::value)
     {
-        return pVM->Stack.Push(uni_pow(Lhs, Rhs));
+        const uint64_t kRhs = pVM->Stack.PopU64();
+        const uint64_t kLhs = pVM->Stack.PopU64();
+        return pVM->Stack.Push(uni_pow(kLhs, kRhs));
     }
     else                                      
     {
-        const double dLhs = *reinterpret_cast<const double*>(&Lhs);
-        const double dRhs = *reinterpret_cast<const double*>(&Rhs);
+        const double dRhs = pVM->Stack.PopF64();
+        const double dLhs = pVM->Stack.PopF64();
         return pVM->Stack.Push(pow(dLhs, dRhs));
     }                                         
 }
@@ -669,7 +668,6 @@ int64_t MyVM::Execute(bool& bRunning)
         }
         case MyOpCode::Newarray:
         {
-            // MY_NOT_IMPLEMENTED();
             MyArray* pArray = MyArrayNew(Context, Assembly->Klasses[IP->Arg0], IP->Arg1);
             Stack.Push(pArray);
             IP++;
