@@ -295,6 +295,20 @@ MyType* MyTypeCreate(uint8_t kKind, void* pData, uint32_t kFlags) noexcept
     return pType;
 }
 
+bool MyTypeIsReference(MyType* pType) noexcept
+{
+    switch (pType->Kind)
+    {
+        case MY_TYPE_KIND_STRUCT:
+            return MyStructIsReference(pType->Klass);
+        case MY_TYPE_KIND_ARRAY:
+            return true;
+        default: break;
+    }
+    
+    return false;
+}
+
 const char* MyTypeGetName(const MyType* pType) noexcept
 {
     if (pType)

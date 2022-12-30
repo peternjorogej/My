@@ -14,7 +14,7 @@ static BoundExpression* _My_StaticCall_StaticAssert(const TextLocation& Location
 
 
 static void    _My_Initialize_StaticCalls() noexcept;
-static bool    ArrayRanksMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict = true) noexcept;
+static bool    _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict = true) noexcept;
 
 #pragma region Type_Conversion
 /// Type Conversion
@@ -71,9 +71,9 @@ public:
 			if (To == My_Defaults.BooleanType || To == My_Defaults.IntType || To == My_Defaults.UintType)
 				return TypeConversion::Implicit;
 
-		if (From->Kind == 1u && To->Kind == 1u)
+		if (From->Kind == MY_TYPE_KIND_ARRAY && To->Kind == MY_TYPE_KIND_ARRAY)
 		{
-			if (ArrayRanksMatch(*From->Array, *To->Array, false))
+			if (_My_ArrayTypesMatch(*From->Array, *To->Array, false))
 			{
 				return TypeConversion::Implicit;
 			}
@@ -127,7 +127,7 @@ bool MyType::Equals(const MyType& Type) const noexcept
 			const ArrayType& lhs = arraytype;
 			const ArrayType& rhs = Type.arraytype;
 
-			return lhs.Type->Equals(*rhs.Type) && ArrayRanksMatch(lhs, rhs);
+			return lhs.Type->Equals(*rhs.Type) && _My_ArrayTypesMatch(lhs, rhs);
 		}
 		case TypeKind::Function:
 		{
@@ -904,6 +904,7 @@ private:
 
 		switch (literal.Literal.Kind)
 		{
+			case TokenKind::NullKeyword:  Literal = MakeValue_Null();                       pType = My_Defaults.ObjectType;  break;
 			case TokenKind::TrueKeyword:  Literal = MakeValue_Bool(true);                   pType = My_Defaults.BooleanType; break;
 			case TokenKind::FalseKeyword: Literal = MakeValue_Bool(false);                  pType = My_Defaults.BooleanType; break;
 			case TokenKind::Int64:        Literal = MakeValue_Int64(literal.Literal.I64);   pType = My_Defaults.IntType;     break;
@@ -1157,8 +1158,7 @@ private:
 			}
 			/*else
 			{
-				MyValue null = MyValue(MyValueKind::Null);
-				pExpression = MakeBoundExpression_Literal(pType, null);
+				pExpression = MakeBoundExpression_Literal(pType, MakeValue_Null());
 			}*/
 		}
 
@@ -1689,7 +1689,8 @@ private:
 			else
 			{
 				// TODO: Proper implementation of null
-				pValue = MakeBoundExpression_Literal(pType, MyValue(MyValueKind::Null));
+				const MyValue Value = MyTypeIsReference(pType) ? MakeValue_Null() : MakeValue_Uint64(0ull);
+				pValue = MakeBoundExpression_Literal(pType, Value);
 			}
 		}
 		if (!pValue)
@@ -2276,9 +2277,9 @@ private:
 	{
 		switch (pType->Kind)
 		{
-			case 0: return pType->Klass;
-			case 1: return pType->Array->Klass;
-			case 2: return MY_NOT_IMPLEMENTED(), nullptr;
+			case MY_TYPE_KIND_STRUCT:   return pType->Klass;
+			case MY_TYPE_KIND_ARRAY:    return pType->Array->Klass;
+			case MY_TYPE_KIND_FUNCTION: return MY_NOT_IMPLEMENTED(), nullptr;
 			default: break;
 		}
 		MY_ASSERT(false, "Error: Unknown type (kind: %u)", pType->Kind);
@@ -2872,7 +2873,7 @@ void _My_Initialize_StaticCalls() noexcept
 	stbds_shput(s_StaticCalls, "is_trivial",    _My_StaticCall_IsTrivial);
 }
 
-bool ArrayRanksMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict) noexcept
+bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict) noexcept
 {
 	if (From.Klass != To.Klass)
 	{

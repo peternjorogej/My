@@ -17,6 +17,20 @@ function int Main(const string[] Argv)
 	const float[] data = new float[5]();
 	WriteLine("{ %f, %f, %f, %f, %f }", data);
 	
+	var float x;
+	var uint y;
+	var string z = null;
+	var int[] w;
+	var StringBuilder sb2 = null;
+	WriteLine("%f, %u, %p, %p, %p", { object(x), y, z, w, sb2 });
+	
+	x = 1.23;
+	y = 567u;
+	z = "Hello, World";
+	w = new int[5]();
+	sb2 = new StringBuilder();
+	WriteLine("%f, %u, %s, %p, %p", { object(x), y, z, w, sb2 });
+	
 	return Go();
 }
 

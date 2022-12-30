@@ -101,6 +101,7 @@ struct MyArray
 #define _MyArrayAddrWithSize(arr,size,index)   ((arr)->Data + (size)*(index))
 
 MyValue     MakeValue_Copy(const MyValue& Value, MyContext* pContext = nullptr);
+MyValue     MakeValue_Null();
 MyValue     MakeValue_Bool(bool bValue);
 MyValue     MakeValue_Int64(int64_t Value);
 MyValue     MakeValue_Uint64(uint64_t Value);

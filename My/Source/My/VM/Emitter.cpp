@@ -180,6 +180,7 @@ void MyBytecodeProcessor::Emit(const MyValue& Value)
     MyOpCode Code = MyOpCode::Invalid;
     switch (Value.Kind)
     {
+        case MyValueKind::Null:    Code = MyOpCode::Ldc;   break;
         case MyValueKind::Bool:    Code = MyOpCode::Ldc;   break;
         case MyValueKind::Int64:   Code = MyOpCode::Ldc;   break;
         case MyValueKind::Uint64:  Code = MyOpCode::Ldc;   break;
@@ -1043,7 +1044,7 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
     EmitExpression(bp, ce.Expr);
     MyType* pType = ce.Expr->Type();
 
-    if (ce.Type == My_Defaults.ObjectType)
+    if (ce.Type == My_Defaults.ObjectType || pType == My_Defaults.ObjectType)
     { }
     else if (ce.Type->Kind == MY_TYPE_KIND_ARRAY && pType->Kind == MY_TYPE_KIND_ARRAY)
     { }

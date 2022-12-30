@@ -130,6 +130,12 @@ MyValue MakeValue_Copy(const MyValue& Value, MyContext* pContext)
     }
 }
 
+MyValue MakeValue_Null()
+{
+    static const MyValue null = MyValue{ MyValueKind::Null };
+    return null;
+}
+
 MyValue MakeValue_Bool(bool bValue)
 {
     MyValue o = MyValue{ MyValueKind::Bool };
