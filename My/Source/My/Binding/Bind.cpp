@@ -1257,12 +1257,6 @@ private:
 			BoundExpression* pBoundArgument = BindExpression(call.Arguments[k]);
 			MySymbol* pParamSym = pFunction->funcsym.Parameters[k];
 
-			if (pParamSym->paramsym.IsReadonly && pBoundArgument->Kind != BoundExpressionKind::Literal)
-			{
-				m_Diagnostics.ReportArgumentNotConstexpr(GetLocation(call.Arguments[k]), pFunction->Name, pParamSym->Name, k);
-				goto Error;
-			}
-
 			pBoundArgument = BindConversion(GetLocation(call.Arguments[k]), pBoundArgument, pParamSym->Type);
 			stbds_arrpush(ppArgs, pBoundArgument);
 		}
