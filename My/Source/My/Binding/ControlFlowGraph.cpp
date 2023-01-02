@@ -224,7 +224,7 @@ private:
 			}
 		}
 
-		if (iIndex > 0)
+		if (iIndex >= 0)
 		{
 			stbds_arrdel(pItems, iIndex);
 		}

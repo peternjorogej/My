@@ -1688,7 +1688,6 @@ private:
 			}
 			else
 			{
-				// TODO: Proper implementation of null
 				const MyValue Value = MyTypeIsReference(pType) ? MakeValue_Null() : MakeValue_Uint64(0ull);
 				pValue = MakeBoundExpression_Literal(pType, Value);
 			}
@@ -2351,8 +2350,6 @@ BoundProgram Binder::BindProgram(MyContext* pContext, BoundGlobalScope* pGlobalS
 {
 	using GMap = BoundProgram::GlobalMap;
 	using FMap = BoundProgram::FunctionMap;
-
-	static const MyValue null = MyValue{ MyValueKind::Null };
 
 	GMap* pGlobals = nullptr;
 	FMap* pFunctionBodies = nullptr;

@@ -34,6 +34,10 @@
   #define MY_ASSERT(x, ...) (void)0
 #endif // NDEGUG
 
+#define MY_EPSILON       (1.0e-7)
+#define MY_ISZERO(x)     (fabs((x)) < MY_EPSILON)
+#define MY_ISEQUAL(x, y) MY_ISZERO((x) - (y))
+
 #define MY_NOT_IMPLEMENTED() MY_ASSERT(false, "NotImplemented")
 
 #define MY_SAFEDELETE(ptr) delete ptr, ptr = nullptr
