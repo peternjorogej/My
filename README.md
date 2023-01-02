@@ -162,6 +162,7 @@ function int Main(string[] Args)
 - Const-correctness
 - Better string management
 - More functionality (builtin functions etc)
+- Constant folding
 - Methods
     - Constructors
     - ToString(), Copy(), Write()
