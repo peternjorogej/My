@@ -1,6 +1,7 @@
 
-extern function void Print(string Text);
-extern function void WriteLine(string Fmt, object[] Args);
+extern function void   Print(string Text);
+extern function string ReadLine();
+extern function void   WriteLine(string Format, object[] Args);
 
 function static int Go() nogc
 {
@@ -9,27 +10,10 @@ function static int Go() nogc
 
 function int Main(const string[] Argv)
 {
-	Print("Hello, World from My#");
-	
-	const StringBuilder sb = new StringBuilder();
-	WriteLine("%p", { sb.Value });
-	
-	const float[] data = new float[5]();
-	WriteLine("{ %f, %f, %f, %f, %f }", data);
-	
-	var float x;
-	var uint y;
-	var string z = null;
-	var int[] w;
-	var StringBuilder sb2 = null;
-	WriteLine("%f, %u, %p, %p, %p", { object(x), y, z, w, sb2 });
-	
-	x = 1.23;
-	y = 567u;
-	z = "Hello, World";
-	w = new int[5]();
-	sb2 = new StringBuilder();
-	WriteLine("%f, %u, %s, %p, %p", { object(x), y, z, w, sb2 });
+	Print("Hello, World from My");
+	// Doesn't work anymore (Need to be implemented differently), and also
+	// there's no need for them (compile-time functions) at the moment
+	// static_assert(false);
 	
 	return Go();
 }

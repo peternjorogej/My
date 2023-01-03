@@ -4,16 +4,7 @@
 #include "My/Base/IO.h"
 #include "Stb/stb_ds.h"
 
-using pfnStaticCall = BoundExpression*(*)(const TextLocation& Location, BoundExpression** ppArgs, DiagnosticBag& Diagnostics);
 
-using StaticFunction = Pair<const char* const, pfnStaticCall>;
-
-static StaticFunction* s_StaticCalls = nullptr;
-
-static BoundExpression* _My_StaticCall_StaticAssert(const TextLocation& Location, BoundExpression** ppArgs, DiagnosticBag& Diagnostics);
-
-
-static void    _My_Initialize_StaticCalls() noexcept;
 static bool    _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict = true) noexcept;
 
 #pragma region Type_Conversion
@@ -710,8 +701,6 @@ public:
 			stbds_arrpush(pFields, fsFilepath);
 			m_Scope->DeclareStruct(MakeSymbol_Struct(md.FileStruct->Name, md.FileType, pFields));
 		}
-
-		_My_Initialize_StaticCalls();
 	}
 
 	InternalBinder(MyContext* pContext, const SyntaxTree* pTree)
@@ -1179,23 +1168,6 @@ private:
 			if (MyType* pType = LookupType(lpName); pType && stbds_arrlenu(call.Arguments) == 1ul)
 			{
 				return BindConversion(call.Arguments[0], pType, true); // <-- bAllowExplicit
-			}
-
-			pfnStaticCall pfnSC = stbds_shget(s_StaticCalls, lpName);
-			if (pfnSC != nullptr)
-			{
-				BoundExpression** ppArgs = nullptr;
-				for (size_t k = 0; k < stbds_arrlenu(call.Arguments); k++)
-				{
-					BoundExpression* pArg = BindExpression(call.Arguments[k]);
-					if (pArg->Type() == My_Defaults.ErrorType)
-					{
-						goto Error;
-					}
-					stbds_arrpush(ppArgs, pArg);
-				}
-
-				return pfnSC(GetLocation(call.Callable), ppArgs, m_Diagnostics);
 			}
 		}
 
@@ -2792,83 +2764,6 @@ BoundStatement* MakeBoundStatement_ConditionalGoto(const BoundLabel& Label, Boun
 }
 #pragma endregion
 
-
-BoundExpression* _My_StaticCall_StaticAssert(const TextLocation& Location, BoundExpression** ppArgs, DiagnosticBag& Diagnostics)
-{
-	const size_t kArgc = stbds_arrlenu(ppArgs);
-	MY_ASSERT(kArgc == 1ul || kArgc == 2ul, "static_assert expects 1 or 2 arguments");
-	
-	BoundExpression* pCondition = ppArgs[0];
-	MY_ASSERT(pCondition->Kind == BoundExpressionKind::Literal);
-
-	if (!pCondition->literal.Value)
-	{
-		std::string Message = "";
-		if (kArgc == 1ull)
-		{
-			Message = "static_assert failed";
-		}
-		else
-		{
-			BoundExpression* pMessage = ppArgs[1];
-			MY_ASSERT(pMessage->Kind == BoundExpressionKind::Literal);
-
-			Message = Console::Format("static_assert failed: %s", pMessage->literal.Value.Str->Chars);
-		}
-
-		Diagnostics.ReportCompilerError(Location, Message);
-		return MakeBoundExpression_Error();
-	}
-	else
-	{
-		return MakeBoundExpression_Empty();
-	}
-}
-
-BoundExpression* _My_StaticCall_IsPrimitive(const TextLocation& Location, BoundExpression** ppArgs, DiagnosticBag& Diagnostics)
-{
-	const size_t kArgc = stbds_arrlenu(ppArgs);
-	MY_ASSERT(kArgc == 1ul, "is_primitive expects 1 argument");
-
-	BoundExpression* pName = ppArgs[0];
-	MY_ASSERT(pName->Kind == BoundExpressionKind::Name);
-
-	char* const& lpName = pName->name.Symbol->Name;
-	bool bIsPrimitive = false;
-
-	const char* lppPrimitiveTypes[] = { "bool", "int", "uint", "float" };
-	for (const char* const& lpTypename : lppPrimitiveTypes)
-	{
-		if (strncmp(lpTypename, lpName, strlen(lpTypename)) == 0)
-		{
-			bIsPrimitive = true;
-		}
-	}
-
-	return MakeBoundExpression_Literal(My_Defaults.BooleanType, MakeValue_Bool(bIsPrimitive));
-}
-
-BoundExpression* _My_StaticCall_IsTrivial(const TextLocation& Location, BoundExpression** ppArgs, DiagnosticBag& Diagnostics)
-{
-	return MY_NOT_IMPLEMENTED(), nullptr;
-}
-
-void _My_Initialize_StaticCalls() noexcept
-{
-	if (stbds_shlenu(s_StaticCalls) > 0u)
-	{
-		return;
-	}
-
-	{
-		static constexpr pfnStaticCall sc = nullptr;
-		stbds_shdefault(s_StaticCalls, sc);
-	}
-
-	stbds_shput(s_StaticCalls, "static_assert", _My_StaticCall_StaticAssert);
-	stbds_shput(s_StaticCalls, "is_primitive",  _My_StaticCall_IsPrimitive);
-	stbds_shput(s_StaticCalls, "is_trivial",    _My_StaticCall_IsTrivial);
-}
 
 bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict) noexcept
 {
