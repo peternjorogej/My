@@ -138,7 +138,7 @@ public:
 		}
 
 	RestartLoop:
-		for (size_t k = 0; k < kBlockCount; k++)
+		for (size_t k = 0; k < stbds_arrlenu(ppBlocks); k++)
 		{
 			BasicControlBlock* const pBlock = ppBlocks[k];
 			if (stbds_arrlenu(pBlock->Incoming) == 0ul)
