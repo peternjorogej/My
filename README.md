@@ -163,15 +163,15 @@ function int Main(string[] Args)
 - Better string management
 - More functionality (builtin functions etc)
 - Constant folding
-- Methods
-    - Constructors
+- Function and operator overloading
+- OOP
+	- Methods (Constructors included)
     - ToString(), Copy(), Write()
-    - Overloading  
-    - Operator Overloading
+	- Inheritance and Polymorphism
+	- Encapsulation (*visibility*)
 - Default arguments and variadic functions
 - Better implementation of compile-time functions (static_assert etc)
 - Lambdas
-- Inheritance, Polymorphism, Encapsulation (visibility)
 - Templates (or *Generics*)
 - Stack allocation of pod structs
 - Shift to using a register-based VM
