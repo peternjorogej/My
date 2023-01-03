@@ -436,9 +436,9 @@ MyType* BoundExpression::Type() const noexcept
 		case BoundExpressionKind::Ternary:     return ternary.Then->Type();
 		case BoundExpressionKind::Increment:   return inc.Lvalue->Type;
 		case BoundExpressionKind::Name:        return name.Symbol->Type;
-		case BoundExpressionKind::Assignment:  return assign.Variable->Type; // TODO: *?
+		case BoundExpressionKind::Assignment:  return assign.Variable->Type;
 		case BoundExpressionKind::OperatorNew: return opnew.Type;
-		case BoundExpressionKind::Call:        return call.Function->Type->Signature->Return; // TODO: Return symbol type or return type*?
+		case BoundExpressionKind::Call:        return call.Function->Type->Signature->Return;
 		case BoundExpressionKind::Index:       return index.Type;
 		case BoundExpressionKind::Field:       return field.Type;
 		case BoundExpressionKind::Array:       return array.Type;

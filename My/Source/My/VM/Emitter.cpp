@@ -92,7 +92,7 @@ void MyBytecodeProcessor::Emit(MyOpCode Code, char* const& lpValue)
             const uint32_t kAddress = stbds_arrlenu(m_Assembly->Code);
             ResolveDeferredAddress(&m_DeferredLabels, lpCachedValue, kAddress);
 
-            // NOTE: We don't need to store the addresses of labels, but they are useful for decompilation (and debugging)
+            // We don't need to store the addresses of labels, but they are useful for decompilation (and debugging)
             stbds_shput(m_Assembly->Labels, lpCachedValue, kAddress);
             Emit(MyOpCode::Label, kAddress);
             break;

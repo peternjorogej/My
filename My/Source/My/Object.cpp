@@ -250,7 +250,6 @@ bool MyStringIsInterned(const MyString* pStr)
 
 bool MyStringIsEqual(const MyString* pLhsStr, const MyString* pRhsStr)
 {
-    // TODO: Assume strings are already interned?
     if (MyStringIsInterned(pLhsStr) && MyStringIsInterned(pRhsStr))
     {
         return pLhsStr == pRhsStr;
