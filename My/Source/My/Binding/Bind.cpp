@@ -1574,7 +1574,7 @@ private:
 
 	BoundStatement* BindBreakStatement(Statement* pBreak)
 	{
-		if (stbds_arrlenu(m_LoopStack))
+		if (!stbds_arrlenu(m_LoopStack))
 		{
 			m_Diagnostics.ReportInvalidBreakOrContinue(GetLocation(pBreak->breakstmt.BreakKeyword), "break");
 			return BindErrorStatement();
@@ -1585,7 +1585,7 @@ private:
 
 	BoundStatement* BindContinueStatement(Statement* pContinue)
 	{
-		if (stbds_arrlenu(m_LoopStack))
+		if (!stbds_arrlenu(m_LoopStack))
 		{
 			m_Diagnostics.ReportInvalidBreakOrContinue(GetLocation(pContinue->continuestmt.ContinueKeyword), "continue");
 			return BindErrorStatement();
