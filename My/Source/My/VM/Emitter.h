@@ -17,7 +17,7 @@ enum class MyOpCode : uint16_t
 	Add, Addf, Sub, Subf, Mul, Mulf, Div, Divf, Pow, Powf,
 	Lsh, Rsh, Mod, And, Or, Xor, Neg, Negf, Not,
 	// Conversion Ops
-	Cvtoi, Cvtou, Cvtof, Cvftoi, Cvftou,
+	Cvtof, Cvftoi, Cvftou,
 	// Comparison Ops
 	Ceq, Ceqf, Cneq, Cneqf, Clt, Cltf, Clte, Cltef, Cgt, Cgtf, Cgte, Cgtef,
 	// Control Flow Ops

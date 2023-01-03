@@ -53,8 +53,14 @@ void _My_Builtin_CvToFloat(MyContext* pContext, MyVM* pVM) noexcept
 void _My_Builtin_CvIntToString(MyContext* pContext, MyVM* pVM) noexcept
 {
     const int64_t iValue = pVM->Stack.PopI64();
-    const char* const lpFmt = iValue < 0 ? "%I64d" : "%I64u";
-    MyString* pString = MyStringNew(pContext, Console::Format(lpFmt, iValue));
+    MyString* pString = MyStringNew(pContext, Console::Format("%I64d", iValue));
+    pVM->Stack.Push(pString);
+}
+
+void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const uint64_t k = pVM->Stack.PopU64();
+    MyString* pString = MyStringNew(pContext, Console::Format("%I64u", k));
     pVM->Stack.Push(pString);
 }
 

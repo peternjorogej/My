@@ -9,6 +9,7 @@ void _My_Builtin_CvToInt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvToUint(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvToFloat(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvIntToString(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept;
 
 void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept;

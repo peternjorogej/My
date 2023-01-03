@@ -1005,10 +1005,6 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
         {
             bp.Emit(MyOpCode::Cvftoi);
         }
-        else
-        {
-            bp.Emit(MyOpCode::Cvtoi);
-        }
     };
     
     static const auto ConvToUint = [&bp](MyType* pTypeFrom) -> void
@@ -1020,10 +1016,6 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
         else if (pTypeFrom == My_Defaults.FloatType)
         {
             bp.Emit(MyOpCode::Cvftou);
-        }
-        else
-        {
-            bp.Emit(MyOpCode::Cvtou);
         }
     };
     
@@ -1070,9 +1062,13 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
         {
             bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvfloattostring"));
         }
+        else if (pType == My_Defaults.UintType)
+        {
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvuinttostring"));
+        }
         else
         {
-            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvtostring"));
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvinttostring"));
         }
     }
     else
@@ -1667,7 +1663,8 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("__cvtoint",         _My_Builtin_CvToInt,         1);
     RegisterBuiltin("__cvtouint",        _My_Builtin_CvToUint,        1);
     RegisterBuiltin("__cvtofloat",       _My_Builtin_CvToFloat,       1);
-    RegisterBuiltin("__cvtostring",      _My_Builtin_CvIntToString,      1);
+    RegisterBuiltin("__cvinttostring",   _My_Builtin_CvIntToString,   1);
+    RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString,  1);
     RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString, 1);
     // Std
     RegisterBuiltin("Write",       _My_Builtin_Write,       2);

@@ -746,13 +746,6 @@ int64_t MyVM::Execute(bool& bRunning)
         }
 #pragma endregion
 #pragma region Conversions_Operations
-        case MyOpCode::Cvtoi:
-        case MyOpCode::Cvtou:
-        {
-            // Value on stack was already on an integer
-            IP++;
-            break;
-        }
         case MyOpCode::Cvtof:
         {
             _My_VM_CheckUnderflow(Stack, 8u);
@@ -1191,8 +1184,6 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 Console::WriteLine("%sinc, [%u]", Space.c_str(), Inst.Arg0);
                 break;
                 // Conversion
-            case MyOpCode::Cvtoi:  Console::WriteLine("%scvtoi",  Space.c_str()); break;
-            case MyOpCode::Cvtou:  Console::WriteLine("%scvtou",  Space.c_str()); break;
             case MyOpCode::Cvtof:  Console::WriteLine("%scvtof",  Space.c_str()); break;
             case MyOpCode::Cvftoi: Console::WriteLine("%scvftoi", Space.c_str()); break;
             case MyOpCode::Cvftou: Console::WriteLine("%scvftou", Space.c_str()); break;
