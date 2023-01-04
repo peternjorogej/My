@@ -857,92 +857,90 @@ private:
 			goto Error;
 		}
 
-		if (Current().Kind == TokenKind::LBracket)
+		while (Current().Kind == TokenKind::LParen || Current().Kind == TokenKind::Dot)
 		{
-			// Index Expression
-			Expression** ppIndices = nullptr;
-
-			const Token& LbracketToken = NextToken();
-			while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
+			// Call Expression
+			if (Current().Kind == TokenKind::LParen)
 			{
-				Expression* pIndex = ParseExpression();
-				if (!pIndex)
+				const Token& LparenToken = NextToken(); // (
+				while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
 				{
-					goto Error;
-				}
-				stbds_arrpush(ppIndices, pIndex);
-
-				if (Current().Kind != TokenKind::RBracket)
-				{
-					if (!CheckAndMatchToken(TokenKind::Comma))
+					Expression* pArg = ParseExpression();
+					if (!pArg)
 					{
 						goto Error;
 					}
-				}
-			}
-			const Token& RbracketToken = Current();
-			if (!CheckAndMatchToken(TokenKind::RBracket))
-			{
-				goto Error;
-			}
+					stbds_arrpush(ppArgs, pArg);
 
-			pExpr = MakeExpression_Index(pExpr, LbracketToken, ppIndices, RbracketToken);
-		}
-		else
-		{
-			while (Current().Kind == TokenKind::LParen || Current().Kind == TokenKind::Dot)
-			{
-				// Call Expression
-				if (Current().Kind == TokenKind::LParen)
-				{
-					const Token& LparenToken = NextToken(); // (
-					while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
+					if (Current().Kind != TokenKind::RParen)
 					{
-						Expression* pArg = ParseExpression();
-						if (!pArg)
+						if (!CheckAndMatchToken(TokenKind::Comma))
 						{
 							goto Error;
 						}
-						stbds_arrpush(ppArgs, pArg);
+					}
+				}
+				const Token& RparenToken = Current();
+				if (!CheckAndMatchToken(TokenKind::RParen))
+				{
+					goto Error;
+				}
 
-						if (Current().Kind != TokenKind::RParen)
+				pExpr = MakeExpression_Call(pExpr, LparenToken, ppArgs, RparenToken);
+			}
+			// (Must be) Field Expression
+			else
+			{
+				const Token& DotToken = Current();
+				if (!CheckAndMatchToken(TokenKind::Dot))
+				{
+					goto Error;
+				}
+
+				if (Current().Kind != TokenKind::Identifier)
+				{
+					const Token& current = Current();
+					TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
+					m_Diagnostics.ReportExpectedIdentifierToken(Location);
+					goto Error;
+				}
+
+				pExpr = MakeExpression_Field(pExpr, DotToken, NextToken());
+			}
+			
+			// Index Expression
+			if (Current().Kind == TokenKind::LBracket)
+			{
+				Expression** ppIndices = nullptr;
+
+				const Token& LbracketToken = NextToken();
+				while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
+				{
+					Expression* pIndex = ParseExpression();
+					if (!pIndex)
+					{
+						goto Error;
+					}
+					stbds_arrpush(ppIndices, pIndex);
+
+					if (Current().Kind != TokenKind::RBracket)
+					{
+						if (!CheckAndMatchToken(TokenKind::Comma))
 						{
-							if (!CheckAndMatchToken(TokenKind::Comma))
-							{
-								goto Error;
-							}
+							goto Error;
 						}
 					}
-					const Token& RparenToken = Current();
-					if (!CheckAndMatchToken(TokenKind::RParen))
-					{
-						goto Error;
-					}
-
-					pExpr = MakeExpression_Call(pExpr, LparenToken, ppArgs, RparenToken);
 				}
-				// (Must be) Field Expression
-				else
+				const Token& RbracketToken = Current();
+				if (!CheckAndMatchToken(TokenKind::RBracket))
 				{
-					const Token& DotToken = Current();
-					if (!CheckAndMatchToken(TokenKind::Dot))
-					{
-						goto Error;
-					}
-
-					if (Current().Kind != TokenKind::Identifier)
-					{
-						const Token& current = Current();
-						TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
-						m_Diagnostics.ReportExpectedIdentifierToken(Location);
-						goto Error;
-					}
-
-					pExpr = MakeExpression_Field(pExpr, DotToken, NextToken());
+					goto Error;
 				}
-			} // end while
-		}
-		
+
+				pExpr = MakeExpression_Index(pExpr, LbracketToken, ppIndices, RbracketToken);
+			}
+		} // end while
+
 		return pExpr;
 
 	Error:

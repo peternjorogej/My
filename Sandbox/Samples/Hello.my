@@ -3,6 +3,20 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args);
 
+struct Column
+{
+	var uint     Id;
+	var string   Name;
+	var object[] Values;
+};
+
+struct Table
+{
+	var uint     Id;
+	var string   Name;
+	var Column[] Columns;
+};
+
 function static int Go() nogc
 {
 	return 0;
@@ -11,9 +25,13 @@ function static int Go() nogc
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
-	// Doesn't work anymore (Need to be implemented differently), and also
-	// there's no need for them (compile-time functions) at the moment
-	// static_assert(false);
+	
+	const Table table = new Table();
+	table.Columns = new Column[2]();
+	table.Columns[0] = new Column();
+	
+	const string cn = table.Columns[0].Name;
+	WriteLine("Column(0).Name: %p", { cn });
 	
 	return Go();
 }

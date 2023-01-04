@@ -1267,7 +1267,7 @@ private:
 		}
 
 		// Arrays
-		if (pSequenceType->Kind == 1u)
+		if (pSequenceType->Kind == MY_TYPE_KIND_ARRAY)
 		{
 			for (size_t k = 0; k < stbds_arrlenu(ppIndices); k++)
 			{
@@ -2232,12 +2232,12 @@ private:
 			return My_Defaults.FileType;
 		}
 
-		for (size_t k = 0; k < stbds_arrlenu(m_Scope->Structs); k++)
+		for (size_t k = 0; k < stbds_hmlenu(s_UserDefinedTypes); k++)
 		{
-			const auto&[lpName, pSymbol] = m_Scope->Structs[k];
-			if (pKlass == pSymbol->structsym.Klass)
+			const auto&[lpName, pType] = s_UserDefinedTypes[k];
+			if (pKlass == pType->Klass)
 			{
-				return pSymbol->Type;
+				return pType;
 			}
 		}
 
