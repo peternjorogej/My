@@ -115,6 +115,7 @@ public:
 	) noexcept;
 	void ReportArgumentNotConstexpr(const TextLocation& Location, char* const& lpFunctionName, char* const& lpArgName, size_t k) noexcept;
 	void ReportTypeCannotBeIndexed(const TextLocation& Location, MyType* pType) noexcept;
+	void ReportMismatchedIndexCount(const TextLocation& Location, uint32_t kExpectedCount, uint32_t kCount) noexcept;
 	void ReportTypeCannotBeUsedAsIndex(const TextLocation& Location, MyType* pObjectType, MyType* pIndexType, MyType* pType) noexcept;
 	void ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyType* pObjectType) noexcept;
 	void ReportTypeDoesNotHaveAttributes(const TextLocation& Location, MyType* pType) noexcept;

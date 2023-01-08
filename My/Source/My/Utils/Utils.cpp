@@ -430,6 +430,12 @@ void DiagnosticBag::ReportTypeCannotBeIndexed(const TextLocation& Location, MyTy
 	Report(Location, Message);*/
 }
 
+void DiagnosticBag::ReportMismatchedIndexCount(const TextLocation& Location, uint32_t kExpectedCount, uint32_t kCount) noexcept
+{
+	const std::string Message = Console::Format("Mismatched index count expected %u, but got %u", kExpectedCount, kCount);
+	Report(Location, Message);
+}
+
 void DiagnosticBag::ReportTypeCannotBeUsedAsIndex(const TextLocation& Location, MyType* pObjectType, MyType* pIndexType, MyType* pType) noexcept
 {
 	MY_NOT_IMPLEMENTED();

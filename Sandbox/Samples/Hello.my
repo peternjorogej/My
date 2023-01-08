@@ -24,7 +24,8 @@ function int Main(const string[] Argv)
 	}
 	
 	WriteLine("Matrix4x4(%v)", { m });
-	Print(string(m[2, 2]));
+	// Print(string(m[2, 3, 2])); // Error: Mismatched index count
+	Print(string(m[2, 3]));
 	
 	return Go();
 }

@@ -1264,6 +1264,13 @@ private:
 		// Arrays
 		if (pSequenceType->Kind == MY_TYPE_KIND_ARRAY)
 		{
+			const size_t kExpectedIndexCount = stbds_arrlenu(pSequenceType->Array->Lengths);
+			if (kCount != kExpectedIndexCount)
+			{
+				m_Diagnostics.ReportMismatchedIndexCount(GetLocation(pIndexExpr), kExpectedIndexCount, kCount);
+				goto Error;
+			}
+
 			for (size_t k = 0; k < stbds_arrlenu(ppIndices); k++)
 			{
 				if (ppIndices[k]->Type() != My_Defaults.IntType)
