@@ -1247,11 +1247,6 @@ private:
 		BoundExpression** ppIndices = nullptr;
 
 		const size_t kCount = stbds_arrlenu(index.Indices);
-		if (kCount > 1ull)
-		{
-			m_Diagnostics.ReportFeatureNotImplemented(GetLocation(index.Indices[1]), "Multidimensional array *ACCESS*");
-		}
-
 		for (size_t k = 0; k < kCount; k++)
 		{
 			BoundExpression* pIndex = BindExpression(index.Indices[k]);

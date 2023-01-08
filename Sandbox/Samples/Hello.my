@@ -3,19 +3,7 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args);
 
-struct Column
-{
-	var uint     Id;
-	var string   Name;
-	var object[] Values;
-};
-
-struct Table
-{
-	var uint     Id;
-	var string   Name;
-	var Column[] Columns;
-};
+using Matrix4x4 = float[4, 4];
 
 function static int Go() nogc
 {
@@ -26,12 +14,17 @@ function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
 	
-	const Table table = new Table();
-	table.Columns = new Column[2]();
-	table.Columns[0] = new Column();
+	const Matrix4x4 m = new Matrix4x4();
+	for (i, 0, 4)
+	{
+		for (j, 0, 4)
+		{
+			m[i, j] = j * 4 + i;
+		}
+	}
 	
-	const string cn = table.Columns[0].Name;
-	WriteLine("Column(0).Name: %p", { cn });
+	WriteLine("Matrix4x4(%v)", { m });
+	Print(string(m[2, 2]));
 	
 	return Go();
 }

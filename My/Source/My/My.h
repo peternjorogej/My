@@ -162,6 +162,7 @@ using pfnMyInternalFunction = void(*)(MyContext* pContext, MyVM* pVM);
 using AddressMap       = Pair<char*, uint32_t>;
 using InternalFunction = Pair<char*, pfnMyInternalFunction>;
 
+struct MyArrayShape;
 
 struct MyAssembly
 {
@@ -174,8 +175,9 @@ struct MyAssembly
 	AddressMap*       Variables = nullptr;
 	InternalFunction* Internals = nullptr;
 
-	AddressMap*    Fields    = nullptr;
-	MyStruct**     Klasses   = nullptr;
+	AddressMap*    Fields     = nullptr;
+	MyStruct**     Klasses    = nullptr;
+	MyArrayShape*  ShapeCache = nullptr;
 };
 
 struct MyContext

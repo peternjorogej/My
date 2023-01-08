@@ -59,36 +59,36 @@ struct MyString
 };
 
 // This struct can also be represented as uint32_t[8]
-struct MyArrayStride
+struct MyArrayShape
 {
-	uint32_t Count = 0ul; // Full length of the array
-	uint32_t Pitch = 0ul; // Number of elements in a 1D block of a 2D array
-	uint32_t Slice = 0ul; // Number of elements in a 2D block of a 3D array
-	uint32_t Block = 0ul; // Number of elements in a 3D block of a 4D array
-	uint32_t HD[4] = { }; // Higher Dimensions (number of elements in a (N-1)D block of a N-D array)
+	uint32_t Lengths[8] = { 0 };
 
-	constexpr MyArrayStride() = default;
-	MyArrayStride(uint32_t kCount);
-	MyArrayStride(uint32_t kCount, uint32_t kPitch);
-	MyArrayStride(uint32_t kCount, uint32_t kPitch, uint32_t kSlice);
-	MyArrayStride(uint32_t kCount, uint32_t kPitch, uint32_t kSlice, uint32_t kBlock);
+	constexpr MyArrayShape() = default;
+	MyArrayShape(uint32_t kLength0);
+	MyArrayShape(uint32_t kLength0, uint32_t kLength1);
+	MyArrayShape(uint32_t kLength0, uint32_t kLength1, uint32_t kLength2);
+	MyArrayShape(uint32_t kLength0, uint32_t kLength1, uint32_t kLength2, uint32_t kLength3);
+
+	uint32_t CalculateCount() const noexcept;
+	uint32_t CalculateRank() const noexcept;
 };
-static_assert(sizeof(MyArrayStride) == sizeof(uint32_t[8]), "Error: Invalid MyArrayStride size");
+static_assert(sizeof(MyArrayShape) == sizeof(uint32_t[8]), "Error: Invalid MyArrayShape size");
 
 struct MyArray
 {
-	MyObject      Object   = {};
-	MyArrayStride Stride   = {};
-	uint32_t      Rank     = 0ul;
-	uint32_t      Capacity = 0ul;
-	Byte*         Data     = nullptr;
+	MyObject     Object   = {};
+	MyArrayShape Shape    = {};
+	uint32_t     Count    = 0ul;
+	uint32_t     Rank     = 0ul;
+	uint32_t     Capacity = 0ul;
+	Byte*        Data     = nullptr;
 };
 
 
 
-#define MyArrayCount(arr)                     ((arr)->Stride.Count)
-#define MyArrayPitch(arr)                     ((arr)->Stride.Pitch)
-#define MyArraySlice(arr)                     ((arr)->Stride.Slice)
+#define MyArrayCount(arr)                     ((arr)->Count)
+#define MyArrayPitch(arr)                     ((arr)->Shape.Lengths[0])
+#define MyArraySlice(arr)                     ((arr)->Shape.Lengths[0] * (arr)->Shape.Lengths[1])
 #define MyArrayAddr(arr,T,index)              ((T*)_MyArrayAddrWithSize(arr, sizeof(T), index))
 #define MyArrayAddrByStride(arr,stride,index) ((Byte*)_MyArrayAddrWithSize(arr, stride, index))
 #define MyArrayGet(arr,T,index)               (*(T*)MyArrayAddr(arr, T, index)) 
@@ -124,7 +124,7 @@ char*       MyStringToUtf8(const MyString* pStr, bool bCopy = false);
 wchar_t*    MyStringToUtf16(const MyString* pStr, bool bCopy = false);
 
 MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kCount, size_t kCapacity = 16ull);
-MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, const MyArrayStride& Stride, size_t kCapacity = 16ull);
+MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, const MyArrayShape& Shape, size_t kCapacity = 16ull);
 MyArray*    MyArrayCopy(MyContext* pContext, const MyArray* pArray);
 bool        MyArrayIsEqual(const MyArray* pLhsStr, const MyArray* pRhsStr);
 

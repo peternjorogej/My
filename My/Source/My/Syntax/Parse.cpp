@@ -847,6 +847,42 @@ private:
 		}
 	}
 	
+	Expression* ParseIndexExpression(Expression* pExpr)
+	{
+		if (Current().Kind == TokenKind::LBracket)
+		{
+			Expression** ppIndices = nullptr;
+
+			const Token& LbracketToken = NextToken();
+			while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
+			{
+				Expression* pIndex = ParseExpression();
+				if (!pIndex)
+				{
+					return nullptr;
+				}
+				stbds_arrpush(ppIndices, pIndex);
+
+				if (Current().Kind != TokenKind::RBracket)
+				{
+					if (!CheckAndMatchToken(TokenKind::Comma))
+					{
+						return nullptr;
+					}
+				}
+			}
+			const Token& RbracketToken = Current();
+			if (!CheckAndMatchToken(TokenKind::RBracket))
+			{
+				return nullptr;
+			}
+
+			return MakeExpression_Index(pExpr, LbracketToken, ppIndices, RbracketToken);
+		}
+
+		return pExpr;
+	}
+
 	Expression* ParseSecondaryExpression() noexcept
 	{
 		Expression*  pExpr  = nullptr;
@@ -908,38 +944,30 @@ private:
 				pExpr = MakeExpression_Field(pExpr, DotToken, NextToken());
 			}
 			
-			// Index Expression
-			if (Current().Kind == TokenKind::LBracket)
+			// Index Expression (coming after call/field expressions)
+			Expression* pIndexExpr = ParseIndexExpression(pExpr);
+			if (!pIndexExpr)
 			{
-				Expression** ppIndices = nullptr;
+				goto Error;
+			}
 
-				const Token& LbracketToken = NextToken();
-				while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
-				{
-					Expression* pIndex = ParseExpression();
-					if (!pIndex)
-					{
-						goto Error;
-					}
-					stbds_arrpush(ppIndices, pIndex);
-
-					if (Current().Kind != TokenKind::RBracket)
-					{
-						if (!CheckAndMatchToken(TokenKind::Comma))
-						{
-							goto Error;
-						}
-					}
-				}
-				const Token& RbracketToken = Current();
-				if (!CheckAndMatchToken(TokenKind::RBracket))
-				{
-					goto Error;
-				}
-
-				pExpr = MakeExpression_Index(pExpr, LbracketToken, ppIndices, RbracketToken);
+			if (pIndexExpr && pIndexExpr != pExpr)
+			{
+				pExpr = pIndexExpr;
 			}
 		} // end while
+
+		// Index Expression (coming after name expressions)
+		Expression* pIndexExpr = ParseIndexExpression(pExpr);
+		if (!pIndexExpr)
+		{
+			goto Error;
+		}
+
+		if (pIndexExpr && pIndexExpr != pExpr)
+		{
+			pExpr = pIndexExpr;
+		}
 
 		return pExpr;
 

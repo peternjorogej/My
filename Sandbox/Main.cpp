@@ -121,7 +121,7 @@ void DataTypeSizes() noexcept
 	Console::WriteLine("sizeof(MyValue)             = %I64u", sizeof(MyValue));
 	Console::WriteLine("sizeof(MyObject)            = %I64u", sizeof(MyObject));
 	Console::WriteLine("sizeof(MyString)            = %I64u", sizeof(MyString));
-	Console::WriteLine("sizeof(MyArrayStride)       = %I64u", sizeof(MyArrayStride));
+	Console::WriteLine("sizeof(MyArrayShape)        = %I64u", sizeof(MyArrayShape));
 	Console::WriteLine("sizeof(MyArray)             = %I64u", sizeof(MyArray));
 	
 	Console::WriteLine();
@@ -132,8 +132,8 @@ void TestNewAPI(MyContext* pContext) noexcept
 	{
 		Console::WriteLine(Console::Color::Green, "Testing array of strings");
 
-		MyArrayStride stride = { 3ul, 0ul, 0ul, 0ul };
-		MyArray* pNames = MyArrayNew(pContext, My_Defaults.StringStruct, stride);
+		MyArrayShape shape = { 3ul, 0ul, 0ul, 0ul };
+		MyArray* pNames = MyArrayNew(pContext, My_Defaults.StringStruct, shape);
 		MyArraySet2(pNames, MyString*, 0, MyStringNew(pContext, "Peter"));
 		MyArraySet2(pNames, MyString*, 1, MyStringNew(pContext, "Njoroge"));
 		MyArraySet2(pNames, MyString*, 2, MyStringNew(pContext, "Julius"));
@@ -147,8 +147,8 @@ void TestNewAPI(MyContext* pContext) noexcept
 	{
 		Console::WriteLine(Console::Color::Green, "Testing array of objects(T = Complex)");
 
-		MyArrayStride stride = { 3ul, 0ul, 0ul, 0ul };
-		MyArray* pNums = MyArrayNew(pContext, My_Defaults.ComplexStruct, stride);
+		MyArrayShape shape = { 3ul, 0ul, 0ul, 0ul };
+		MyArray* pNums = MyArrayNew(pContext, My_Defaults.ComplexStruct, shape);
 		for (size_t k = 0; k < MyArrayCount(pNums); k++)
 		{
 			const Complex Z = Complex{ Random::Float(1, 10), Random::Float(1, 10) };

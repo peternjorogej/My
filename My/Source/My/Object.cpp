@@ -81,21 +81,61 @@ void MyValue::Print(bool bQuoteString) const noexcept
     }
 }
 
-MyArrayStride::MyArrayStride(uint32_t kCount)
-    : Count(kCount)
-{ }
+MyArrayShape::MyArrayShape(uint32_t kLength0)
+{
+    Lengths[0] = kLength0;
+}
 
-MyArrayStride::MyArrayStride(uint32_t kCount, uint32_t kPitch)
-    : Count(kCount), Pitch(kPitch)
-{ }
+MyArrayShape::MyArrayShape(uint32_t kLength0, uint32_t kLength1)
+{
+    Lengths[0] = kLength0;
+    Lengths[1] = kLength1;
+}
 
-MyArrayStride::MyArrayStride(uint32_t kCount, uint32_t kPitch, uint32_t kSlice)
-    : Count(kCount), Pitch(kPitch), Slice(kSlice)
-{ }
+MyArrayShape::MyArrayShape(uint32_t kLength0, uint32_t kLength1, uint32_t kLength2)
+{
+    Lengths[0] = kLength0;
+    Lengths[1] = kLength1;
+    Lengths[2] = kLength2;
+}
 
-MyArrayStride::MyArrayStride(uint32_t kCount, uint32_t kPitch, uint32_t kSlice, uint32_t kBlock)
-    : Count(kCount), Pitch(kPitch), Slice(kSlice), Block(kBlock)
-{ }
+MyArrayShape::MyArrayShape(uint32_t kLength0, uint32_t kLength1, uint32_t kLength2, uint32_t kLength3)
+{
+    Lengths[0] = kLength0;
+    Lengths[1] = kLength1;
+    Lengths[2] = kLength2;
+    Lengths[3] = kLength3;
+}
+
+uint32_t MyArrayShape::CalculateCount() const noexcept
+{
+    uint32_t kCount = 1ul;
+    for (const uint32_t& kLength : Lengths)
+    {
+        if (kLength == 0ul)
+        {
+            break;
+        }
+
+        kCount *= kLength;
+    }
+    return kCount;
+}
+
+uint32_t MyArrayShape::CalculateRank() const noexcept
+{
+    uint32_t kRank = 0ul;
+    for (const uint32_t& kLength : Lengths)
+    {
+        if (kLength == 0ul)
+        {
+            break;
+        }
+        
+        kRank++;
+    }
+    return kRank;
+}
 
 MyValue MakeValue_Copy(const MyValue& Value, MyContext* pContext)
 {
@@ -300,30 +340,26 @@ wchar_t* MyStringToUtf16(const MyString* pStr, bool bCopy)
 MyArray* MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kCount, size_t kCapacity)
 {
     MY_ASSERT(kCount != 0ull && kCapacity != 0ull, "Error: Invalid array item size");
-    MyArrayStride stride;
-    stride.Count = kCount;
-
-    return MyArrayNew(pContext, pKlass, stride, kCapacity);
+    return MyArrayNew(pContext, pKlass, MyArrayShape(kCount), kCapacity);
 }
 
-MyArray* MyArrayNew(MyContext* pContext, MyStruct* pKlass, const MyArrayStride& Stride, size_t kCapacity)
+MyArray* MyArrayNew(MyContext* pContext, MyStruct* pKlass, const MyArrayShape& Shape, size_t kCapacity)
 {
-    static constexpr MyArrayStride s_ZeroStride = {};
-
-    MY_ASSERT(memcmp(&Stride, &s_ZeroStride, sizeof(MyArrayStride)) != 0, "Error: Cannot create array with zero stride");
-    if (kCapacity < Stride.Count)
+    static constexpr MyArrayShape s_ZeroShape = {};
+    MY_ASSERT(memcmp(&Shape, &s_ZeroShape, sizeof(MyArrayShape)) != 0, "Error: Cannot create array with zero stride");
+    
+    if (kCapacity < Shape.CalculateCount())
     {
-        kCapacity = Stride.Count;
+        kCapacity = Shape.CalculateCount();
     }
-
-    return pContext->VM->GC.CreateArray(pKlass, Stride, kCapacity);
+    return pContext->VM->GC.CreateArray(pKlass, Shape, kCapacity);
 }
 
 MyArray* MyArrayCopy(MyContext* pContext, const MyArray* pArray)
 {
-    MyArray* pCopy = pContext->VM->GC.CreateArray(pArray->Object.Klass, pArray->Stride, pArray->Stride.Count);
+    MyArray* pCopy = pContext->VM->GC.CreateArray(pArray->Object.Klass, pArray->Shape, pArray->Count);
 
-    const uint32_t kSize = pArray->Object.Klass->Size * pCopy->Stride.Count;
+    const uint32_t kSize = pArray->Object.Klass->Size * pCopy->Count;
     memcpy(pCopy->Data, pArray->Data, kSize);
 
     return pCopy;

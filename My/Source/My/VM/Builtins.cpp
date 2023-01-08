@@ -74,8 +74,7 @@ void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept
 // Std
 void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept
 {
-    DebugLog::Warn("[DEBUG]: [%s] is not properly implemented", __FUNCTION__);
-
+    // TODO: Implement properly
     MyArray*  pArgs = pVM->Stack.PopArray();
     MyString* pFmt  = pVM->Stack.PopString();
 
@@ -129,6 +128,18 @@ void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept
                 {
                     void* const& pObject = MyArrayGet(pArgs, void*, kIndex++);
                     Console::Write("0x%p", pObject);
+                    break;
+                }
+                case 'v':
+                {
+                    MyArray* const& pArray = MyArrayGet(pArgs, MyArray*, kIndex++);
+                    Console::Write("{ ");
+                    for (size_t k = 0; k < pArray->Count; k++)
+                    {
+                        const char* const lpSeparator = k == pArray->Count-1 ? "" : ", ";
+                        Console::Write("%1.9g%s", MyArrayGet(pArray, double, k), lpSeparator);
+                    }
+                    Console::Write(" }");
                     break;
                 }
                 default: break;
@@ -205,7 +216,7 @@ void _My_Builtin_RandomFloat(MyContext* pContext, MyVM* pVM) noexcept
 void _My_Builtin_Print(MyContext* pContext, MyVM* pVM) noexcept
 {
     // FIXME: Should (realistically) print any object not just strings
-    DebugLog::Warn("[DEBUG]: [%s] is not properly implemented", __FUNCTION__);
+    // TODO: Implement properly
     MyString* const& pMessage = pVM->Stack.PopString();
     Console::WriteLine(pMessage->Chars);
 }

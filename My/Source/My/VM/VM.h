@@ -33,9 +33,9 @@ struct MyGC
     void Collect() noexcept;
 
     MyString*  CreateString(const char* lpString, size_t kLength = 0ull) noexcept;
-    MyArray*   CreateArray(MyStruct* Klass, const MyArrayStride& Stride, size_t kCapacity) noexcept;
+    MyArray*   CreateArray(MyStruct* Klass, const MyArrayShape& Shape, size_t kCapacity) noexcept;
     MyObject*  CreateObject(MyStruct* pKlass) noexcept;
-    void        DestroyObject(MyValueKind Kind, void* pMemory) noexcept;
+    void       DestroyObject(MyValueKind Kind, void* pMemory) noexcept;
     
     uint32_t GetAllocationCount() const noexcept;
 };

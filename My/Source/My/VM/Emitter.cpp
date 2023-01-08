@@ -983,13 +983,18 @@ void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression
     }
     else
     {
-        uint32_t kCount = 1ul;
+        MyArrayShape Shape = {};
+
         for (size_t k = 0; k < stbds_arrlenu(one.Type->Array->Lengths); k++)
         {
-            kCount *= one.Type->Array->Lengths[k];
+            Shape.Lengths[k] = one.Type->Array->Lengths[k];
         }
-        uint32_t kIndex = MyGetElementIndex(pAssembly->Klasses, stbds_arrlenu(pAssembly->Klasses), one.Type->Array->Klass);
-        bp.Emit(MyOpCode::Newarray, kIndex, kCount);
+
+        const uint32_t kKlassIndex = MyGetElementIndex(pAssembly->Klasses, stbds_arrlenu(pAssembly->Klasses), one.Type->Array->Klass);
+        const uint32_t kShapeIndex = stbds_arrlenu(pAssembly->ShapeCache);
+        stbds_arrpush(pAssembly->ShapeCache, Shape);
+
+        bp.Emit(MyOpCode::Newarray, kKlassIndex, kShapeIndex);
     }
 }
 
@@ -1235,8 +1240,8 @@ namespace PnBS
                 }
                 case MyValueKind::Array:
                 {
-                    Out << Value.Arr->Stride.Count;
-                    for (size_t k = 0; k < Value.Arr->Stride.Count; k++)
+                    Out << Value.Arr->Count;
+                    for (size_t k = 0; k < Value.Arr->Count; k++)
                     {
                         MY_NOT_IMPLEMENTED();
                         // Out << Value.Arr->Items[k];
@@ -1253,6 +1258,17 @@ namespace PnBS
     };
 
     template<>
+    struct Encode<::MyArrayShape>
+    {
+        void operator()(BufferWriter& Out, const ::MyArrayShape& Shape) noexcept
+        {
+            MyAssembly* Assembly = MyContextGet()->Assembly;
+            Out << Shape.Lengths[0] << Shape.Lengths[1] << Shape.Lengths[2] << Shape.Lengths[3] <<
+                   Shape.Lengths[4] << Shape.Lengths[5] << Shape.Lengths[6] << Shape.Lengths[7];
+        }
+    };
+    
+    template<>
     struct Encode<::MyField>
     {
         void operator()(BufferWriter& Out, const ::MyField& Field) noexcept
@@ -1268,22 +1284,6 @@ namespace PnBS
         }
     };
     
-    /*template<>
-    struct Encode<::MyMethod>
-    {
-        void operator()(BufferWriter& Out, const ::MyMethod& Method) noexcept
-        {
-            MyAssembly* Assembly = MyContextGet()->Assembly;
-
-            Out << std::string(Method.Fullname);
-            Out << std::string(Method.Signature.Name);
-            Out << Method.Flags;
-            Out << Method.Address;
-            Out << Method.IsCtor;
-            Out << MyGetElementIndex(Assembly->Klasses, Method.Klass);
-        }
-    };*/
-
     template<>
     struct Encode<::MyStruct*>
     {
@@ -1389,6 +1389,17 @@ namespace PnBS
     };
 
     template<>
+    struct Decode<::MyArrayShape>
+    {
+        void operator()(BufferReader& In, ::MyArrayShape& Shape) noexcept
+        {
+            MyAssembly* Assembly = MyContextGet()->Assembly;
+            In >> Shape.Lengths[0] >> Shape.Lengths[1] >> Shape.Lengths[2] >> Shape.Lengths[3] >>
+                  Shape.Lengths[4] >> Shape.Lengths[5] >> Shape.Lengths[6] >> Shape.Lengths[7];
+        }
+    };
+    
+    template<>
     struct Decode<::MyField>
     {
         void operator()(BufferReader& In, ::MyField& Field) noexcept
@@ -1476,6 +1487,13 @@ void _My_Emitter_Serialize(const MyAssembly* pAssembly, const std::string& Path)
     {
         Out << pAssembly->Klasses[k];
     }
+    // Array Shapes
+    kCount = stbds_arrlenu(pAssembly->ShapeCache);
+    Out << kCount;
+    for (size_t k = 0; k < kCount; k++)
+    {
+        Out << pAssembly->ShapeCache[k];
+    }
 
     /// RUNTIME DATA
     // Constants
@@ -1542,6 +1560,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
     stbds_shfree(pAssembly->Functions);
     stbds_arrfree(pAssembly->Code);
     stbds_arrfree(pAssembly->Klasses);
+    stbds_arrfree(pAssembly->ShapeCache);
     stbds_shfree(pAssembly->Fields);
 
     PnBS::BufferReader In = PnBS::BufferReader(Path.c_str());
@@ -1575,6 +1594,14 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
         MyStruct* pKlass = MyStructCreate(MyContextGet(), "", 0ul);
         In >> pKlass;
         stbds_arrpush(pAssembly->Klasses, pKlass);
+    }
+    // Array Shapes
+    In >> uSize;
+    for (size_t k = 0; k < uSize; k++)
+    {
+        MyArrayShape Shape = {};
+        In >> Shape;
+        stbds_arrpush(pAssembly->ShapeCache, Shape);
     }
 
     /// RUNTIME DATA

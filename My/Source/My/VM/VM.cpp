@@ -8,11 +8,11 @@
 #include <unordered_set>
 
 #ifdef MY_DEBUG
-  #define _My_VM_CheckOverflow(__stk)  if (__stk.SP == MY_STACK_MAX) { return MY_RC_STACK_OVERFLOW; }
-  #define _My_VM_CheckUnderflow(__stk, __n) if (__stk.SP < __n) { return MY_RC_STACK_UNDERFLOW; }
+  #define _My_VM_CheckOverflow(__stk)       if (__stk.SP == MY_STACK_MAX) { return MY_ASSERT(false), MY_RC_STACK_OVERFLOW; }
+  #define _My_VM_CheckUnderflow(__stk, __n) if (__stk.SP < __n) { return MY_ASSERT(false), MY_RC_STACK_UNDERFLOW; }
 #else
-  #define _My_VM_CheckOverflow(__stk)
-  #define _My_VM_CheckUnderflow(__stk, __n)
+  #define _My_VM_CheckOverflow(__stk)       if (__stk.SP == MY_STACK_MAX) { return MY_RC_STACK_OVERFLOW; }
+  #define _My_VM_CheckUnderflow(__stk, __n) if (__stk.SP < __n) { return MY_RC_STACK_UNDERFLOW; }
 #endif // MY_DEBUG
 
 #pragma region Garbage_Collector
@@ -219,8 +219,9 @@ MyString* MyGC::CreateString(const char* lpString, size_t kLength) noexcept
     return pString;
 }
 
-MyArray* MyGC::CreateArray(MyStruct* Klass, const MyArrayStride& Stride, size_t kCapacity) noexcept
+MyArray* MyGC::CreateArray(MyStruct* Klass, const MyArrayShape& Shape, size_t kCapacity) noexcept
 {
+    // Capacity is always >= full array length
     const size_t kBufferSize = sizeof(MyArray) + (Klass->Size*kCapacity);
 
     Byte* pBuffer = reinterpret_cast<Byte*>(::operator new(kBufferSize));
@@ -235,17 +236,10 @@ MyArray* MyGC::CreateArray(MyStruct* Klass, const MyArrayStride& Stride, size_t 
     pArray->Object.Klass = Klass;
     pArray->Object.Data  = pBuffer;
     pArray->Capacity = kCapacity;
-    pArray->Stride   = Stride;
+    pArray->Count    = Shape.CalculateCount();
+    pArray->Shape    = Shape;
+    pArray->Rank     = Shape.CalculateRank();
     pArray->Data     = pBuffer + sizeof(MyArray);
-
-    const uint32_t* pStrides = reinterpret_cast<const uint32_t*>(&Stride);
-    for (size_t k = 0; k < 8; k++)
-    {
-        if (pStrides[k] != 0ull)
-        {
-            pArray->Rank++;
-        }
-    }
 
     return pArray;
 }
@@ -516,7 +510,7 @@ void MyVM::Prepare(MyAssembly* const& pAssembly, int iArgc, char* const* ppArgv)
     IP = &Assembly->Code[0];
 
     Args.Argc = iArgc;
-    Args.Argv = MyArrayNew(Context, My_Defaults.StringStruct, MyArrayStride(iArgc), (size_t)iArgc);
+    Args.Argv = MyArrayNew(Context, My_Defaults.StringStruct, MyArrayShape(iArgc), (size_t)iArgc);
 
     for (size_t k = 0; k < (size_t)Args.Argc; k++)
     {
@@ -668,7 +662,7 @@ int64_t MyVM::Execute(bool& bRunning)
         }
         case MyOpCode::Newarray:
         {
-            MyArray* pArray = MyArrayNew(Context, Assembly->Klasses[IP->Arg0], IP->Arg1);
+            MyArray* pArray = MyArrayNew(Context, Assembly->Klasses[IP->Arg0], Assembly->ShapeCache[IP->Arg1]);
             Stack.Push(pArray);
             IP++;
             break;
@@ -682,7 +676,7 @@ int64_t MyVM::Execute(bool& bRunning)
 
             _My_VM_CheckUnderflow(Stack, (8u*kSize));
 
-            MyArray* pArray = MyArrayNew(Context, My_Defaults.ObjectStruct, MyArrayStride(kSize), kSize);
+            MyArray* pArray = MyArrayNew(Context, My_Defaults.ObjectStruct, MyArrayShape(kSize), kSize);
             for (size_t k = 0; k < kSize; k++)
             {
                 const size_t kIndex = kSize - k - 1ul;
@@ -696,12 +690,12 @@ int64_t MyVM::Execute(bool& bRunning)
         {
             // TODO: Will come back to this later (improvement)
             MyArray* const& pArray = Stack.PopArray();
-            uint32_t* pStrides = reinterpret_cast<uint32_t*>(&pArray->Stride);
 
-            size_t kIndex = 0ul;
-            for (size_t k = IP->Arg0-1; k > 0u; k--)
+            size_t kIndex = 0ul, kStride = 1ul;
+            for (int32_t k = (int32_t)IP->Arg0-1; k > 0; k--)
             {
-                kIndex += pStrides[k]*Stack.PopU64();
+                kStride *= pArray->Shape.Lengths[k];
+                kIndex += kStride * Stack.PopU64();
             }
             kIndex += Stack.PopU64();
 
@@ -713,14 +707,14 @@ int64_t MyVM::Execute(bool& bRunning)
         {
             // TODO: Will come back to this later (improvement)
             MyArray* const& pArray = Stack.PopArray();
-            uint32_t* pStrides = reinterpret_cast<uint32_t*>(&pArray->Stride);
 
-            size_t kIndex = 0ul;
-            for (size_t k = IP->Arg0 - 1; k > 0u; k--)
+            size_t kIndex = 0ul, kStride = 1ul;
+            for (int32_t k = (int32_t)IP->Arg0 - 1; k > 0; k--)
             {
-                kIndex += pStrides[k] * Stack.PopU64();
+                kStride *= pArray->Shape.Lengths[k];
+                kIndex += kStride * Stack.PopU64();
             }
-            kIndex += Stack.PopU64();
+            kIndex += Stack.PopU64();            
 
             MyArraySet2(pArray, uint64_t, kIndex, Stack.PopU64());
             IP++;
@@ -1163,7 +1157,7 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 Console::WriteLine("%sstglo, [%u]", Space.c_str(), Inst.Arg0);
                 break;
             case MyOpCode::Newarray:
-                Console::WriteLine("%snewarray, [%s, %u]", Space.c_str(), Assembly.Klasses[Inst.Arg0]->Name, Inst.Arg1);
+                Console::WriteLine("%snewarray, [%s, %u]", Space.c_str(), Assembly.Klasses[Inst.Arg0]->Name, Assembly.ShapeCache[Inst.Arg1].CalculateCount());
                 break;
             case MyOpCode::Newobj:
                 Console::WriteLine("%snewobj, [%s]", Space.c_str(), Assembly.Klasses[Inst.Arg0]->Name);
