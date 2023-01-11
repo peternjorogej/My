@@ -17,14 +17,18 @@ Comment */
 2. Variable Declaration
 ```C#
 // Basic types
-var int iMyvalue = 0;
+var int iMyValue = 0;
 var uint kMyValue = 1u;
-var float fMyvalue; // Defaults to zero
+var float fMyValue; // Defaults to zero
 const string Greeting = "Hello, World"; // Readonly
 // Struct types
 var MyType mt = new MyType();
-// Array types (still incomplete)
+/* Array types (still incomplete, indexing higher dimensions
+does not work as intended */
 var float[] data = new float[5]();
+//   - 2D (representing a 3x3 matrix)
+var float[3, 3] m33 = new float[3, 3](); // Indexing: m33[i, j]
+
 ```
 
 3. Function Definition
@@ -41,7 +45,22 @@ function int Main(string[] Args)
 }
 ```
 
-4. Forward Declarations - forward declared structs are defined natively (kind of like internal functions)
+4. Typedefs
+```C#
+// New name for a 4x4 matrix of floats
+using Matrix4x4F = float[4, 4];
+
+function int Main(string[] Args)
+{
+    // ...
+    var Matrix4x4F m = new Matrix4x4F();
+    // indexing into the array: m[i, j]
+    // ...
+}
+
+```
+
+5. Forward Declarations - forward declared structs are defined natively (kind of like internal functions)
 ```C#
 // Defined with a single field 'Dummy' of type int
 struct FwdDecl;
@@ -56,7 +75,7 @@ function int Main(string[] Args)
 
 ```
 
-5. Structs
+6. Structs
 ```C#
 // POD (Plain Old Data) structs contain no reference types, and *should* be
 // stack allocated (not working at the moment)
@@ -159,6 +178,8 @@ function int Main(string[] Args)
 
 ## The Future?
 - Proper implementation of array types
+- Type casting from `object` type to user defined types
+- Importing files (compiled or not)
 - Const-correctness
 - Better string management
 - More functionality (builtin functions etc)
@@ -178,8 +199,8 @@ function int Main(string[] Args)
 - Support for 32-bit types
 - Better garbage collection algorithm(s)
 - Proper scripting API
-    - FFI (C/C++)
-    - Better internal function calls, FFI (with C/C++)
+    - Better internal function calls
+    - FFI (with C/C++)
     - Easy, non-complicated interface
 - Optimization
     - Codegen
