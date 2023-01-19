@@ -1,9 +1,15 @@
 # **My**
-(Still searching for a better name😩; it might also look a bit *derivative*, my apologies in advance😅)
+(Still searching for a better name😩)
 
-An attempt to write my own fully functional, statically-typed programming language (I am still a long way off though).
+An attempt to write my own fully functional, statically-typed, compiled programming language (I am still a long way off though).
+I always wanted to know how programming languages are made and I
+decided to do it just as a fun project.
+The language is (kind of) inspired by C# and Mono, and a little bit of Python.
 
-At the moment it is usable but lacks many, many features.
+I have learnt a lot of concepts, most of which I give credit to [Immo Landwerth](https://www.youtube.com/@ImmoLandwerth) and
+his [Building a Compiler](https://www.youtube.com/playlist?list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y) playlist on YouTube.
+
+At the moment, the language is usable but lacks many, many useful features.
 
 ## Basic Syntax
 1. Comments
@@ -177,34 +183,34 @@ function int Main(string[] Args)
 ```
 
 ## The Future?
-- Proper implementation of array types
-- Type casting from `object` type to user defined types
-- Importing files (compiled or not)
-- Const-correctness
-- Better string management
-- More functionality (builtin functions etc)
-- Constant folding
-- Function and operator overloading
-- OOP
-	- Methods (Constructors included)
-    - ToString(), Copy(), Write()
-	- Inheritance and Polymorphism
-	- Encapsulation (*visibility*)
-- Default arguments and variadic functions
-- Better implementation of compile-time functions (static_assert etc)
-- Lambdas
-- Templates (or *Generics*)
-- Stack allocation of pod structs
-- Shift to using a register-based VM
-- Support for 32-bit types
-- Better garbage collection algorithm(s)
-- Proper scripting API
-    - Better internal function calls
-    - FFI (with C/C++)
-    - Easy, non-complicated interface
-- Optimization
-    - Codegen
-    - Inlining
-- API for debugging
-- Reflection
-- Rewrite in C (usability in both C and C++)
+- [ ] Proper implementation of array types
+- [ ] Type casting from `object` type to user defined types
+- [ ] Importing files (compiled or not)
+- [ ] Const-correctness
+- [ ] Better string management
+- [ ] More functionality (builtin functions etc)
+- [ ] Constant folding
+- [ ] Function and operator overloading
+- [ ] OOP
+	- [ ] Methods (Constructors included)
+    - [ ] ToString(), Copy(), Write()
+	- [ ] Inheritance and Polymorphism
+	- [ ] Encapsulation (*visibility*)
+- [ ] Default arguments and variadic functions
+- [ ] Better implementation of compile-time functions (static_assert etc)
+- [ ] Lambdas
+- [ ] Templates (or *Generics*)
+- [ ] Stack allocation of pod structs
+- [ ] Shift to using a register-based VM
+- [ ] Support for 32-bit types
+- [ ] Better garbage collection algorithm(s)
+- [ ] Proper scripting API
+    - [ ] Better internal function calls
+    - [ ] FFI (with C/C++)
+    - [ ] Easy, non-complicated interface
+- [ ] Optimization
+    - [ ] Codegen
+    - [ ] Inlining
+- [ ] API for debugging
+- [ ] Reflection
+- [ ] Rewrite in C (usability in both C and C++)
