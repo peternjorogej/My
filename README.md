@@ -191,7 +191,7 @@ function int Main(string[] Args)
 - [ ] More functionality (builtin functions etc)
 - [ ] Constant folding
 - [ ] Function and operator overloading
-- OOP
+- [ ] OOP
 	- [ ] Methods (Constructors included)
     - [ ] ToString(), Copy(), Write()
 	- [ ] Inheritance and Polymorphism
@@ -204,11 +204,11 @@ function int Main(string[] Args)
 - [ ] Shift to using a register-based VM
 - [ ] Support for 32-bit types
 - [ ] Better garbage collection algorithm(s)
-- Proper scripting API
+- [ ] Proper scripting API
     - [ ] Better internal function calls
     - [ ] FFI (with C/C++)
     - [ ] Easy, non-complicated interface
-- Optimization
+- [ ] Optimization
     - [ ] Codegen
     - [ ] Inlining
 - [ ] API for debugging
