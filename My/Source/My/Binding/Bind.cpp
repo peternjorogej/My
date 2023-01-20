@@ -5,7 +5,7 @@
 #include "Stb/stb_ds.h"
 
 
-static bool    _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict = true) noexcept;
+static bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcept;
 
 #pragma region Type_Conversion
 /// Type Conversion
@@ -64,7 +64,7 @@ public:
 
 		if (From->Kind == MY_TYPE_KIND_ARRAY && To->Kind == MY_TYPE_KIND_ARRAY)
 		{
-			if (_My_ArrayTypesMatch(*From->Array, *To->Array, false))
+			if (_My_ArrayTypesMatch(*From->Array, *To->Array))
 			{
 				return TypeConversion::Implicit;
 			}
@@ -2774,14 +2774,10 @@ BoundStatement* MakeBoundStatement_ConditionalGoto(const BoundLabel& Label, Boun
 #pragma endregion
 
 
-bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bIsStrict) noexcept
+bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcept
 {
 	if (From.Klass != To.Klass)
 	{
-		if (bIsStrict)
-		{
-			return false;
-		}
 		if (To.Klass != My_Defaults.ObjectStruct)
 		{
 			return false;
@@ -2799,16 +2795,9 @@ bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To, bool bI
 	{
 		const uint64_t& fc = From.Lengths[k];
 		const uint64_t& tc = To.Lengths[k];
-		if (fc != tc)
+		if (fc != tc && tc != 0ull)
 		{
-			if (tc == 0ull && !bIsStrict)
-			{
-				continue;
-			}
-			else
-			{
-				return false;
-			}
+			return false;
 		}
 	}
 
