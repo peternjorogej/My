@@ -563,7 +563,11 @@ int64_t MyVM::Run()
         }
     }
 
-    return Stack.PopI64();
+    iReturnCode = Stack.PopI64();
+    Globals.Clear();
+    Stack.Clear();
+
+    return iReturnCode;
 }
 
 int64_t MyVM::Execute(bool& bRunning)

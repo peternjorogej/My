@@ -103,7 +103,7 @@ struct MyVM
     struct CommandLineArgs
     {
         MyArray* Argv = nullptr;
-        int64_t   Argc = 0;
+        int64_t  Argc = 0;
     };
 
     MyContext*       Context   = nullptr;
@@ -115,7 +115,7 @@ struct MyVM
     // uint8_t*          SP        = nullptr;
     FunctionCallInfo* CallStack = nullptr;
     CommandLineArgs   Args      = {};
-    MyGC             GC        = {};
+    MyGC              GC        = {};
     ExecutionMode     Mode      = ExecutionMode::WholeProgram;
 
     MyVM() = default;
