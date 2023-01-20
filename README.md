@@ -183,7 +183,7 @@ function int Main(string[] Args)
 ```
 
 ## The Future?
-- [ ] Proper implementation of array types
+- [x] Better implementation of array types
 - [ ] Type casting from `object` type to user defined types
 - [ ] Importing files (compiled or not)
 - [ ] Const-correctness
@@ -198,7 +198,7 @@ function int Main(string[] Args)
 	- [ ] Inheritance and Polymorphism
 	- [ ] Encapsulation (*visibility*)
 - [ ] Default arguments and variadic functions
-- [ ] Better implementation of compile-time functions (static_assert etc)
+- [ ] Implementation of compile-time functions (static_assert etc)
 - [ ] Lambdas
 - [ ] Templates (or *Generics*)
 - [ ] Stack allocation of pod structs
