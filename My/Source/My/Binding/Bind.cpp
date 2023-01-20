@@ -1978,20 +1978,27 @@ private:
 		{
 			for (size_t k = 0; k < stbds_arrlenu(ats.Counts); k++)
 			{
-				BoundExpression* pCount = BindExpression(ats.Counts[k]);
-				if (pCount->Kind != BoundExpressionKind::Literal)
+				if (ats.Counts[k])
 				{
-					m_Diagnostics.ReportExpectedNumberToken(GetLocation(ats.Counts[k]));
-					goto Error;
-				}
-				if (pCount->Type() != My_Defaults.UintType && pCount->Type() != My_Defaults.IntType)
-				{
-					m_Diagnostics.ReportIllegalTypeConversion(GetLocation(ats.Counts[k]), pCount->Type(), My_Defaults.UintType);
-					goto Error;
-				}
+					BoundExpression* pCount = BindExpression(ats.Counts[k]);
+					if (pCount->Kind != BoundExpressionKind::Literal)
+					{
+						m_Diagnostics.ReportExpectedNumberToken(GetLocation(ats.Counts[k]));
+						goto Error;
+					}
+					if (pCount->Type() != My_Defaults.UintType && pCount->Type() != My_Defaults.IntType)
+					{
+						m_Diagnostics.ReportIllegalTypeConversion(GetLocation(ats.Counts[k]), pCount->Type(), My_Defaults.UintType);
+						goto Error;
+					}
 
-				const uint32_t kLength = (uint32_t)pCount->literal.Value.U64;
-				stbds_arrpush(pLengths, kLength);
+					const uint32_t kLength = (uint32_t)pCount->literal.Value.U64;
+					stbds_arrpush(pLengths, kLength);
+				}
+				else
+				{
+					stbds_arrpush(pLengths, 0ul);
+				}
 			}
 		}
 		else

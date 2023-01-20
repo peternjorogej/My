@@ -717,20 +717,39 @@ private:
 			const Token& LbracketToken = NextToken(); // [
 
 			Expression** ppCounts = nullptr;
-			while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
+			if (Current().Kind == TokenKind::Comma)
 			{
-				Expression* pCount = ParseNumberExpression();
-				if (!pCount)
+				stbds_arrpush(ppCounts, nullptr);
+				while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
 				{
-					goto Error;
-				}
-				stbds_arrpush(ppCounts, pCount);
+					stbds_arrpush(ppCounts, nullptr);
 
-				if (Current().Kind !=TokenKind::RBracket)
+					if (Current().Kind != TokenKind::RBracket)
+					{
+						if (!CheckAndMatchToken(TokenKind::Comma))
+						{
+							goto Error;
+						}
+					}
+				}
+			}
+			else
+			{
+				while (Current().Kind != TokenKind::RBracket && Current().Kind != TokenKind::Eof)
 				{
-					if (!CheckAndMatchToken(TokenKind::Comma))
+					Expression* pCount = ParseNumberExpression();
+					if (!pCount)
 					{
 						goto Error;
+					}
+					stbds_arrpush(ppCounts, pCount);
+
+					if (Current().Kind !=TokenKind::RBracket)
+					{
+						if (!CheckAndMatchToken(TokenKind::Comma))
+						{
+							goto Error;
+						}
 					}
 				}
 			}

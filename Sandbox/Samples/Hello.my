@@ -13,17 +13,14 @@ function static int Go() nogc
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
-	
-	// Testing logical operators
 	Print(ReadLine()); // Hold console to view decompilation
-	if (true && true)   { Print("true && true"); }  /* Executed */
-	if (true && false)  { Print("true && false"); } /* Not Executed */
-	if (false && true)  { Print("false && true"); }  /* Not Executed */
-	if (false && false) { Print("false && false"); } /* Not Executed */
-	if (true || true)   { Print("true || true"); }  /* Executed */
-	if (true || false)  { Print("true || false"); } /* Executed */
-	if (false || true)  { Print("false || true"); }  /* Executed */
-	if (false || false) { Print("false || false"); } /* Not Executed */
+	
+	// C# style definition of multidimensional array types
+	var float[,] f = new float[2, 2]();
+	var float[,,] g = new float[2, 2, 4]();
+	
+	const int[2,2] i = null;
+	const int[,] j = i;
 	
 	return Go();
 }

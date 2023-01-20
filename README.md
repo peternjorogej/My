@@ -188,6 +188,7 @@ function int Main(string[] Args)
 - [ ] Importing files (compiled or not)
 - [ ] Const-correctness
 - [ ] Better string management
+- [ ] Better error messages and error reporting
 - [ ] More functionality (builtin functions etc)
 - [ ] Constant folding
 - [ ] Function and operator overloading
