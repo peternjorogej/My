@@ -732,9 +732,29 @@ void Emitter::EmitUnaryExpression(MyBytecodeProcessor& bp, BoundExpression* pUna
 
 void Emitter::EmitBinaryExpression(MyBytecodeProcessor& bp, BoundExpression* pBinary)
 {
+    static int32_t iNextLogicalOpLabel = 0l;
+
     BoundBinaryExpression& be = pBinary->binary;
 
     const BoundBinaryOperator& Op = *be.Operator;
+
+    // Logical Operators (&&, ||)
+    if (Op.OperatorKind == BoundBinaryOperatorKind::LogicalAnd || Op.OperatorKind == BoundBinaryOperatorKind::LogicalOr)
+    {
+        char* const lpJmpLabel = MyGetCachedStringV("__logic_%d", iNextLogicalOpLabel++);
+
+        EmitExpression(bp, be.Lhs);
+        bp.Emit(MyOpCode::Dup);
+        {
+            MyOpCode Code = Op.OperatorKind == BoundBinaryOperatorKind::LogicalAnd ? MyOpCode::Jz : MyOpCode::Jnz;
+            bp.Emit(Code, lpJmpLabel);
+        }
+        EmitExpression(bp, be.Rhs);
+        bp.Emit(MyOpCode::Label, lpJmpLabel);
+
+        return;
+    }
+
 
     EmitExpression(bp, be.Lhs);
     EmitExpression(bp, be.Rhs);
@@ -781,6 +801,7 @@ void Emitter::EmitBinaryExpression(MyBytecodeProcessor& bp, BoundExpression* pBi
         return;
     }
 
+   
     const bool bIsFloatOperation = be.Lhs->Type() == My_Defaults.FloatType;
 
     switch (Op.OperatorKind)
@@ -808,14 +829,6 @@ void Emitter::EmitBinaryExpression(MyBytecodeProcessor& bp, BoundExpression* pBi
             break;
         case BoundBinaryOperatorKind::Modulo:
             bp.Emit(MyOpCode::Mod);
-            break;
-        case BoundBinaryOperatorKind::LogicalAnd:
-            // bp.Emit(MyOpCode::And);
-            MY_ASSERT(false, "NotImplementedException [LogicalAnd &&]");
-            break;
-        case BoundBinaryOperatorKind::LogicalOr:
-            // bp.Emit(MyOpCode::Or);
-            MY_ASSERT(false, "NotImplementedException [LogicalOr  ||]");
             break;
         case BoundBinaryOperatorKind::BitwiseAnd:
             bp.Emit(MyOpCode::And);

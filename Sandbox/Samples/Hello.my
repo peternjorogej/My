@@ -14,18 +14,16 @@ function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
 	
-	const Matrix4x4 m = new Matrix4x4();
-	for (i, 0, 4)
-	{
-		for (j, 0, 4)
-		{
-			m[i, j] = j * 4 + i;
-		}
-	}
-	
-	WriteLine("Matrix4x4(%v)", { m });
-	// Print(string(m[2, 3, 2])); // Error: Mismatched index count
-	Print(string(m[2, 3]));
+	// Testing logical operators
+	Print(ReadLine()); // Hold console to view decompilation
+	if (true && true)   { Print("true && true"); }  /* Executed */
+	if (true && false)  { Print("true && false"); } /* Not Executed */
+	if (false && true)  { Print("false && true"); }  /* Not Executed */
+	if (false && false) { Print("false && false"); } /* Not Executed */
+	if (true || true)   { Print("true || true"); }  /* Executed */
+	if (true || false)  { Print("true || false"); } /* Executed */
+	if (false || true)  { Print("false || true"); }  /* Executed */
+	if (false || false) { Print("false || false"); } /* Not Executed */
 	
 	return Go();
 }
