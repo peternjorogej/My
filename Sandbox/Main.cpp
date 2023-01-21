@@ -1,14 +1,14 @@
 ﻿
-/// Major problems that will be fixed in due time
-///  1. Array types T[]...[] - I want them to be a contiguous block of memory
-///     even with multi-dimensional arrays, i.e, T[2][2] translates to:
-///     { t, t, t, t } instead of { { t, t }, { t, t } }
+/// Major problems that need to be fixed
+///  1. Rewriting the parser to remove all the goto statements, and sometimes, to defer
+///     error reporting to the later stages of parsing (I want some of the functions to
+///     return nullptrs and NOT report errors).
 ///  2. Passing functions (pointers/addresses) as parameters to functions so that
 ///     we can have callbacks
 ///  3. Proper FFI with C/C++. Something like P/Invoke in C# would (kind of) work,
 ///     but is there a way to implement internal calls (defined as extern here)?
 ///  4. Structs:
-///     - Implementing trivial structs
+///     - Implementing pod structs
 ///     - Using the defined methods
 ///  5. Proper type serialization (Maybe Relfection in (distant) future?)
 ///  6. const should modify the type and not the variable itself. This means that
@@ -18,30 +18,10 @@
 ///     a lot and slow down the vm. Also think about inplace operations, especially
 ///     in loops, e.q clt 0, 1 means cmp less than between local 0 & 1 (not pushing
 ///     into evaluation stack then setting it back)
-///  9. Remove the stack size checks *? Binder and emitter should have done all the
-///     sanity checks
-/// 10. Compile time functions:
+///  9. Compile time functions:
 ///     - static_assert, ...
-/// 11. Better type registration. Currently I'd need to know the indices of the types
-///     of all the fields of the struct (in short, disaster). Have a name, and a list
-///     types for the fields, then create a typeinfo to be registered
-/// 12. Debugging *?
+/// 10. Debugging *?
 /// 
-/// Type Serialization:
-/// - No problem with primitives, string and most struct types
-/// - The problem is when a struct has a member with an array type.
-/// - Consider:
-///     + array type T[N] (rank: 1) or T[N, ...] (rank: 1+len(...)) is serializable as:
-///           >> name
-///           >> len(dims)
-///           >> for (dim in dims) dim
-///	    + Array types to have a base type, rank and dimensions (where rank == len(dimensions)).
-///     + This way it's easier to serialize arrays, all we need it its base type and it's
-///       dimensions
-///     + Creating array types will therefore be easy:
-///           >> n = 1
-///           >> for (dim in dims) n *= dim
-///           >> for (dim in dims) n *= dim
 /// 
 /// 
 /// 
