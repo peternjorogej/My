@@ -189,6 +189,7 @@ enum class ExpressionKind
 	Name,
 	Assignment,
 	OperatorNew,
+	Cast,
 	Call,
 	Index,
 	Field,
@@ -263,6 +264,14 @@ struct OperatorNewExpression
 	bool        IsStructInitializer = false;
 };
 
+struct CastExpression
+{
+	Token       LparenToken = {};
+	TypeSpec*   Type        = nullptr;
+	Token       RparenToken = {};
+	Expression* Expr        = nullptr;
+};
+
 struct CallExpression
 {
 	Expression*  Callable    = nullptr;
@@ -307,6 +316,7 @@ struct Expression
 		NameExpression          name;
 		AssignmentExpression    assign;
 		OperatorNewExpression   opnew;
+		CastExpression          cast;
 		CallExpression          call;
 		IndexExpression         index;
 		FieldExpression         field;

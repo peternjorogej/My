@@ -59,6 +59,7 @@ static Expression* MakeExpression_OperatorNew(
 	FieldInitializer* pFields,
 	const Token&      RbraceToken
 );
+static Expression* MakeExpression_Cast(const Token& LparenToken, TypeSpec* pType, const Token& RparenToken, Expression* pExpr);
 static Expression* MakeExpression_Call(
 	Expression*  pCallable,
 	const Token& LparenToken,
@@ -2756,6 +2757,13 @@ Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType,
 	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LbraceToken, nullptr, RbraceToken, true };
 	pOperatorNew->opnew.Fields = pFields;
 	return pOperatorNew;
+}
+
+Expression* MakeExpression_Cast(const Token& LparenToken, TypeSpec* pType, const Token& RparenToken, Expression* pExpr)
+{
+	Expression* pCast = Allocator::Create<Expression>(Allocator::Stage::Parser, ExpressionKind::Cast);
+	new(&pCast->cast) CastExpression{ LparenToken, pType, RparenToken, pExpr };
+	return pCast;
 }
 
 Expression* MakeExpression_Call(Expression* pCallable, const Token& LparenToken, Expression** ppArguments, const Token& RparenToken)
