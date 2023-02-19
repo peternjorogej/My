@@ -479,8 +479,9 @@ private:
 		}
 
 		m_Token.Kind = TokenKind::String;
-		// m_Token.Str  = MyStringNew(m_Context, Str.c_str());
 		m_Token.Str  = MyStringNew(m_Context, SbGetString(&sb));
+
+		SbDestroy(&sb);
 	}
 
 	void ReadNumber() noexcept

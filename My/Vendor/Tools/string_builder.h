@@ -91,9 +91,9 @@ StringBuilder SbCreate(int iInitialCapacity)
     if (pBuffer)
     {
         memset(pBuffer, 0, iInitialCapacity);
-        sb.Buffer   = pBuffer;
+        sb.Buffer = pBuffer;
         sb.Position = sb.Buffer;
-        sb.Length   = 0;
+        sb.Length = 0;
         sb.Capacity = iInitialCapacity;
     }
 
@@ -109,6 +109,7 @@ void SbDestroy(StringBuilder* pSb)
     pSb->Length   = 0;
     pSb->Capacity = 0;
     pSb->Indent   = 0;
+    //free(pSb);
 }
 
 void SbWriteChar(StringBuilder* pSb, char Character)
