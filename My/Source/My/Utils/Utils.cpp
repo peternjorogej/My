@@ -460,9 +460,17 @@ void DiagnosticBag::ReportTypeCannotBeUsedAsIndex(const TextLocation& Location, 
 	Report(Location, Message);*/
 }
 
-void DiagnosticBag::ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyType* pObjectType) noexcept
+void DiagnosticBag::ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept
 {
-	const std::string Message = Console::Format("Object of type '%s' has no key/attribute '%s'", pObjectType->Klass->Name, lpField);
+	const std::string Message = Console::Format("Object of type '%s' has no key/attribute '%s'", pKlass->Name, lpField);
+	Report(Location, Message);
+}
+
+void DiagnosticBag::ReportTooManyInitializers(const TextLocation& Location, MyStruct* pKlass, size_t kExpectedCount, size_t kCount)
+{
+	const std::string Message = Console::Format(
+		"Too many initializers for '%s' in operator new (expected %I64u, got %I64u)", pKlass->Name, kExpectedCount, kCount
+	);
 	Report(Location, Message);
 }
 
