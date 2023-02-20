@@ -708,13 +708,6 @@ private:
 	{
 		TypeSpec*  pTypeSpec  = nullptr;
 
-		// - Types come in basically 3 flavours:
-		//       1. a name, say, T - most primitive type
-		//       2. a function type, callback(R(TArgs...)) - can be recursive but, that takes care of itself since
-		//          we've abstracted parsing function types to its own function ParseFunctionTypeSpec()
-		//       3. an array, T[N...] - here T can be either a name or a function type
-		// - Since arrays are the most complex, we will parse them last, get the item type, then parse the rank
-
 		if (Current().Kind != TokenKind::Identifier && Current().Kind != TokenKind::CallbackKeyword)
 		{
 			// m_Diagnostics.ReportMissingTypename(GetErrorLocation());
@@ -751,19 +744,6 @@ private:
 					{
 						return nullptr;
 					}
-
-					/*if (Current().Kind != TokenKind::RBracket)
-					{
-						if (Current().Kind != TokenKind::Comma)
-						{
-							
-							return nullptr;
-						}
-						else
-						{
-							NextToken();
-						}
-					}*/
 				}
 			}
 			else
@@ -784,14 +764,6 @@ private:
 					{
 						return nullptr;
 					}
-
-					/*if (Current().Kind !=TokenKind::RBracket)
-					{
-						if (!CheckAndMatchToken(TokenKind::Comma))
-						{
-							return nullptr;
-						}
-					}*/
 				}
 			}
 			
