@@ -253,9 +253,23 @@ void DiagnosticBag::ReportExpectedCommaOrEndingToken(const TextLocation& Locatio
 	Report(Location, Message);
 }
 
+void DiagnosticBag::ReportExpectedComma(const TextLocation& Location, TokenKind Kind) noexcept
+{
+	const std::string Message = Console::Format("Expected a ',' (not '%s')", TokenKindString(Kind));
+	Report(Location, Message);
+}
+
 void DiagnosticBag::ReportExpectedSemicolon(const TextLocation& Location, TokenKind Kind) noexcept
 {
 	const std::string Message = Console::Format("Expected semicolon at end of statement (not '%s')", TokenKindString(Kind));
+	Report(Location, Message);
+}
+
+void DiagnosticBag::ReportExpectedMatchingEndingToken(const TextLocation& Location, TokenKind Kind, TokenKind OpeningTokenKind, TokenKind EndingTokenKind) noexcept
+{
+	const std::string Message = Console::Format(
+		"Expected matching closing token '%s' (not '%s')", TokenKindString(EndingTokenKind), TokenKindString(Kind)
+	);
 	Report(Location, Message);
 }
 

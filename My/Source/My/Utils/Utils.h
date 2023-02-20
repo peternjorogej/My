@@ -88,7 +88,9 @@ public:
 	void ReportExpectedNumberToken(const TextLocation& Location) noexcept;
 	void ReportExpectedPrimaryExpression(const TextLocation& Location, TokenKind Kind) noexcept;
 	void ReportExpectedCommaOrEndingToken(const TextLocation& Location, TokenKind Kind, TokenKind EndTokenKind) noexcept;
+	void ReportExpectedComma(const TextLocation& Location, TokenKind Kind) noexcept;
 	void ReportExpectedSemicolon(const TextLocation& Location, TokenKind Kind) noexcept;
+	void ReportExpectedMatchingEndingToken(const TextLocation& Location, TokenKind Kind, TokenKind OpeningTokenKind, TokenKind EndingTokenKind) noexcept;
 	void ReportExpectedVariableOrFunctionDeclaration(const TextLocation& Location, const struct Token& Current) noexcept;
 	void ReportExpectedDeclaration(const TextLocation& Location) noexcept;
 	// Binding
