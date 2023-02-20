@@ -989,10 +989,11 @@ void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression
 
     MyAssembly* const pAssembly = bp.GetAssembly();
 
-    if (one.Type->Kind == 0u)
+    if (one.Type->Kind == MY_TYPE_KIND_STRUCT)
     {
         MyStruct* const& pKlass = one.Type->Klass;
         bp.Emit(MyOpCode::Newobj, pKlass->Name);
+        // Handle field initializers
     }
     else
     {
