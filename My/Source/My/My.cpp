@@ -285,6 +285,11 @@ MyField* MyStructGetField(MyStruct* pKlass, const char* lpField)
     return nullptr;
 }
 
+size_t MyStructFieldCount(const MyStruct* pKlass)
+{
+    return stbds_arrlenu(pKlass->Fields);
+}
+
 MyType* MyTypeCreate(uint8_t kKind, void* pData, uint32_t kFlags) noexcept
 {
     MyType* pType = new MyType{};

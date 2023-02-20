@@ -247,6 +247,7 @@ bool        MyStructIsReference(MyStruct* pKlass) noexcept;
 void        MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs = 0ul) noexcept;
 void        MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs = 0ul) noexcept;
 MyField*    MyStructGetField(MyStruct* pKlass, const char* lpField);
+size_t      MyStructFieldCount(const MyStruct* pKlass);
 MyType*     MyTypeCreate(uint8_t kKind, void* pData, uint32_t kFlags = 0ul) noexcept;
 bool        MyTypeIsReference(MyType* pType) noexcept;
 const char* MyTypeGetName(const MyType* pType) noexcept;
