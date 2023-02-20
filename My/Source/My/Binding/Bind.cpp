@@ -1051,7 +1051,7 @@ private:
 
 			if (!pField)
 			{
-				m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(assign.Lhs), fe.Field, pType);
+				m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(assign.Lhs), fe.Field, pType->Klass);
 				goto Error;
 			}
 			if (pField->Attributes & MY_FIELD_ATTR_CONST)
@@ -1077,13 +1077,39 @@ private:
 
 		if (!pType || pType == My_Defaults.ErrorType)
 		{
-			goto Error;
+			return MakeBoundExpression_Error();
 		}
 
-#if 0
 		if (opnew.IsStructInitializer)
 		{
-			using MemberMap = BoundInstanceExpression::MemberMap;
+			const size_t kActualFieldCount = stbds_arrlenu(opnew.Fields);
+			const size_t kExpectedFieldCount = MyStructFieldCount(pType->Klass);
+
+			if (kActualFieldCount > kExpectedFieldCount)
+			{
+				const Token& token = opnew.Fields[kExpectedFieldCount].Name;
+				m_Diagnostics.ReportTooManyInitializers(GetLocation(token), pType->Klass, kExpectedFieldCount, kActualFieldCount);
+				return MakeBoundExpression_Error();
+			}
+
+			BONEFieldInitializer* pInitializers = nullptr;
+			for (size_t k = 0; k < kActualFieldCount; k++)
+			{
+				const FieldInitializer& fi = opnew.Fields[k];
+				if (!MyStructGetField(pType->Klass, fi.Name.Id))
+				{
+					m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(fi.Name), fi.Name.Id, pType->Klass);
+					return MakeBoundExpression_Error();
+				}
+
+				BoundExpression* pValue = BindExpression(fi.Value);
+				const BONEFieldInitializer bfi = BONEFieldInitializer{ fi.Name.Id, pValue };
+				stbds_arrpush(pInitializers, bfi);
+			}
+
+			return MakeBoundExpression_OperatorNew(pType, pInitializers);
+
+			/*using MemberMap = BoundInstanceExpression::MemberMap;
 
 			DebugLog::Warn("Struct initializers are being bound but not emitted");
 			pExpression = MakeExpressionFromType(pType, GetLocation(opnew.Type));
@@ -1134,29 +1160,12 @@ private:
 			}
 			MY_ASSERT(stbds_shlenu(bie.Members) == stbds_shlenu(pMembers), "Invalid member count");
 			stbds_shfree(bie.Members);
-			bie.Members = pMembers;
+			bie.Members = pMembers;*/
 		}
 		else
-#endif // 0
 		{
-			if (opnew.Initializer)
-			{
-				pExpression = BindExpression(opnew.Initializer, pType);
-				if (pExpression->Type() == My_Defaults.ErrorType)
-				{
-					goto Error;
-				}
-			}
-			/*else
-			{
-				pExpression = MakeBoundExpression_Literal(pType, MakeValue_Null());
-			}*/
+			return MakeBoundExpression_OperatorNew(pType, nullptr);
 		}
-
-		return MakeBoundExpression_OperatorNew(pType, pExpression);
-
-	Error:
-		return MakeBoundExpression_Error();
 	}
 	
 	BoundExpression* BindCallExpression(Expression* pCall)
@@ -1206,6 +1215,14 @@ private:
 
 				if (kArgsLength != kParamsLength)
 				{
+					/*TextLocation Location = GetLocation(pCall);
+					if (kArgsLength > 0)
+					{
+						uint32_t kStart = GetStart(stbds_arrlast(call.Arguments));
+						uint32_t kEnd   = GetEnd(pCall);
+						uint32_t kLine  = m_Tree->GetText().GetLineIndex(kStart);
+						Location = TextLocation(kStart, kEnd - kStart, kLine, m_Tree->GetText().Filename);
+					}*/
 					TextLocation Location = kArgsLength ? GetLocation(stbds_arrlast(call.Arguments)) : GetLocation(pCall);
 					m_Diagnostics.ReportInvalidArgumentCount(Location, pFun->Name, kParamsLength, kArgsLength);
 					goto Error;
@@ -1218,10 +1235,16 @@ private:
 				goto Error;
 			}
 		}
+		else if (pCallable->Kind == BoundExpressionKind::Field)
+		{
+			BoundFieldExpression& field = pCallable->field;
+			DebugLog::Warn("[DEBUG] - %s.%s", field.Type->Klass->Name, field.Field);
+			m_Diagnostics.ReportFeatureNotImplemented(GetLocation(call.Callable), "Method call (function call on object)");
+			goto Error;
+		}
 		else
 		{
-			DebugLog::Warn("[DEBUG] - Callable Kind: %s", BoundExpressionKindString(pCallable->Kind));
-			m_Diagnostics.ReportFeatureNotImplemented(GetLocation(call.Callable), "Method call (function call on object)");
+			m_Diagnostics.ReportUnknownError(GetLocation(call.Callable), "Invlid object kind for call expression");
 			goto Error;
 		}
 
@@ -1312,7 +1335,7 @@ private:
 			MyField* pField = MyStructGetField(pObjectType->Klass, lpField);
 			if (!pField)
 			{
-				m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(field.Field), lpField, pObjectType);
+				m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(field.Field), lpField, pObjectType->Klass);
 				goto Error;
 			}
 
@@ -2594,10 +2617,10 @@ BoundExpression* MakeBoundExpression_Assignment(BoundExpression* pLvalue, MySymb
 	return pAssignment;
 }
 
-BoundExpression* MakeBoundExpression_OperatorNew(MyType* pType, BoundExpression* pInitializer)
+BoundExpression* MakeBoundExpression_OperatorNew(MyType* pType, BoundOperatorNewExpression::FieldInitializer* pInitializers)
 {
 	BoundExpression* pOperatorNew = Allocator::Create<BoundExpression>(Allocator::Stage::Binder, BoundExpressionKind::OperatorNew);
-	new(&pOperatorNew->opnew) BoundOperatorNewExpression{ pType, pInitializer };
+	new(&pOperatorNew->opnew) BoundOperatorNewExpression{ pType, pInitializers };
 	return pOperatorNew;
 }
 

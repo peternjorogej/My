@@ -905,8 +905,10 @@ void Emitter::EmitAssignmentExpression(MyBytecodeProcessor& bp, BoundExpression*
     switch (ae.Lhs->Kind)
     {
         case BoundExpressionKind::Name:
+        {
             bp.Emit(ae.Variable->varsym.IsLocal ? MyOpCode::Stloc : MyOpCode::Stglo, ae.Variable);
             break;
+        }
         case BoundExpressionKind::Index:
         {
             MyType* pArrayType = ae.Lhs->index.Sequence->Type();
@@ -922,12 +924,16 @@ void Emitter::EmitAssignmentExpression(MyBytecodeProcessor& bp, BoundExpression*
             break;
         }
         case BoundExpressionKind::Field:
+        {
             EmitExpression(bp, ae.Lhs->field.Object);
             bp.Emit(MyOpCode::Stfld, ae.Lhs->field.Field);
             break;
+        }
         default:
+        {
             MY_ASSERT(false, "Invalid assignment expression");
             break;
+        }
     }
 }
 
@@ -996,7 +1002,18 @@ void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression
     {
         MyStruct* const& pKlass = one.Type->Klass;
         bp.Emit(MyOpCode::Newobj, pKlass->Name);
-        // Handle field initializers
+        
+        if (one.Initializers)
+        {
+            for (size_t k = 0; k < stbds_arrlenu(one.Initializers); k++)
+            {
+                const auto&[lpField, pValue] = one.Initializers[k];
+
+                EmitExpression(bp, pValue);
+                bp.Emit(MyOpCode::Dup, 1u);
+                bp.Emit(MyOpCode::Stfld, lpField);
+            }
+        }
     }
     else
     {
@@ -1185,11 +1202,13 @@ static char OpCodeHasArgument(MyOpCode Code) noexcept
 {
     switch (Code)
     {
+        case MyOpCode::Cast:
         case MyOpCode::Newarray:
             return 2;
         case MyOpCode::Ldc:
         case MyOpCode::Ldcf:
         case MyOpCode::Ldstr:
+        case MyOpCode::Dup:
         case MyOpCode::Ldarr:
         case MyOpCode::Ldobj:
         case MyOpCode::Ldarg:

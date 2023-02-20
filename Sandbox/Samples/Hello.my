@@ -21,8 +21,8 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	auto[x, y] = (Float2)(object)new Float2();
-	WriteLine("Float2{ %f, %f }", { x, y });
+	const Float2 u = new Float2(X: 1.2, Y: 3.4);
+	WriteLine("Float2{ %f, %f }", { u.X, u.Y });
 	
 	return Go();
 }

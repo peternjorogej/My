@@ -651,7 +651,7 @@ int64_t MyVM::Execute(bool& bRunning)
         case MyOpCode::Dup:
         {
             _My_VM_CheckOverflow(Stack);
-            Stack.Push(Stack.Top<uint64_t>());
+            Stack.Push(Stack.At<uint64_t>(IP->Arg0));
             IP++;
             break;
         }
@@ -1164,7 +1164,7 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
                 Console::WriteLine("%sldobj, [%u]", Space.c_str(), (Inst.Arg0 & 0xFFFF));
                 break;
             case MyOpCode::Dup:
-                Console::WriteLine("%sdup", Space.c_str());
+                Console::WriteLine("%sdup, [%u]", Space.c_str(), Inst.Arg0 + 1u);
                 break;
             case MyOpCode::Pop:
                 Console::WriteLine("%spop", Space.c_str());

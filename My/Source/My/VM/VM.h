@@ -72,7 +72,13 @@ struct MyStack
     template<typename Tp>
     inline Tp& Top() noexcept
     {
-        return *reinterpret_cast<Tp*>(&Stack[SP - sizeof(Tp)]);
+        return At<Tp>(0u);
+    }
+
+    template<typename Tp>
+    inline Tp& At(uint32_t kIndex) noexcept
+    {
+        return *reinterpret_cast<Tp*>(&Stack[SP - ((kIndex + 1u) * sizeof(Tp))]);
     }
 };
 

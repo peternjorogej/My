@@ -212,9 +212,12 @@ struct BoundAssignmentExpression
 
 struct BoundOperatorNewExpression
 {
-	MyType*          Type = nullptr;
-	BoundExpression* Expr = nullptr;
+	using FieldInitializer = Pair<char*, BoundExpression*>;
+
+	MyType*           Type         = nullptr;
+	FieldInitializer* Initializers = nullptr;
 };
+using BONEFieldInitializer = BoundOperatorNewExpression::FieldInitializer;
 
 struct BoundCallExpression
 {
@@ -526,7 +529,7 @@ BoundExpression* MakeBoundExpression_Ternary(BoundExpression* pCondition, BoundE
 BoundExpression* MakeBoundExpression_Increment(MySymbol* pLvalue, BoundExpression* pIncrement);
 BoundExpression* MakeBoundExpression_Name(MySymbol* pSymbol);
 BoundExpression* MakeBoundExpression_Assignment(BoundExpression* pLvalue, MySymbol* pVariable, BoundExpression* pRvalue);
-BoundExpression* MakeBoundExpression_OperatorNew(MyType* pType, BoundExpression* pInitializer);
+BoundExpression* MakeBoundExpression_OperatorNew(MyType* pType, BoundOperatorNewExpression::FieldInitializer* pInitializers);
 BoundExpression* MakeBoundExpression_Call(BoundExpression* pCallable, MySymbol* pFunction, BoundExpression** ppArguments);
 BoundExpression* MakeBoundExpression_Call(
 	BoundExpression* pCallable,

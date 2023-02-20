@@ -210,8 +210,34 @@ protected:
 	{
 		BoundOperatorNewExpression& opnew = pOperatorNew->opnew;
 
-		BoundExpression* pExpression = opnew.Expr ? RewriteExpression(opnew.Expr) : nullptr;
-		return pExpression == opnew.Expr ? pOperatorNew : MakeBoundExpression_OperatorNew(opnew.Type, pExpression);
+		BONEFieldInitializer* pInitializers = nullptr;
+
+		const size_t kLength = stbds_arrlenu(opnew.Initializers);
+		for (size_t k = 0; k < kLength; k++)
+		{
+			BoundExpression* pOldExpression = opnew.Initializers[k].value;
+			BoundExpression* pNewExpression = RewriteExpression(pOldExpression);
+			if (pNewExpression != pOldExpression)
+			{
+				if (stbds_arrlenu(pInitializers) == 0ul)
+				{
+					stbds_arrsetlen(pInitializers, kLength);
+					for (size_t j = 0; j < k; j++)
+					{
+						pInitializers[j] = opnew.Initializers[j];
+					}
+				}
+			}
+			if (stbds_arrlenu(pInitializers) != 0ul)
+			{
+				pInitializers[k].value = pNewExpression;
+			}
+		}
+
+		return stbds_arrlenu(pInitializers) == 0ul ? pOperatorNew : MakeBoundExpression_OperatorNew(opnew.Type, pInitializers);
+
+		/*BoundExpression* pExpression = opnew.Expr ? RewriteExpression(opnew.Expr) : nullptr;
+		return pExpression == opnew.Expr ? pOperatorNew : MakeBoundExpression_OperatorNew(opnew.Type, pExpression);*/
 	}
 	
 	virtual BoundExpression* RewriteCallExpression(BoundExpression* pCall) noexcept
