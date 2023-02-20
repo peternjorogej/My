@@ -11,6 +11,15 @@ struct Float2
 	var float Y;
 };
 
+struct Person
+{
+	var string Name;
+	var string Registration;
+	var int    YearOfBirth;
+	var float  Score;
+	var bool   Married;
+};
+
 function static int Go() nogc
 {
 	return 0;
@@ -23,6 +32,11 @@ function int Main(const string[] Argv)
 	
 	const Float2 u = new Float2(X: 1.2, Y: 3.4);
 	WriteLine("Float2{ %f, %f }", { u.X, u.Y });
+	
+	const Person p = new Person(
+		Name: "Mr. Nobody", Registration: "NBD-002/2015", YearOfBirth: 1984, Score: 80.01, Married: false
+	);
+	WriteLine("Person{ %s, %s, %d, %f, %b }", { (object)p.Name, p.Registration, p.YearOfBirth, p.Score, p.Married });
 	
 	return Go();
 }
