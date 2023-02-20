@@ -2057,9 +2057,32 @@ private:
 		return nullptr;
 	}
 
-private:
 	/// Utilities
-	int32_t GetStart(const TypeSpec* const& pTypeSpec) noexcept
+private:
+	TextLocation GetLocation(const Token& Token) noexcept
+	{
+		const SourceText& Text = m_Tree->GetText();
+		return TextLocation(Token.Start, Token.End - Token.Start, Text.GetLineIndex(Token.Start), Text.Filename);
+	}
+
+	TextLocation GetLocation(TypeSpec* const& pTypeSpec) noexcept
+	{
+		const SourceText& Text = m_Tree->GetText();
+		int32_t iStart = GetStart(pTypeSpec);
+		int32_t iEnd = GetEnd(pTypeSpec);
+		return TextLocation(iStart, iEnd - iStart, Text.GetLineIndex(iStart), Text.Filename);
+	}
+
+	TextLocation GetLocation(Expression* const& pExpression) noexcept
+	{
+		const SourceText& Text = m_Tree->GetText();
+		int32_t iStart = GetStart(pExpression);
+		int32_t iEnd = GetEnd(pExpression);
+		return TextLocation(iStart, iEnd - iStart, Text.GetLineIndex(iStart), Text.Filename);
+	}
+
+private:
+	static int32_t GetStart(const TypeSpec* const& pTypeSpec) noexcept
 	{
 		switch (pTypeSpec->Kind)
 		{
@@ -2076,7 +2099,7 @@ private:
 		return -1;
 	}
 
-	int32_t GetStart(const Expression* const& pExpression) noexcept
+	static int32_t GetStart(const Expression* const& pExpression) noexcept
 	{
 		switch (pExpression->Kind)
 		{
@@ -2111,7 +2134,7 @@ private:
 		return -1;
 	}
 
-	int32_t GetEnd(const TypeSpec* const& pTypeSpec) noexcept
+	static int32_t GetEnd(const TypeSpec* const& pTypeSpec) noexcept
 	{
 		switch (pTypeSpec->Kind)
 		{
@@ -2128,7 +2151,7 @@ private:
 		return -1;
 	}
 
-	int32_t GetEnd(const Expression* const& pExpression) noexcept
+	static int32_t GetEnd(const Expression* const& pExpression) noexcept
 	{
 		switch (pExpression->Kind)
 		{
@@ -2147,7 +2170,14 @@ private:
 			case ExpressionKind::Assignment:
 				return GetEnd(pExpression->assign.Rhs);
 			case ExpressionKind::OperatorNew:
-				return pExpression->opnew.RbraceToken.End;
+				if (pExpression->opnew.RparenToken)
+				{
+					return pExpression->opnew.RparenToken->End;
+				}
+				else
+				{
+					return GetEnd(pExpression->opnew.Type);
+				}
 			case ExpressionKind::Call:
 				return pExpression->call.RparenToken.End;
 			case ExpressionKind::Index:
@@ -2163,29 +2193,7 @@ private:
 		return -1;
 	}
 
-	TextLocation GetLocation(const Token& Token) noexcept
-	{
-		const SourceText& Text = m_Tree->GetText();
-		return TextLocation(Token.Start, Token.End - Token.Start, Text.GetLineIndex(Token.Start), Text.Filename);
-	}
-
-	TextLocation GetLocation(TypeSpec* const& pTypeSpec) noexcept
-	{
-		const SourceText& Text = m_Tree->GetText();
-		int32_t iStart = GetStart(pTypeSpec);
-		int32_t iEnd   = GetEnd(pTypeSpec);
-		return TextLocation(iStart, iEnd - iStart, Text.GetLineIndex(iStart), Text.Filename);
-	}
-
-	TextLocation GetLocation(Expression* const& pExpression) noexcept
-	{
-		const SourceText& Text = m_Tree->GetText();
-		int32_t iStart = GetStart(pExpression);
-		int32_t iEnd   = GetEnd(pExpression);
-		return TextLocation(iStart, iEnd - iStart, Text.GetLineIndex(iStart), Text.Filename);
-	}
-
-	char* const GetTypeName(TypeSpec* const& pTypeSpec) noexcept
+	static char* const GetTypeName(TypeSpec* const& pTypeSpec) noexcept
 	{
 		switch (pTypeSpec->Kind)
 		{
@@ -2202,7 +2210,7 @@ private:
 		return nullptr;
 	}
 
-	MyType* GetTypeFromStruct(MyStruct* const& pKlass) noexcept
+	static MyType* GetTypeFromStruct(MyStruct* const& pKlass) noexcept
 	{
 		if (pKlass == My_Defaults.ObjectStruct)
 		{
@@ -2253,7 +2261,7 @@ private:
 		return nullptr;
 	}
 
-	MyStruct* GetStructFromType(MyType* const& pType) noexcept
+	static MyStruct* GetStructFromType(MyType* const& pType) noexcept
 	{
 		switch (pType->Kind)
 		{
