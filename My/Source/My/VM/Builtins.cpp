@@ -107,6 +107,9 @@ void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept
                 case '%':
                     Console::Write("%%");
                     break;
+                case 'b':
+                    Console::Write("%s", MyArrayGet(pArgs, uint64_t, kIndex++) ? "true" : "false");
+                    break;
                 case 'd':
                 case 'i':
                     Console::Write("%I64d", MyArrayGet(pArgs, int64_t, kIndex++));
