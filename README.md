@@ -184,34 +184,43 @@ function int Main(string[] Args)
 
 ## The Future?
 - [x] Better implementation of array types
-- [ ] Type casting from `object` type to user defined types
+- [ ] Type casting:
+    - [x] Casting from `object` type to user defined types
+    - [ ] Better type safety
 - [ ] Importing files (compiled or not)
-- [ ] Const-correctness
+- [ ] Const-correctness in the C++ API and in the language itself
 - [ ] Better string management
-- [ ] Better error messages and error reporting
-- [ ] More functionality (builtin functions etc)
+- [ ] Error handling:
+    - [ ] Better error messages
+    - [ ] Better error reporting
+    - [ ] Error handling in the language (it has nothing)
+- [ ] More functionality (builtin functions etc):
 - [ ] Constant folding
-- [ ] Function and operator overloading
-- [ ] OOP
+- [ ] Functions:
+    - [ ] Default arguments and variadics
+    - [ ] Overloading
+    - [ ] Operator overloading
+    - [ ] Compile-time functions (*static_assert* etc)
+- [ ] OOP:
 	- [ ] Methods (Constructors included)
     - [ ] ToString(), Copy(), Write()
 	- [ ] Inheritance and Polymorphism
 	- [ ] Encapsulation (*visibility*)
-- [ ] Default arguments and variadic functions
-- [ ] Implementation of compile-time functions (static_assert etc)
 - [ ] Lambdas
 - [ ] Templates (or *Generics*)
 - [ ] Stack allocation of pod structs
-- [ ] Shift to using a register-based VM
-- [ ] Support for 32-bit types
+- [ ] Support for 32-bit types (and maybe 16-bit as well)
 - [ ] Better garbage collection algorithm(s)
-- [ ] Proper scripting API
+- [ ] Proper scripting API:
     - [ ] Better internal function calls
     - [ ] FFI (with C/C++)
     - [ ] Easy, non-complicated interface
-- [ ] Optimization
+- [ ] Optimization:
     - [ ] Codegen
     - [ ] Inlining
-- [ ] API for debugging
-- [ ] Reflection
-- [ ] Rewrite in C (usability in both C and C++)
+- [ ] Distant Future: 
+    - [ ] API for debugging
+    - [ ] Better parsing
+    - [ ] Reflection
+    - [ ] Shift to using a register-based VM
+    - [ ] Rewrite in C (usability in both C and C++)
