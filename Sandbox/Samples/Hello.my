@@ -5,6 +5,12 @@ extern function void   WriteLine(string Format, object[] Args,);
 
 using Matrix4x4 = float[4, 4,];
 
+struct Float2
+{
+	var float X;
+	var float Y;
+};
+
 function static int Go() nogc
 {
 	return 0;
@@ -14,6 +20,9 @@ function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
 	Print(ReadLine());
+	
+	auto[x, y] = (Float2)(object)new Float2();
+	WriteLine("Float2{ %f, %f }", { x, y });
 	
 	return Go();
 }

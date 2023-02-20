@@ -1130,21 +1130,40 @@ private:
 
 	Expression* ParseParenthesizedExpression() noexcept
 	{
+		TypeSpec*   pType = nullptr;
 		Expression* pExpr = nullptr;
 
 		const Token& LparenToken = NextToken();
-		if (!(pExpr = ParseExpression()))
+		if (pType = ParseTypeSpec())
 		{
-			return nullptr;
-		}
+			const Token& RparenToken = Current();
+			if (!CheckAndMatchToken(TokenKind::RParen))
+			{
+				return nullptr;
+			}
 
-		const Token& RparenToken = Current();
-		if (!CheckAndMatchToken(TokenKind::RParen))
+			if (!(pExpr = ParseExpression()))
+			{
+				return nullptr;
+			}
+			
+			return MakeExpression_Cast(LparenToken, pType, RparenToken, pExpr);
+		}
+		else
 		{
-			return nullptr;
-		}
+			if (!(pExpr = ParseExpression()))
+			{
+				return nullptr;
+			}
 
-		return MakeExpression_Parenthesized(LparenToken, pExpr, RparenToken);
+			const Token& RparenToken = Current();
+			if (!CheckAndMatchToken(TokenKind::RParen))
+			{
+				return nullptr;
+			}
+
+			return MakeExpression_Parenthesized(LparenToken, pExpr, RparenToken);
+		}
 	}
 
 	Expression* ParseNumberExpression() noexcept

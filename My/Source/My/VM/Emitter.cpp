@@ -672,6 +672,9 @@ void Emitter::EmitExpression(MyBytecodeProcessor& bp, BoundExpression* pExpressi
         case BoundExpressionKind::Array:
             EmitArrayExpression(bp, pExpression);
             break;
+        case BoundExpressionKind::Cast:
+            EmitCastExpression(bp, pExpression);
+            break;
         case BoundExpressionKind::Instance:
             EmitInstanceExpression(bp, pExpression);
             break;
@@ -1012,6 +1015,74 @@ void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression
     }
 }
 
+void Emitter::EmitArrayExpression(MyBytecodeProcessor& bp, BoundExpression* pArray)
+{
+    // MY_NOT_IMPLEMENTED();
+    BoundArrayExpression& ae = pArray->array;
+
+    const uint32_t kItemCount = stbds_arrlenu(ae.Items);
+    for (size_t k = 0; k < kItemCount; k++)
+    {
+        EmitExpression(bp, ae.Items[k]);
+    }
+
+    uint32_t Flags = 0u;
+    MY_ENCODE_OBJECT_INFO(Flags, MyValueKind::Array, kItemCount);
+
+    bp.Emit(MyOpCode::Ldarr, Flags);
+    /*BoundArrayExpression& ae = pArray->array;
+    const ArrayType& at = ae.Type->arraytype;
+
+    const size_t kItemCount = stbds_arrlenu(ae.Items);
+    const size_t kTypeCount = stbds_arrlenu(at.Counts);
+
+    if (kItemCount == kTypeCount)
+    {
+        for (size_t k = 0; k < kItemCount; k++)
+        {
+            EmitExpression(bp, ae.Items[k]);
+        }
+
+        uint32_t Flags = 0u;
+        MY_ENCODE_OBJECT_INFO(Flags, MyObjectKind::Array, kItemCount);
+
+        bp.Emit(MyOpCode::Ldobj, Flags);
+    }
+    else
+    {
+        EmitExpression(bp, ae.Default);
+        uint64_t kCount = 1ull;
+        for (size_t k = 0; k < kTypeCount; k++)
+        {
+            kCount *= at.Counts[k];
+        }
+
+        bp.Emit(MyOpCode::Newarray, uint32_t(kCount));
+    }*/
+}
+
+void Emitter::EmitCastExpression(MyBytecodeProcessor& bp, BoundExpression* pCast)
+{
+    BoundCastExpression& cast = pCast->cast;
+
+    MyAssembly* const pAssembly = bp.GetAssembly();
+
+    EmitExpression(bp, cast.Expr);
+
+    const bool bIsArrayType = cast.Type->Kind == MY_TYPE_KIND_ARRAY;
+    MyStruct* pKlass = bIsArrayType ? cast.Type->Array->Klass : cast.Type->Klass;
+
+    if (pKlass == My_Defaults.ObjectStruct)
+    {
+        // No need to emit an instruction for this
+        return;
+    }
+
+    const uint32_t kKlassIndex = MyGetElementIndex(pAssembly->Klasses, stbds_arrlenu(pAssembly->Klasses), pKlass);
+
+    bp.Emit(MyOpCode::Cast, kKlassIndex, bIsArrayType ? 1u : 0u);
+}
+
 void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression* pConversion)
 {
     static const auto ConvToInt = [&bp](MyType* pTypeFrom) -> void
@@ -1097,52 +1168,6 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
         // MY_ASSERT(false, "Unexpected conversion from '%s' to '%s'\n", lpTypename0, lpTypename1);
         MY_ASSERT(false, "Error: Invalid conversion");
     }
-}
-
-void Emitter::EmitArrayExpression(MyBytecodeProcessor& bp, BoundExpression* pArray)
-{
-    // MY_NOT_IMPLEMENTED();
-    BoundArrayExpression& ae = pArray->array;
-
-    const uint32_t kItemCount = stbds_arrlenu(ae.Items);
-    for (size_t k = 0; k < kItemCount; k++)
-    {
-        EmitExpression(bp, ae.Items[k]);
-    }
-
-    uint32_t Flags = 0u;
-    MY_ENCODE_OBJECT_INFO(Flags, MyValueKind::Array, kItemCount);
-
-    bp.Emit(MyOpCode::Ldarr, Flags);
-    /*BoundArrayExpression& ae = pArray->array;
-    const ArrayType& at = ae.Type->arraytype;
-
-    const size_t kItemCount = stbds_arrlenu(ae.Items);
-    const size_t kTypeCount = stbds_arrlenu(at.Counts);
-
-    if (kItemCount == kTypeCount)
-    {
-        for (size_t k = 0; k < kItemCount; k++)
-        {
-            EmitExpression(bp, ae.Items[k]);
-        }
-
-        uint32_t Flags = 0u;
-        MY_ENCODE_OBJECT_INFO(Flags, MyObjectKind::Array, kItemCount);
-
-        bp.Emit(MyOpCode::Ldobj, Flags);
-    }
-    else
-    {
-        EmitExpression(bp, ae.Default);
-        uint64_t kCount = 1ull;
-        for (size_t k = 0; k < kTypeCount; k++)
-        {
-            kCount *= at.Counts[k];
-        }
-
-        bp.Emit(MyOpCode::Newarray, uint32_t(kCount));
-    }*/
 }
 
 void Emitter::EmitInstanceExpression(MyBytecodeProcessor& bp, BoundExpression* pInstance)

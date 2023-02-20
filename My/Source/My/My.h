@@ -52,6 +52,7 @@ enum tagMyReturnCode
 
 	MY_RC_DIVISION_BY_ZERO,
 	MY_RC_INDEX_OUT_OF_BOUNDS,
+	MY_RC_INVALID_CAST,
 	MY_RC_INVALID_OPERATION,
 	MY_RC_UNDEFINED_BUILTIN,
 	MY_RC_UNDEFINED_INTERNAL,
@@ -256,7 +257,7 @@ MyGuid      MyGuidCreate(MyContext* pContext, uint64_t kValue0, uint64_t kValue1
 char*       MyGuidCreateStringRepr(MyContext* pContext, const MyGuid& Guid) noexcept;
 
 void        MyDecompile(const MyAssembly* pAssembly) noexcept; // Defined in VM.cpp
-const char* ReturnCodeString(int64_t iReturnCode) noexcept;
+const char* MyReturnCodeString(int64_t iReturnCode) noexcept;
 
 template<typename Item>
 uint32_t    MyGetElementIndex(Item* const& pItems, size_t kCount, const Item& it) noexcept

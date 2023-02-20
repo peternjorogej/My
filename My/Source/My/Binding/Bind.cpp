@@ -35,8 +35,8 @@ public:
 		if (From != My_Defaults.VoidType && To == My_Defaults.ObjectType)
 			return TypeConversion::Implicit;
 
-		if (From == My_Defaults.ObjectType && To != My_Defaults.VoidType)
-			return TypeConversion::Implicit;
+		/*if (From == My_Defaults.ObjectType && To != My_Defaults.VoidType)
+			return TypeConversion::Implicit;*/
 
 		if (From == My_Defaults.BooleanType || From == My_Defaults.IntType || From == My_Defaults.UintType || From == My_Defaults.FloatType)
 			if (To == My_Defaults.StringType)
@@ -442,6 +442,7 @@ MyType* BoundExpression::Type() const noexcept
 		case BoundExpressionKind::Index:       return index.Type;
 		case BoundExpressionKind::Field:       return field.Type;
 		case BoundExpressionKind::Array:       return array.Type;
+		case BoundExpressionKind::Cast:        return cast.Type;
 		case BoundExpressionKind::Conversion:  return conv.Type;
 		case BoundExpressionKind::Instance:    return inst.Type;
 		default: break;
@@ -786,6 +787,7 @@ public:
 			case ExpressionKind::Index:         return BindIndexExpression(pExpression);
 			case ExpressionKind::Field:         return BindFieldExpression(pExpression);
 			case ExpressionKind::Array:         return BindArrayExpression(pExpression);
+			case ExpressionKind::Cast:          return BindCastExpression(pExpression);
 			default: break;
 		}
 
@@ -1346,6 +1348,26 @@ private:
 		MyType* pType = MyTypeCreate(MY_TYPE_KIND_ARRAY, new MyArrayType{ pFirstItemType->Klass, pCounts });
 
 		return MakeBoundExpression_Array(pType, ppItems);
+	}
+
+	BoundExpression* BindCastExpression(Expression* pCast)
+	{
+		CastExpression& cast = pCast->cast;
+
+		MyType* pType = BindTypeSpec(cast.Type);
+		if (!pType)
+		{
+			m_Diagnostics.ReportUnknownType(GetLocation(cast.Type), GetTypeName(cast.Type));
+			return MakeBoundExpression_Error();
+		}
+
+		BoundExpression* pExpr = BindExpression(cast.Expr);
+		if (!pExpr || pExpr->Type() == My_Defaults.ErrorType)
+		{
+			return MakeBoundExpression_Error();
+		}
+
+		return MakeBoundExpression_Cast(pType, pExpr);
 	}
 
 	BoundExpression* BindConversion(Expression* pExpression, MyType* pType, bool bAllowExplicit = false)
@@ -2127,6 +2149,8 @@ private:
 				return GetStart(pExpression->field.Object);
 			case ExpressionKind::Array:
 				return pExpression->array.LbraceToken.Start;
+			case ExpressionKind::Cast:
+				return pExpression->cast.LparenToken.Start;
 			default: break;
 		}
 
@@ -2179,6 +2203,8 @@ private:
 				return pExpression->field.Field.End;
 			case ExpressionKind::Array:
 				return pExpression->array.RbraceToken.End;
+			case ExpressionKind::Cast:
+				return GetEnd(pExpression->cast.Expr);
 			default: break;
 		}
 
@@ -2618,6 +2644,13 @@ BoundExpression* MakeBoundExpression_Instance(MyType* pType, BoundInstanceExpres
 	BoundExpression* pInstance = Allocator::Create<BoundExpression>(Allocator::Stage::Binder, BoundExpressionKind::Instance);
 	new(&pInstance->inst) BoundInstanceExpression{ pType, pMembers };
 	return pInstance;
+}
+
+BoundExpression* MakeBoundExpression_Cast(MyType* pType, BoundExpression* pExpression)
+{
+	BoundExpression* pCast = Allocator::Create<BoundExpression>(Allocator::Stage::Binder, BoundExpressionKind::Cast);
+	new(&pCast->cast) BoundCastExpression{ pType, pExpression };
+	return pCast;
 }
 
 BoundExpression* MakeBoundExpression_Conversion(MyType* pType, BoundExpression* pExpression)

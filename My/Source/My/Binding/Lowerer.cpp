@@ -82,7 +82,8 @@ public:
 				return RewriteConversionExpression(pExpression);
 			case BoundExpressionKind::Array:
 				return RewriteArrayExpression(pExpression);
-				return RewriteInstanceExpression(pExpression);
+			case BoundExpressionKind::Cast:
+				return RewriteCastExpression(pExpression);
 			case BoundExpressionKind::Instance:
 				return RewriteInstanceExpression(pExpression);
 			default:
@@ -235,6 +236,14 @@ protected:
 
 		BoundExpression* pObject = RewriteExpression(field.Object);
 		return pObject == field.Object ? pField : MakeBoundExpression_Field(pObject, field.Type, field.Field);
+	}
+	
+	virtual BoundExpression* RewriteCastExpression(BoundExpression* pCast) noexcept
+	{
+		BoundCastExpression& cast = pCast->cast;
+
+		BoundExpression* pExpression = RewriteExpression(cast.Expr);
+		return pExpression == cast.Expr ? pCast : MakeBoundExpression_Cast(cast.Type, pExpression);
 	}
 	
 	virtual BoundExpression* RewriteConversionExpression(BoundExpression* pConversion) noexcept

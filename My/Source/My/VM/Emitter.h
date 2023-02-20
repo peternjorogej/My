@@ -16,8 +16,8 @@ enum class MyOpCode : uint16_t
 	// Math Ops
 	Add, Addf, Sub, Subf, Mul, Mulf, Div, Divf, Pow, Powf,
 	Lsh, Rsh, Mod, And, Or, Xor, Neg, Negf, Not,
-	// Conversion Ops
-	Cvtof, Cvftoi, Cvftou,
+	// Casting, Conversion Ops
+	Cast, Cvtof, Cvftoi, Cvftou,
 	// Comparison Ops
 	Ceq, Ceqf, Cneq, Cneqf, Clt, Cltf, Clte, Cltef, Cgt, Cgtf, Cgte, Cgtef,
 	// Control Flow Ops
@@ -124,8 +124,9 @@ private:
 	void EmitIndexExpression(MyBytecodeProcessor& bp, BoundExpression* pIndex);
 	void EmitFieldExpression(MyBytecodeProcessor& bp, BoundExpression* pField);
 	void EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression* pOperatorNew);
-	void EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression* pConversion);
 	void EmitArrayExpression(MyBytecodeProcessor& bp, BoundExpression* pArray);
+	void EmitCastExpression(MyBytecodeProcessor& bp, BoundExpression* pCast);
+	void EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression* pConversion);
 	void EmitInstanceExpression(MyBytecodeProcessor& bp, BoundExpression* pInstance);
 
 private:

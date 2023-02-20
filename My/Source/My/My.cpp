@@ -460,7 +460,7 @@ void _My_StructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyS
 }
 
 
-const char* ReturnCodeString(int64_t iReturnCode) noexcept
+const char* MyReturnCodeString(int64_t iReturnCode) noexcept
 {
     switch (iReturnCode)
     {
@@ -475,6 +475,7 @@ const char* ReturnCodeString(int64_t iReturnCode) noexcept
 
         case MY_RC_DIVISION_BY_ZERO:         return "RC_DIVISION_BY_ZERO";
         case MY_RC_INDEX_OUT_OF_BOUNDS:      return "RC_INDEX_OUT_OF_BOUNDS";
+        case MY_RC_INVALID_CAST:             return "RC_INVALID_CAST";
         case MY_RC_INVALID_OPERATION:        return "RC_INVALID_OPERATION";
         case MY_RC_UNDEFINED_BUILTIN:        return "RC_UNDEFINED_BUILTIN";
         case MY_RC_UNDEFINED_INTERNAL:       return "RC_UNDEFINED_INTERNAL";

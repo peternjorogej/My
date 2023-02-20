@@ -71,7 +71,7 @@ int main(int iArgc, char** ppArgv)
 			{
 				Color = Console::Color::Red;
 			}
-			Console::WriteLine(Color, "\nProgram exited with code %I64d (%s)\n", kResult, ReturnCodeString(kResult));
+			Console::WriteLine(Color, "\nProgram exited with code %I64d (%s)\n", kResult, MyReturnCodeString(kResult));
 		}
 	}
 

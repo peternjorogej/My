@@ -743,7 +743,31 @@ int64_t MyVM::Execute(bool& bRunning)
             break;
         }
 #pragma endregion
-#pragma region Conversions_Operations
+#pragma region Casting_Conversion_Operations
+        case MyOpCode::Cast:
+        {
+            if (IP->Arg1 == 1u)
+            {
+                // array type casts
+                MyArray* const& pArray = Stack.Top<MyArray*>();
+                if (pArray->Object.Klass != Assembly->Klasses[IP->Arg0])
+                {
+                    return MY_RC_INVALID_CAST;
+                }
+            }
+            else
+            {
+                // struct type casts
+                MyObject* const& pObject = Stack.Top<MyObject*>();
+                if (pObject->Klass != Assembly->Klasses[IP->Arg0])
+                {
+                    return MY_RC_INVALID_CAST;
+                }
+            }
+
+            IP++;
+            break;
+        }
         case MyOpCode::Cvtof:
         {
             _My_VM_CheckUnderflow(Stack, 8u);
@@ -1181,7 +1205,10 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
             case MyOpCode::Inc:
                 Console::WriteLine("%sinc, [%u]", Space.c_str(), Inst.Arg0);
                 break;
-                // Conversion
+                // Casting, Conversion
+            case MyOpCode::Cast:
+                Console::WriteLine("%scast, [%s, isarray: %s]", Space.c_str(), Assembly.Klasses[Inst.Arg0]->Name, Inst.Arg1 ? "true" : "false");
+                break;
             case MyOpCode::Cvtof:  Console::WriteLine("%scvtof",  Space.c_str()); break;
             case MyOpCode::Cvftoi: Console::WriteLine("%scvftoi", Space.c_str()); break;
             case MyOpCode::Cvftou: Console::WriteLine("%scvftou", Space.c_str()); break;

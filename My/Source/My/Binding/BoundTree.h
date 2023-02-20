@@ -97,6 +97,7 @@ enum class BoundExpressionKind
 	Field,
 	Array,
 	Instance,
+	Cast,
 
 	Conversion
 };
@@ -259,6 +260,8 @@ struct BoundConversionExpression
 	BoundExpression* Expr = nullptr;
 };
 
+using BoundCastExpression = BoundConversionExpression;
+
 struct BoundExpression
 {
 	BoundExpressionKind Kind = BoundExpressionKind::Invalid;
@@ -279,6 +282,7 @@ struct BoundExpression
 		BoundArrayExpression        array;
 		BoundInstanceExpression     inst;
 		BoundConversionExpression   conv;
+		BoundCastExpression         cast;
 	};
 
 	BoundExpression();
@@ -291,7 +295,7 @@ struct BoundExpression
 
 #pragma endregion
 
-#pragma region Statements
+#pragma region BoundStatements
 /// <summary>
 /// Statements
 /// </summary>
@@ -533,6 +537,7 @@ BoundExpression* MakeBoundExpression_Index(BoundExpression* pSequence, MyType* p
 BoundExpression* MakeBoundExpression_Field(BoundExpression* pObject, MyType* pFieldType, char* const lpField);
 BoundExpression* MakeBoundExpression_Array(MyType* pType, BoundExpression** ppItems, BoundExpression* pDefault = nullptr);
 BoundExpression* MakeBoundExpression_Instance(MyType* pType, BoundInstanceExpression::MemberMap* pMembers);
+BoundExpression* MakeBoundExpression_Cast(MyType* pType, BoundExpression* pExpression);
 BoundExpression* MakeBoundExpression_Conversion(MyType* pType, BoundExpression* pExpression);
 
 /// Create Bound Statements
