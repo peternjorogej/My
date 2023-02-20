@@ -2170,14 +2170,7 @@ private:
 			case ExpressionKind::Assignment:
 				return GetEnd(pExpression->assign.Rhs);
 			case ExpressionKind::OperatorNew:
-				if (pExpression->opnew.RparenToken)
-				{
-					return pExpression->opnew.RparenToken->End;
-				}
-				else
-				{
-					return GetEnd(pExpression->opnew.Type);
-				}
+				return pExpression->opnew.RparenToken.End;
 			case ExpressionKind::Call:
 				return pExpression->call.RparenToken.End;
 			case ExpressionKind::Index:

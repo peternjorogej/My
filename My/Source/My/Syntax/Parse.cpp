@@ -48,16 +48,16 @@ static Expression* MakeExpression_Assignment(Expression* pLhs, const Token& Equa
 static Expression* MakeExpression_OperatorNew(
 	const Token& NewKeyword,
 	TypeSpec*    pType,
-	const Token& LbraceToken,
+	const Token& LparenToken,
 	Expression*  pInitializer,
-	const Token& RbraceToken
+	const Token& RparenToken
 );
 static Expression* MakeExpression_OperatorNew(
 	const Token&      NewKeyword,
 	TypeSpec*         pType,
-	const Token&      LbraceToken,
+	const Token&      LparenToken,
 	FieldInitializer* pFields,
-	const Token&      RbraceToken
+	const Token&      RparenToken
 );
 static Expression* MakeExpression_Cast(const Token& LparenToken, TypeSpec* pType, const Token& RparenToken, Expression* pExpr);
 static Expression* MakeExpression_Call(
@@ -682,6 +682,27 @@ private:
 		}
 	}
 
+	template<typename Func>
+	bool CheckEndingOrSeparatorTokens(TokenKind EndingTokenKind, TokenKind SeparatorTokenKind, Func&& pfnCallback) noexcept
+	{
+		TokenKind Kind = Current().Kind;
+
+		if (Current().Kind != EndingTokenKind)
+		{
+			if (Current().Kind != SeparatorTokenKind)
+			{
+				pfnCallback();
+				return false;
+			}
+			else
+			{
+				NextToken();
+			}
+		}
+		
+		return true;
+	}
+
 	// TypeSpecifiers
 	TypeSpec* ParseTypeSpec() noexcept
 	{
@@ -696,11 +717,8 @@ private:
 
 		if (Current().Kind != TokenKind::Identifier && Current().Kind != TokenKind::CallbackKeyword)
 		{
-			const Token& current = Current();
-			TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
-			m_Diagnostics.ReportMissingTypename(Location);
-
-			goto Error;
+			// m_Diagnostics.ReportMissingTypename(GetErrorLocation());
+			return nullptr;
 		}
 
 		// As stated above, first get type T
@@ -713,7 +731,7 @@ private:
 			pTypeSpec = MakeTypeSpec_Name(NextToken()); // If we got here, the current token is an identifier
 		}
 
-		// If we have a '[', then we parse T[N...]
+		// If we have a '[', then we parse T[N...] or T[,...]
 		if (Current().Kind == TokenKind::LBracket)
 		{
 			const Token& LbracketToken = NextToken(); // [
@@ -726,13 +744,26 @@ private:
 				{
 					stbds_arrpush(ppCounts, nullptr);
 
-					if (Current().Kind != TokenKind::RBracket)
-					{
-						if (!CheckAndMatchToken(TokenKind::Comma))
+					if (!CheckEndingOrSeparatorTokens(TokenKind::RBracket, TokenKind::Comma, [this]() -> void
 						{
-							goto Error;
-						}
+							m_Diagnostics.ReportExpectedComma(GetErrorLocation(), Current().Kind);
+						}))
+					{
+						return nullptr;
 					}
+
+					/*if (Current().Kind != TokenKind::RBracket)
+					{
+						if (Current().Kind != TokenKind::Comma)
+						{
+							
+							return nullptr;
+						}
+						else
+						{
+							NextToken();
+						}
+					}*/
 				}
 			}
 			else
@@ -742,33 +773,38 @@ private:
 					Expression* pCount = ParseNumberExpression();
 					if (!pCount)
 					{
-						goto Error;
+						return nullptr;
 					}
 					stbds_arrpush(ppCounts, pCount);
 
-					if (Current().Kind !=TokenKind::RBracket)
+					if (!CheckEndingOrSeparatorTokens(TokenKind::RBracket, TokenKind::Comma, [this]() -> void
+						{
+							m_Diagnostics.ReportExpectedComma(GetErrorLocation(), Current().Kind);
+						}))
+					{
+						return nullptr;
+					}
+
+					/*if (Current().Kind !=TokenKind::RBracket)
 					{
 						if (!CheckAndMatchToken(TokenKind::Comma))
 						{
-							goto Error;
+							return nullptr;
 						}
-					}
+					}*/
 				}
 			}
 			
 			const Token& RbracketToken = Current(); // ]
 			if (!CheckAndMatchToken(TokenKind::RBracket))
 			{
-				goto Error;
+				return nullptr;
 			}
 			
 			pTypeSpec = MakeTypeSpec_Array(pTypeSpec, LbracketToken, ppCounts, RbracketToken);
 		}
 
 		return pTypeSpec;
-
-	Error:
-		return nullptr;
 	}
 
 	TypeSpec* ParseFunctionTypeSpec() noexcept
@@ -782,23 +818,23 @@ private:
 		const Token& LparenToken0 = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pType = ParseTypeSpec()))
 		{
-			goto Error;
+			return nullptr;
 		}
 		const Token& LparenToken1 = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
 		{
 			TypeSpec* pArgType = ParseTypeSpec();
 			if (!pArgType)
 			{
-				goto Error;
+				return nullptr;
 			}
 			stbds_arrpush(ppTypes, pArgType);
 
@@ -806,24 +842,22 @@ private:
 			{
 				if (!CheckAndMatchToken(TokenKind::Comma))
 				{
-					goto Error;
+					return nullptr;
 				}
 			}
 		}
 		const Token& RparenToken1 = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		const Token& RparenToken0 = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		
-		return MakeTypeSpec_Function(CallbackKeyword, LparenToken0, pType, LparenToken1, ppTypes, RparenToken1, RparenToken0);
-
-	Error:*/
+		return MakeTypeSpec_Function(CallbackKeyword, LparenToken0, pType, LparenToken1, ppTypes, RparenToken1, RparenToken0);*/
 		return nullptr;
 	}
 
@@ -860,9 +894,7 @@ private:
 				return ParseNameExpression();
 			default:
 			{
-				const Token& current = Current();
-				TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
-				m_Diagnostics.ReportExpectedPrimaryExpression(Location, current.Kind);
+				m_Diagnostics.ReportExpectedPrimaryExpression(GetErrorLocation(), Current().Kind);
 				return nullptr;
 			}
 		}
@@ -911,7 +943,7 @@ private:
 
 		if (!(pExpr = ParsePrimaryExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		while (Current().Kind == TokenKind::LParen || Current().Kind == TokenKind::Dot)
@@ -925,7 +957,7 @@ private:
 					Expression* pArg = ParseExpression();
 					if (!pArg)
 					{
-						goto Error;
+						return nullptr;
 					}
 					stbds_arrpush(ppArgs, pArg);
 
@@ -933,14 +965,14 @@ private:
 					{
 						if (!CheckAndMatchToken(TokenKind::Comma))
 						{
-							goto Error;
+							return nullptr;
 						}
 					}
 				}
 				const Token& RparenToken = Current();
 				if (!CheckAndMatchToken(TokenKind::RParen))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				pExpr = MakeExpression_Call(pExpr, LparenToken, ppArgs, RparenToken);
@@ -951,7 +983,7 @@ private:
 				const Token& DotToken = Current();
 				if (!CheckAndMatchToken(TokenKind::Dot))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				if (Current().Kind != TokenKind::Identifier)
@@ -959,17 +991,17 @@ private:
 					const Token& current = Current();
 					TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
 					m_Diagnostics.ReportExpectedIdentifierToken(Location);
-					goto Error;
+					return nullptr;
 				}
 
 				pExpr = MakeExpression_Field(pExpr, DotToken, NextToken());
 			}
-			
+
 			// Index Expression (coming after call/field expressions)
 			Expression* pIndexExpr = ParseIndexExpression(pExpr);
 			if (!pIndexExpr)
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			if (pIndexExpr && pIndexExpr != pExpr)
@@ -982,7 +1014,7 @@ private:
 		Expression* pIndexExpr = ParseIndexExpression(pExpr);
 		if (!pIndexExpr)
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (pIndexExpr && pIndexExpr != pExpr)
@@ -991,9 +1023,6 @@ private:
 		}
 
 		return pExpr;
-
-	Error:
-		return nullptr;
 	}
 
 	Expression* ParseBinaryExpression(int iParentPrecedence = 0) noexcept
@@ -1007,7 +1036,7 @@ private:
 			const Token& Operator = NextToken();
 			if (!(pRhs = ParseBinaryExpression(iUnaryOperatorPrecedence)))
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			pLhs = MakeExpression_Unary(Operator, pRhs);
@@ -1016,7 +1045,7 @@ private:
 		{
 			if (!(pLhs = ParseSecondaryExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 		}
 
@@ -1031,16 +1060,13 @@ private:
 			const Token& Operator = NextToken();
 			if (!(pRhs = ParseBinaryExpression(iPrecedence)))
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			pLhs = MakeExpression_Binary(pLhs, Operator, pRhs);
 		}
 
 		return pLhs;
-
-	Error:
-		return nullptr;
 	}
 
 	Expression* ParseTernaryExpression() noexcept
@@ -1051,7 +1077,7 @@ private:
 
 		if (!(pCond = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind == TokenKind::Question)
@@ -1059,26 +1085,23 @@ private:
 			const Token& QuestionToken = NextToken();
 			if (!(pThen = ParseExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			const Token& ColonToken = Current();
 			if (!CheckAndMatchToken(TokenKind::Colon))
 			{
-				goto Error;
+				return nullptr;
 			}
 			if (!(pElse = ParseExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			return MakeExpression_Ternary(pCond, QuestionToken, pThen, ColonToken, pElse);
 		}
 
 		return pCond;
-
-	Error:
-		return nullptr;
 	}
 
 	Expression* ParseAssignmentExpression() noexcept
@@ -1088,7 +1111,7 @@ private:
 
 		if (!(pLhs = ParseBinaryExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind == TokenKind::Equals)
@@ -1096,16 +1119,13 @@ private:
 			const Token& EqualsToken = NextToken();
 			if (!(pRhs = ParseTernaryExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			pLhs = MakeExpression_Assignment(pLhs, EqualsToken, pRhs);
 		}
 
 		return pLhs;
-
-	Error:
-		return nullptr;
 	}
 
 	Expression* ParseParenthesizedExpression() noexcept
@@ -1115,19 +1135,16 @@ private:
 		const Token& LparenToken = NextToken();
 		if (!(pExpr = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		const Token& RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeExpression_Parenthesized(LparenToken, pExpr, RparenToken);
-
-	Error:
-		return nullptr;
 	}
 
 	Expression* ParseNumberExpression() noexcept
@@ -1159,62 +1176,30 @@ private:
 
 	Expression* ParseOperatorNewExpression() noexcept
 	{
-		// MY_NOT_IMPLEMENTED();
-
 		TypeSpec*         pType   = nullptr;
 		Expression*       pInit   = nullptr;
 		FieldInitializer* pFields = nullptr;
 
-		bool bIsStructInitializer = false;
+		bool bHasFieldInitializers = false;
 
 		const Token& NewKeyword = NextToken();
 		if (!(pType = ParseTypeSpec()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
-		const Token& LbraceToken = Current();
+		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind != TokenKind::RParen)
 		{
-			// TODO: StructInitializer to use
-			//     1. dot syntax (.Field = Value)
-			//     2. colon syntax (Field: Value) *
-			//     3. both
-#if 0
-			if (Peek(0).Kind == TokenKind::Dot && Peek(1).Kind == TokenKind::Identifier && Peek(2).Kind == TokenKind::Equals)
-			{
-				while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
-				{
-					FieldInitializer fi = {};
-					NextToken(); // Dot(.) token
-					fi.Name = MatchToken(TokenKind::Identifier);
-					fi.ColonToken = MatchToken(TokenKind::Equals);
-					if (!(fi.Value = ParseExpression()))
-					{
-						goto Error;
-					}
-
-					stbds_arrpush(pFields, fi);
-
-					if (Current().Kind != TokenKind::RParen)
-					{
-						if (!CheckAndMatchToken(TokenKind::Comma))
-						{
-							goto Error;
-						}
-					}
-				}
-			}
-#endif // 0
-#if 1
+			// FieldInitializers: new T(Field: Value, ...)
 			if (Peek(0).Kind == TokenKind::Identifier && Peek(1).Kind == TokenKind::Colon)
 			{
-				bIsStructInitializer = true;
+				bHasFieldInitializers = true;
 				while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
 				{
 					FieldInitializer fi = {};
@@ -1222,44 +1207,40 @@ private:
 					fi.ColonToken = MatchToken(TokenKind::Colon);
 					if (!(fi.Value = ParseExpression()))
 					{
-						goto Error;
+						return nullptr;
 					}
 
 					stbds_arrpush(pFields, fi);
 
-					if (Current().Kind != TokenKind::RParen)
-					{
-						if (!CheckAndMatchToken(TokenKind::Comma))
+					if (!CheckEndingOrSeparatorTokens(TokenKind::RParen, TokenKind::Comma, [this]() -> void
 						{
-							goto Error;
-						}
+							m_Diagnostics.ReportExpectedComma(GetErrorLocation(), Current().Kind);
+						}))
+					{
+						return nullptr;
 					}
 				}
 			}
-#endif // 1
 			/*else
 			{
 				pInit = ParseExpression();
 			}*/
-		} // Current().Kind != TokenKind::RParen
+		}
 
-		const Token& RbraceToken = Current();
+		const Token& RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		
-		if (bIsStructInitializer)
+		if (bHasFieldInitializers)
 		{
-			return MakeExpression_OperatorNew(NewKeyword, pType, LbraceToken, pFields, RbraceToken);
+			return MakeExpression_OperatorNew(NewKeyword, pType, LparenToken, pFields, RparenToken);
 		}
 		else
 		{
-			return MakeExpression_OperatorNew(NewKeyword, pType, LbraceToken, pInit, RbraceToken);
+			return MakeExpression_OperatorNew(NewKeyword, pType, LparenToken, pInit, RparenToken);
 		}
-
-	Error:
-		return nullptr;
 	}
 
 	Expression* ParseArrayExpression() noexcept
@@ -1276,7 +1257,7 @@ private:
 		Expression* pItem = ParseExpression();
 		if (!pItem)
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		stbds_arrpush(ppItems, pItem);
@@ -1285,14 +1266,14 @@ private:
 		{
 			if (!CheckAndMatchToken(TokenKind::Comma))
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			while (Current().Kind != TokenKind::RBrace && Current().Kind != TokenKind::Eof)
 			{
 				if (!(pItem = ParseExpression()))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				stbds_arrpush(ppItems, pItem);
@@ -1301,7 +1282,7 @@ private:
 				{
 					if (!CheckAndMatchToken(TokenKind::Comma))
 					{
-						goto Error;
+						return nullptr;
 					}
 				}
 			}
@@ -1310,13 +1291,10 @@ private:
 		const Token& RbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeExpression_Array(LbraceToken, ppItems, RbraceToken);
-
-	Error:
-		return nullptr;
 	}
 
 	// Statements
@@ -1359,7 +1337,7 @@ private:
 		const Token& LbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		while (Current().Kind != TokenKind::RBrace && Current().Kind != TokenKind::Eof)
@@ -1367,7 +1345,7 @@ private:
 			Statement* pStmt = ParseStatement();
 			if (!pStmt)
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			stbds_arrpush(ppStmts, pStmt);
@@ -1376,13 +1354,10 @@ private:
 		const Token& RbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_Block(LbraceToken, ppStmts, RbraceToken);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseExpressionStatement() noexcept
@@ -1390,18 +1365,15 @@ private:
 		Expression* pExpr = ParseExpression();
 		if (!pExpr)
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_Expression(pExpr);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseVariableDeclarationStatement() noexcept
@@ -1416,12 +1388,12 @@ private:
 		const Token& VarKeyword = Current();
 		if (!CheckAndMatchToken(ExpectedKind))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!(pType = ParseTypeSpec()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		Identifier = MatchToken(TokenKind::Identifier);
@@ -1431,19 +1403,16 @@ private:
 			EqualsToken = NextToken();
 			if (!(pValue = ParseExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 		}
 
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_VariableDeclaration(VarKeyword, pType, Identifier, EqualsToken, pValue, ExpectedKind == TokenKind::ConstKeyword);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseDecomposeDeclarationStatement() noexcept
@@ -1458,15 +1427,13 @@ private:
 		const Token& LbracketToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LBracket))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind != TokenKind::Identifier)
 		{
-			const Token& current = Current();
-			TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
-			m_Diagnostics.ReportExpectedIdentifierToken(Location);
-			goto Error;
+			m_Diagnostics.ReportExpectedIdentifierToken(GetErrorLocation());
+			return nullptr;
 		}
 
 		while (Current().Kind == TokenKind::Identifier && Current().Kind != TokenKind::Eof)
@@ -1478,37 +1445,34 @@ private:
 			{
 				if (!CheckAndMatchToken(TokenKind::Comma))
 				{
-					goto Error;
+					return nullptr;
 				}
 			}
 		}
-		
+
 		RbracketToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RBracket))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		EqualsToken = Current();
 		if (!CheckAndMatchToken(TokenKind::Equals))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!(pDecomposable = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_DecomposeDeclaration(AutoKeyword, LbracketToken, pIdentifiers, RbracketToken, EqualsToken, pDecomposable);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseIfStatement() noexcept
@@ -1525,21 +1489,21 @@ private:
 		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pIfCondition = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		const Token& RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pIfBlock = ParseStatement()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind == TokenKind::ElseifKeyword)
@@ -1552,23 +1516,23 @@ private:
 				eis.LparenToken = Current();
 				if (!CheckAndMatchToken(TokenKind::LParen))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				if (!(eis.Condition = ParseExpression()))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				eis.RparenToken = Current();
 				if (!CheckAndMatchToken(TokenKind::RParen))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				if (!(eis.ElseifBlock = ParseStatement()))
 				{
-					goto Error;
+					return nullptr;
 				}
 
 				stbds_arrpush(pElseifs, eis);
@@ -1580,14 +1544,11 @@ private:
 			ElseKeyword = NextToken();
 			if (!(pElseBlock = ParseStatement()))
 			{
-				goto Error;
+				return nullptr;
 			}
 		}
 
 		return MakeStatement_If(IfKeyword, LparenToken, pIfCondition, RparenToken, pIfBlock, pElseifs, ElseKeyword, pElseBlock);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseForStatement() noexcept
@@ -1603,53 +1564,50 @@ private:
 		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		Identifier = MatchToken(TokenKind::Identifier);
 		if (!CheckAndMatchToken(TokenKind::Comma))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pLowerBound = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!CheckAndMatchToken(TokenKind::Comma))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pUpperBound = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind != TokenKind::RParen)
 		{
 			if (!CheckAndMatchToken(TokenKind::Comma))
 			{
-				goto Error;
+				return nullptr;
 			}
 			if (!(pStep = ParseExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 		}
 
 		const Token& RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pBody = ParseStatement()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_For(ForKeyword, LparenToken, Identifier, pLowerBound, pUpperBound, pStep, RparenToken, pBody);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseForeachStatement() noexcept
@@ -1666,7 +1624,7 @@ private:
 		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		Identifier = MatchToken(TokenKind::Identifier);
@@ -1674,28 +1632,26 @@ private:
 		ColonToken = Current();
 		if (!CheckAndMatchToken(TokenKind::Colon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!(pIterable = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!(pBody = ParseStatement()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
-		return MakeStatement_Foreach(ForeachKeyword, LparenToken, Identifier, ColonToken, pIterable, RparenToken, pBody);
-
-	Error:*/
+		return MakeStatement_Foreach(ForeachKeyword, LparenToken, Identifier, ColonToken, pIterable, RparenToken, pBody);*/
 		return nullptr;
 	}
 
@@ -1709,27 +1665,24 @@ private:
 		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pCond = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		const Token& RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pBody = ParseStatement()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_While(WhileKeyword, LparenToken, pCond, RparenToken, pBody);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseDoWhileStatement() noexcept
@@ -1740,36 +1693,33 @@ private:
 		const Token& DoKeyword = NextToken();
 		if (!(pBody = ParseStatement()))
 		{
-			goto Error;
+			return nullptr;
 		}
 		const Token& WhileKeyword = Current();
 		if (!CheckAndMatchToken(TokenKind::WhileKeyword))
 		{
-			goto Error;
+			return nullptr;
 		}
 		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pCond = ParseExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 		const Token& RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_DoWhile(DoKeyword, pBody, WhileKeyword, LparenToken, pCond, RparenToken);
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseBreakStatement() noexcept
@@ -1777,13 +1727,10 @@ private:
 		Statement* pBreak = MakeStatement_Break(NextToken());
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return pBreak;
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseContinueStatement() noexcept
@@ -1791,13 +1738,10 @@ private:
 		Statement* pContinue = MakeStatement_Break(NextToken());
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return pContinue;
-
-	Error:
-		return nullptr;
 	}
 
 	Statement* ParseReturnStatement() noexcept
@@ -1809,18 +1753,15 @@ private:
 		{
 			if (!(pExpr = ParseExpression()))
 			{
-				goto Error;
+				return nullptr;
 			}
 		}
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeStatement_Return(ReturnKeyword, pExpr);
-
-	Error:
-		return nullptr;
 	}
 
 	Declaration*  ParseDeclaration() noexcept
@@ -1839,8 +1780,7 @@ private:
 			default: break;
 		}
 
-		const Token& current = Current();
-		m_Diagnostics.ReportExpectedDeclaration(current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename));
+		m_Diagnostics.ReportExpectedDeclaration(GetErrorLocation());
 		return nullptr;
 	}
 
@@ -1853,16 +1793,13 @@ private:
 			Declaration* pDecl = ParseDeclaration();
 			if (!pDecl)
 			{
-				goto Error;
+				return nullptr;
 			}
 
 			stbds_arrpush(ppDecls, pDecl);
 		}
 
 		return ppDecls;
-
-	Error:
-		return nullptr;
 	}
 
 	Declaration* ParseImportDeclaration() noexcept
@@ -1873,17 +1810,15 @@ private:
 		const Token& ModulePath = Current();
 		if (!CheckAndMatchToken(TokenKind::String))
 		{
-			goto Error;
+			return nullptr;
 		}
 		
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
-		return MakeDeclaration_Import(ImportKeyword, ModulePath);
-
-	Error:*/
+		return MakeDeclaration_Import(ImportKeyword, ModulePath);*/
 		return nullptr;
 	}
 
@@ -1897,29 +1832,26 @@ private:
 		const Token& Name = Current();
 		if (!CheckAndMatchToken(TokenKind::Identifier))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		EqualsToken = Current();
 		if (!CheckAndMatchToken(TokenKind::Equals))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!(pType = ParseTypeSpec()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeDeclaration_Using(UsingKeyword, Name, EqualsToken, pType);
-
-	Error:
-		return nullptr;
 	}
 
 	Declaration* ParseExternDeclaration() noexcept
@@ -1930,19 +1862,16 @@ private:
 		const Token& FunctionKeyword = Current();
 		if (!CheckAndMatchToken(TokenKind::FunctionKeyword))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		Signature = ParseFunctionSignature();
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeDeclaration_Extern(ExternKeyword, FunctionKeyword, Signature);
-
-	Error:
-		return nullptr;
 	}
 
 	Declaration* ParseEnumDeclaration() noexcept
@@ -1957,13 +1886,13 @@ private:
 		const Token& Name = Current();
 		if (!CheckAndMatchToken(TokenKind::Identifier))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		LbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind != TokenKind::RBrace)
@@ -1977,7 +1906,7 @@ private:
 				{
 					if (!CheckAndMatchToken(TokenKind::Comma))
 					{
-						goto Error;
+						return nullptr;
 					}
 				}
 			}
@@ -1986,17 +1915,15 @@ private:
 		RbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
-		return MakeDeclaration_Enum(EnumKeyword, Name, LbraceToken, pValues, RbraceToken);
-
-	Error:*/
+		return MakeDeclaration_Enum(EnumKeyword, Name, LbraceToken, pValues, RbraceToken);\*/
 		return nullptr;
 	}
 	
@@ -2015,30 +1942,30 @@ private:
 		const Token& LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!(pBase = ParseNumberExpression()))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return nullptr;
 		}
 		
 		Name = Current();
 		if (!CheckAndMatchToken(TokenKind::Identifier))
 		{
-			goto Error;
+			return nullptr;
 		}
 		
 		LbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind != TokenKind::RBrace)
@@ -2052,7 +1979,7 @@ private:
 				{
 					if (!CheckAndMatchToken(TokenKind::Comma))
 					{
-						goto Error;
+						return nullptr;
 					}
 				}
 			}
@@ -2061,17 +1988,15 @@ private:
 		RbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
-		return MakeDeclaration_BitFlags(BflagsKeyword, LparenToken, pBase, RparenToken, Name, LbraceToken, pValues, RbraceToken);
-
-	Error:*/
+		return MakeDeclaration_BitFlags(BflagsKeyword, LparenToken, pBase, RparenToken, Name, LbraceToken, pValues, RbraceToken);*/
 		return nullptr;
 	}
 
@@ -2080,13 +2005,10 @@ private:
 		Statement* pVarDeclStmt = ParseVariableDeclarationStatement();
 		if (!pVarDeclStmt)
 		{
-			goto Error;
+			return nullptr;
 		}
 		
 		return MakeDeclaration_Variable(pVarDeclStmt);
-	
-	Error:
-		return nullptr;
 	}
 
 	Declaration* ParseFunctionDeclaration() noexcept
@@ -2097,16 +2019,13 @@ private:
 		FunctionSignature Signature = ParseFunctionSignature();
 		if (!Signature.Return || Signature.Name.Kind == TokenKind::Invalid)
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!(pBody = ParseStatement()))
 		{
-			goto Error;
+			return nullptr;
 		}
 		return MakeDeclaration_Function(FunctionKeyword, Signature, pBody, Signature.Attributes);
-		
-	Error:
-		return nullptr;
 	}
 
 	Declaration* ParseStructDeclaration() noexcept
@@ -2126,7 +2045,7 @@ private:
 		const Token& Name = Current();
 		if (!CheckAndMatchToken(TokenKind::Identifier))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind == TokenKind::Semicolon)
@@ -2135,11 +2054,11 @@ private:
 			NextToken();
 			return MakeDeclaration_Forward(StructKeyword, Name);
 		}
-		
+
 		const Token& LbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		if (Current().Kind != TokenKind::RBrace)
@@ -2167,11 +2086,8 @@ private:
 					}
 					default:
 					{
-						const Token& current = Current();
-						TextLocation Location = current.Location(m_Text.GetLineIndex(current.Start), m_Text.Filename);
-						m_Diagnostics.ReportExpectedVariableOrFunctionDeclaration(Location, current);
-						goto Error;
-						break;
+						m_Diagnostics.ReportExpectedVariableOrFunctionDeclaration(GetErrorLocation(), Current());
+						return nullptr;
 					}
 				}
 			}
@@ -2180,21 +2096,23 @@ private:
 		const Token& RbraceToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RBrace))
 		{
-			goto Error;
+			return nullptr;
 		}
 		if (!CheckAndMatchToken(TokenKind::Semicolon))
 		{
-			goto Error;
+			return nullptr;
 		}
 
 		return MakeDeclaration_Struct(StructKeyword, pPodKeyword, Name, LbraceToken, ppMembers, ppMethods, RbraceToken, kAttributes);
-
-	Error:
-		return nullptr;
 	}
 
 	FunctionSignature ParseFunctionSignature() noexcept
 	{
+		// Signature is invalid if:
+		//     1. FunctionSignature.Name.Kind != Identifier
+		//     2. FunctionSignature.Return == nullptr;
+		static const FunctionSignature s_InvalidSignature = {};
+
 		// Signature: inline? static? rtype name(constexpr? argtype argname, ...) nogc?
 		FunctionSignature fs = {};
 
@@ -2211,7 +2129,7 @@ private:
 
 		if (!(fs.Return = ParseTypeSpec()))
 		{
-			goto Error;
+			return s_InvalidSignature;
 		}
 
 		fs.Name = MatchToken(TokenKind::Identifier);
@@ -2219,7 +2137,7 @@ private:
 		fs.LparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::LParen))
 		{
-			goto Error;
+			return s_InvalidSignature;
 		}
 
 		if (Current().Kind != TokenKind::RParen)
@@ -2234,7 +2152,7 @@ private:
 				}
 				if (!(param.Type = ParseTypeSpec()))
 				{
-					goto Error;
+					return s_InvalidSignature;
 				}
 
 				param.Name = MatchToken(TokenKind::Identifier);
@@ -2244,7 +2162,7 @@ private:
 				{
 					if (!CheckAndMatchToken(TokenKind::Comma))
 					{
-						goto Error;
+						return s_InvalidSignature;
 					}
 				}
 			}
@@ -2253,7 +2171,7 @@ private:
 		fs.RparenToken = Current();
 		if (!CheckAndMatchToken(TokenKind::RParen))
 		{
-			goto Error;
+			return s_InvalidSignature;
 		}
 
 		if (Current().Kind == TokenKind::NoGCKeyword)
@@ -2263,12 +2181,14 @@ private:
 		}
 
 		return fs;
+	}
 
-	Error:
-		// Signature is invalid if:
-		//     1. FunctionSignature.Name.Kind != Identifier
-		//     2. FunctionSignature.Return == nullptr;
-		return {};
+private:
+	TextLocation GetErrorLocation() noexcept
+	{
+		const Token& token = Current();
+		TextLocation Location = token.Location(m_Text.GetLineIndex(token.Start), m_Text.Filename);
+		return Location;
 	}
 
 private:
@@ -2744,18 +2664,18 @@ Expression* MakeExpression_Assignment(Expression* pLhs, const Token& EqualsToken
 	return pAssign;
 }
 
-Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LbraceToken, Expression* pInitializer, const Token& RbraceToken)
+Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LparenToken, Expression* pInitializer, const Token& RparenToken)
 {
 	Expression* pOperatorNew = Allocator::Create<Expression>(Allocator::Stage::Parser, ExpressionKind::OperatorNew);
-	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LbraceToken, nullptr, RbraceToken, false };
+	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LparenToken, nullptr, RparenToken, false };
 	pOperatorNew->opnew.Initializer = pInitializer;
 	return pOperatorNew;
 }
 
-Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LbraceToken, FieldInitializer* pFields, const Token& RbraceToken)
+Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LparenToken, FieldInitializer* pFields, const Token& RparenToken)
 {
 	Expression* pOperatorNew = Allocator::Create<Expression>(Allocator::Stage::Parser, ExpressionKind::OperatorNew);
-	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LbraceToken, nullptr, RbraceToken, true };
+	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LparenToken, nullptr, RparenToken, true };
 	pOperatorNew->opnew.Fields = pFields;
 	return pOperatorNew;
 }

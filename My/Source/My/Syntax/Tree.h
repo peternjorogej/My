@@ -254,13 +254,13 @@ struct OperatorNewExpression
 {
 	Token       NewKeyword  = {};
 	TypeSpec*   Type        = nullptr;
-	Token       LbraceToken = {};
+	Token       LparenToken = {};
 	union
 	{
 		Expression*       Initializer; // In case of a single expression
 		FieldInitializer* Fields;      // In case of struct member initializers
 	};
-	Token       RbraceToken = {};
+	Token       RparenToken = {};
 	bool        IsStructInitializer = false;
 };
 

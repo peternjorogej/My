@@ -1,9 +1,9 @@
 
 extern function void   Print(string Text);
 extern function string ReadLine();
-extern function void   WriteLine(string Format, object[] Args);
+extern function void   WriteLine(string Format, object[] Args,);
 
-using Matrix4x4 = float[4, 4];
+using Matrix4x4 = float[4, 4,];
 
 function static int Go() nogc
 {
@@ -13,14 +13,7 @@ function static int Go() nogc
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
-	Print(ReadLine()); // Hold console to view decompilation
-	
-	// C# style definition of multidimensional array types
-	var float[,] f = new float[2, 2]();
-	var float[,,] g = new float[2, 2, 4]();
-	
-	const int[2,2] i = null;
-	const int[,] j = i;
+	Print(ReadLine());
 	
 	return Go();
 }
