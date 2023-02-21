@@ -409,6 +409,12 @@ void DiagnosticBag::ReportIllegalAssignment(const TextLocation& Location, char* 
 	Report(Location, Message);
 }
 
+void DiagnosticBag::ReportIllegalFieldAssignment(const TextLocation& Location, MyStruct* pKlass, char* const& lpField) noexcept
+{
+	const std::string Message = Console::Format("Illegal assignment to readonly field '%s.%s'", pKlass->Name, lpField);
+	Report(Location, Message);
+}
+
 void DiagnosticBag::ReportInvalidArgumentCount(const TextLocation& Location, char* const& lpName, size_t ExpectedCount, size_t Count) noexcept
 {
 	const std::string Message = Console::Format(

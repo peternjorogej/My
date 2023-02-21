@@ -111,6 +111,7 @@ public:
 	void ReportIllegalTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept;
 	void ReportIllegalImplicitTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept;
 	void ReportIllegalAssignment(const TextLocation& Location, char* const& lpName) noexcept;
+	void ReportIllegalFieldAssignment(const TextLocation& Location, MyStruct* pKlass, char* const& lpField) noexcept;
 	void ReportInvalidArgumentCount(const TextLocation& Location, char* const& lpName, size_t ExpectedCount, size_t Count) noexcept;
 	void ReportInvalidArgumentType(
 		const TextLocation& Location, char* const& lpName, MyType* pExpectedType, MyType* pType, size_t Index
