@@ -290,27 +290,24 @@ void DiagnosticBag::ReportExpectedDeclaration(const TextLocation& Location) noex
 // Binding
 void DiagnosticBag::ReportBadUnaryOperator(const TextLocation& Location, const Token& Op, MyType* pRhsType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format("Unary operator '%s' not defined for '%s'", TokenKindString(Op.Kind), pRhsType->Fullname);
-	Report(Location, Message);*/
+	const std::string Message = Console::Format("Unary operator '%s' not defined for '%s'", TokenKindString(Op.Kind), MyTypeGetName(pRhsType));
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportBadBinaryOperator(const TextLocation& Location, const Token& Op, MyType* pLhsType, MyType* pRhsType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format(
-		"Binary operator '%s' not defined for '%s' and '%s'", TokenKindString(Op.Kind), pLhsType->Fullname, pRhsType->Fullname
+	const std::string Message = Console::Format(
+		"Binary operator '%s' not defined for '%s' and '%s'", TokenKindString(Op.Kind), MyTypeGetName(pLhsType), MyTypeGetName(pRhsType)
 	);
-	Report(Location, Message);*/
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportTernaryTypeMismatch(const TextLocation& Location, MyType* pThenType, MyType* pElseType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format(
-		"Ternary operator has mismatched types for '%s' and '%s'", pThenType->Fullname, pElseType->Fullname
+	const std::string Message = Console::Format(
+		"Ternary operator has mismatched types for '%s' and '%s'", MyTypeGetName(pThenType), MyTypeGetName(pElseType)
 	);
-	Report(Location, Message);*/
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportNotAVariable(const TextLocation& Location, char* const& lpName) noexcept
@@ -363,10 +360,7 @@ void DiagnosticBag::ReportParameterRedeclaration(const TextLocation& Location, c
 
 void DiagnosticBag::ReportInvalidTypeForDecomposable(const TextLocation& Location, MyType* pType) noexcept
 {
-	// MY_NOT_IMPLEMENTED();
-	// const std::string Message = Console::Format("Decomposable must be struct type or array-like, not %s", pType->Klass->Name);
-	DebugLog::Warn("Incomplete diagnostic message [for DiagnosticBag::ReportInvalidTypeForDecomposable]");
-	const std::string Message = "Illegal type for decomposable";
+	const std::string Message = Console::Format("Decomposable must be struct type or array-like, not %s", MyTypeGetName(pType));
 	Report(Location, Message);
 }
 
@@ -378,28 +372,23 @@ void DiagnosticBag::ReportInvalidCountForDecomposition(const TextLocation& Locat
 
 void DiagnosticBag::ReportForeachIterableNotArrayLike(const TextLocation& Location, MyType* pType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format("Foreach loop expects iterable to be array-like (got type '%s')", pType->Fullname);
-	Report(Location, Message);*/
+	const std::string Message = Console::Format("Foreach loop expects iterable to be array-like (got type '%s')", MyTypeGetName(pType));
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportIllegalTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept
 {
-	// MY_NOT_IMPLEMENTED();
-	// const std::string Message = Console::Format("Cannot convert from type '%s' to '%s'", pType->Fullname, pExpectedType->Fullname);
-	DebugLog::Warn("Incomplete diagnostic message [for DiagnosticBag::ReportIllegalTypeConversion]");
-	const std::string Message = "Illegal type conversion";
+	const std::string Message = Console::Format(
+		"Cannot convert from type '%s' to '%s'", MyTypeGetName(pType), MyTypeGetName(pExpectedType)
+	);
 	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportIllegalImplicitTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept
 {
-	/*MY_NOT_IMPLEMENTED();
 	const std::string Message = Console::Format(
-		"Cannot implicitly convert from type '%s' to '%s' (are you missing a cast?)", pType->Fullname, pExpectedType->Fullname
-	);*/
-	DebugLog::Warn("Incomplete diagnostic message [for DiagnosticBag::ReportIllegalImplicitTypeConversion]");
-	const std::string Message = "Illegal implicit type conversion";
+		"Cannot implicitly convert from type '%s' to '%s' (are you missing a cast?)", MyTypeGetName(pType), MyTypeGetName(pExpectedType)
+	);
 	Report(Location, Message);
 }
 
@@ -427,12 +416,9 @@ void DiagnosticBag::ReportInvalidArgumentType(
 	const TextLocation& Location, char* const& lpName, MyType* pExpectedType, MyType* pType, size_t Index
 ) noexcept
 {
-	/*MY_NOT_IMPLEMENTED();
 	const std::string Message = Console::Format(
-		"Argument %I64u of '%s' has invalid type '%s'; expected '%s'", Index, lpName, pType->Fullname, pExpectedType->Fullname
-	);*/
-	DebugLog::Warn("Incomplete diagnostic message [for DiagnosticBag::ReportInvalidArgumentType()]");
-	const std::string Message = "Invalid argument type";
+		"Argument %I64u of '%s' has invalid type '%s'; expected '%s'", Index, lpName, MyTypeGetName(pType), MyTypeGetName(pExpectedType)
+	);
 	Report(Location, Message);
 }
 
@@ -445,9 +431,8 @@ void DiagnosticBag::ReportArgumentNotConstexpr(const TextLocation& Location, cha
 
 void DiagnosticBag::ReportTypeCannotBeIndexed(const TextLocation& Location, MyType* pType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format("Type '%s' cannot be indexed (expected array)", pType->Fullname);
-	Report(Location, Message);*/
+	const std::string Message = Console::Format("Type '%s' cannot be indexed (expected array)", MyTypeGetName(pType));
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportMismatchedIndexCount(const TextLocation& Location, uint32_t kExpectedCount, uint32_t kCount) noexcept
@@ -458,12 +443,11 @@ void DiagnosticBag::ReportMismatchedIndexCount(const TextLocation& Location, uin
 
 void DiagnosticBag::ReportTypeCannotBeUsedAsIndex(const TextLocation& Location, MyType* pObjectType, MyType* pIndexType, MyType* pType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format(
+	const std::string Message = Console::Format(
 		"Type '%s' cannot be used as index to object of type '%s' (expected type '%s')",
-		pIndexType->Fullname, pObjectType->Fullname, pType->Fullname
+		MyTypeGetName(pIndexType), MyTypeGetName(pObjectType), MyTypeGetName(pType)
 	);
-	Report(Location, Message);*/
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept
@@ -482,9 +466,8 @@ void DiagnosticBag::ReportTooManyInitializers(const TextLocation& Location, MySt
 
 void DiagnosticBag::ReportTypeDoesNotHaveAttributes(const TextLocation& Location, MyType* pType) noexcept
 {
-	MY_NOT_IMPLEMENTED();
-	/*const std::string Message = Console::Format("Type '%s' does not have attributes", pType->Fullname);
-	Report(Location, Message);*/
+	const std::string Message = Console::Format("Type '%s' does not have attributes", MyTypeGetName(pType));
+	Report(Location, Message);
 }
 
 void DiagnosticBag::ReportInvalidUseOfVoid(const TextLocation& Location) noexcept
@@ -543,7 +526,7 @@ void DiagnosticBag::ReportAllPathsMustReturn(const TextLocation& Location) noexc
 
 void DiagnosticBag::ReportImportedFileDoesNotExist(const TextLocation& Location, MyString* pFilepath) noexcept
 {
-	const std::string Message = Console::Format("File '%s' does not exists (cannot be imported)", pFilepath->Chars);
+	const std::string Message = Console::Format("File '%s' does not exist (cannot be imported)", pFilepath->Chars);
 	Report(Location, Message);
 }
 
@@ -555,7 +538,7 @@ void DiagnosticBag::ReportMainIsUndefined() noexcept
 
 void DiagnosticBag::ReportMainHasInvalidSignature() noexcept
 {
-	const std::string Message = "function 'Main' has invalid signature, expected: 'function int Main(int, string[])";
+	const std::string Message = "function 'Main' has invalid signature, expected: 'function int Main(string[])";
 	Report(TextLocation(0u, 0u, 0u, {}), Message);
 }
 
