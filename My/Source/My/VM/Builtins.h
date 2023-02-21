@@ -51,8 +51,12 @@ void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_Indent(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_Dedent(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_Append(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_AppendV(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_Write(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_WriteV(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_WriteLine(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_WriteLineV(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM);
 
 

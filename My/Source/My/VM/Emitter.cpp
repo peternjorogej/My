@@ -1782,12 +1782,16 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("__strcat", _My_Builtin_Strcat, 2);
     RegisterBuiltin("__strcmp", _My_Builtin_Strcmp, 2);
     // StringBuilder
-    RegisterBuiltin("SbInit",      _My_Builtin_StringBuilder_Init,      2);
-    RegisterBuiltin("SbIndent",    _My_Builtin_StringBuilder_Indent,    1);
-    RegisterBuiltin("SbDedent",    _My_Builtin_StringBuilder_Dedent,    1);
-    RegisterBuiltin("SbWrite",     _My_Builtin_StringBuilder_Write,     2);
-    RegisterBuiltin("SbWriteLine", _My_Builtin_StringBuilder_WriteLine, 2);
-    RegisterBuiltin("SbToString",  _My_Builtin_StringBuilder_ToString,  1);
+    RegisterBuiltin("SbInit",       _My_Builtin_StringBuilder_Init,       2);
+    RegisterBuiltin("SbIndent",     _My_Builtin_StringBuilder_Indent,     1);
+    RegisterBuiltin("SbDedent",     _My_Builtin_StringBuilder_Dedent,     1);
+    RegisterBuiltin("SbAppend",     _My_Builtin_StringBuilder_Append,     2);
+    RegisterBuiltin("SbAppendV",    _My_Builtin_StringBuilder_AppendV,    3);
+    RegisterBuiltin("SbWrite",      _My_Builtin_StringBuilder_Write,      2);
+    RegisterBuiltin("SbWriteV",     _My_Builtin_StringBuilder_WriteV,     3);
+    RegisterBuiltin("SbWriteLine",  _My_Builtin_StringBuilder_WriteLine,  2);
+    RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV, 3);
+    RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString,   1);
 }
 #pragma endregion
 

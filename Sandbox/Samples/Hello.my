@@ -7,6 +7,7 @@ extern function void   SbInit(StringBuilder sb, uint InitCapacity);
 extern function void   SbIndent(StringBuilder sb);
 extern function void   SbDedent(StringBuilder sb);
 extern function void   SbWriteLine(StringBuilder sb, string Text);
+extern function void   SbWriteLineV(StringBuilder sb, string Format, object[] Args);
 extern function string SbToString(StringBuilder sb);
 
 using Matrix4x4 = float[4, 4,];
@@ -29,13 +30,16 @@ function int Main(const string[] Argv)
 		SbIndent(sb);
 		SbWriteLine(sb, "Group(Entity)");
 			SbIndent(sb);
-			SbWriteLine(sb, "GUID = 1234567890u");
+			SbWriteLineV(sb, "GUID = %u", { 1234567890u });
 			SbWriteLine(sb, "Name = \"Floor\"");
+			SbWriteLineV(sb, "Cold = %b", { false });
+			SbWriteLineV(sb, "Year = %d", { 1987 });
 			SbDedent(sb);
 		SbWriteLine(sb, "EndGroup");
 		SbDedent(sb);
 	SbWriteLine(sb, "EndGroup");
-	const string text = SbToString(sb);
+	
+	const string text = SbToString(sb); // Gets the string and then clears the internal string builder
 	Print(text);
 	
 	return Go();

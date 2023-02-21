@@ -21,6 +21,9 @@ typedef struct
 
 StringBuilder SbCreate(int iInitialCapacity);
 void          SbDestroy(StringBuilder* pSb);
+void          SbAppendChar(StringBuilder* pSb, char Character); // Does not indent
+void          SbAppend(StringBuilder* pSb, const char* lpText); // Does not indent
+void          SbAppendV(StringBuilder* pSb, const char* lpFormat, ...); // Does not indent
 void          SbWriteChar(StringBuilder* pSb, char Character);
 void          SbWrite(StringBuilder* pSb, const char* lpText);
 void          SbWriteV(StringBuilder* pSb, const char* lpFormat, ...);
@@ -108,12 +111,53 @@ void SbDestroy(StringBuilder* pSb)
     pSb->Buffer   = NULL;
 }
 
-void SbWriteChar(StringBuilder* pSb, char Character)
+void SbAppendChar(StringBuilder* pSb, char Character)
 {
     assert(pSb && pSb->Position);
 
     _SbCheckResizeBuffer(pSb, 1);
+
+    if ((*pSb->Position++ = Character))
+    {
+        pSb->Length++;
+    }
+}
+
+void SbAppend(StringBuilder* pSb, const char* lpText)
+{
+    assert(pSb && pSb->Position && lpText);
+
+    const int iTextLength = (int)strlen(lpText);
+    _SbCheckResizeBuffer(pSb, iTextLength);
+
+    char* pBuffer = (char*)memcpy(pSb->Position, lpText, iTextLength);
+    if (pBuffer)
+    {
+        pSb->Position = pBuffer;
+        pSb->Position += iTextLength;
+        pSb->Length += iTextLength;
+    }
+}
+
+void SbAppendV(StringBuilder* pSb, const char* lpFormat, ...)
+{
+    assert(pSb && pSb->Position && lpFormat);
+    static char lpBuffer[2048] = {};
+
+    va_list vArgs;
+    va_start(vArgs, lpFormat);
+    vsnprintf_s(lpBuffer, 2048ull, 2048ull, lpFormat, vArgs);
+    va_end(vArgs);
+
+    SbAppend(pSb, lpBuffer);
+}
+
+void SbWriteChar(StringBuilder* pSb, char Character)
+{
+    assert(pSb && pSb->Position);
+
     _SbIndent(pSb);
+    _SbCheckResizeBuffer(pSb, 1);
 
     if ((*pSb->Position++ = Character))
     {
@@ -125,9 +169,9 @@ void SbWrite(StringBuilder* pSb, const char* lpText)
 {
     assert(pSb && pSb->Position && lpText);
 
+    _SbIndent(pSb);
     const int iTextLength = (int)strlen(lpText);
     _SbCheckResizeBuffer(pSb, iTextLength);
-    _SbIndent(pSb);
 
     char* pBuffer = (char*)memcpy(pSb->Position, lpText, iTextLength);
     if (pBuffer)
@@ -153,8 +197,7 @@ void SbWriteV(StringBuilder* pSb, const char* lpFormat, ...)
 
 void SbWriteLine(StringBuilder* pSb, const char* lpText)
 {
-    SbWrite(pSb, lpText);
-    SbWrite(pSb, "\n");
+    SbWriteV(pSb, "%s\n", lpText);
 }
 
 void SbWriteLineV(StringBuilder* pSb, const char* lpFormat, ...)
