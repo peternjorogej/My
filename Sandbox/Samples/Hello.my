@@ -11,6 +11,16 @@ struct Float2
 	var float Y;
 };
 
+// Testing static initialization
+const Float2 Zero = new Float2();
+const Float2 Xdir = new Float2(X: 1.0);
+const Float2 Ydir = new Float2(Y: 1.0);
+
+function static void PrintFloat2(const Float2 u)
+{
+	WriteLine("Float2{ %f, %f }", { u.X, u.Y });
+}
+
 function static int Go() nogc
 {
 	return 0;
@@ -21,8 +31,11 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const Float2 u = new Float2(X: 1.2, Y: 3.4);
-	WriteLine("Float2{ %f, %f }", { u.X, u.Y });
+	const Float2 u = new Float2(X: 1.23/* , Y: 4.56 */);
+	PrintFloat2(u);
+	PrintFloat2(Zero);
+	PrintFloat2(Xdir);
+	PrintFloat2(Ydir);
 	
 	return Go();
 }
