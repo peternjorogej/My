@@ -323,7 +323,7 @@ char* MyStringToUtf8(const MyString* pStr, bool bCopy)
     }
 }
 
-wchar_t* MyStringToUtf16(const MyString* pStr, bool bCopy)
+wchar_t* MyStringToUtf16(const MyString* pStr)
 {
     const size_t kLength = pStr->Length + 1;
     wchar_t* lpWstrCopy = new wchar_t[kLength]{};

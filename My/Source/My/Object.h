@@ -121,7 +121,7 @@ bool        MyStringIsEqual(const MyString* pLhsStr, const MyString* pRhsStr);
 uint64_t    MyStringGetHash(const MyString* pStr);
 uint64_t    MyStringGetLength(const MyString* pStr);
 char*       MyStringToUtf8(const MyString* pStr, bool bCopy = false);
-wchar_t*    MyStringToUtf16(const MyString* pStr, bool bCopy = false);
+wchar_t*    MyStringToUtf16(const MyString* pStr);
 
 MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, size_t kCount, size_t kCapacity = 16ull);
 MyArray*    MyArrayNew(MyContext* pContext, MyStruct* pKlass, const MyArrayShape& Shape, size_t kCapacity = 16ull);
