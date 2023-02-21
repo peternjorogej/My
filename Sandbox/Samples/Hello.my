@@ -5,25 +5,6 @@ extern function void   WriteLine(string Format, object[] Args,);
 
 using Matrix4x4 = float[4, 4,];
 
-// Registered internally (fields: int Value0, Value2)
-struct MyNativeStruct;
-
-struct Float2
-{
-	var float X;
-	var float Y;
-};
-
-// Testing static initialization
-const Float2 Zero = new Float2();
-const Float2 Xdir = new Float2(X: 1.0);
-const Float2 Ydir = new Float2(Y: 1.0);
-
-function static void PrintFloat2(const Float2 u)
-{
-	WriteLine("Float2{ %f, %f }", { u.X, u.Y });
-}
-
 function static int Go() nogc
 {
 	return 0;
@@ -34,17 +15,14 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const Float2 u = new Float2(X: 1.23/* , Y: 4.56 */);
-	PrintFloat2(u);
-	PrintFloat2(Zero);
-	PrintFloat2(Xdir);
-	PrintFloat2(Ydir);
-	
-	// const Float2 v = new Float2(-6.66); // Error: for now operator new only expects field initializers
-	// PrintFloat2(v);
-	
-	const MyNativeStruct mns = new MyNativeStruct(Value0: 234, Value1: 567);
-	WriteLine("MyNativeStruct{ Value0: %d, Value1: %d }", { mns.Value0, mns.Value1 });
+	const StringBuilder sb = new StringBuilder(CStrBldrObjAddress: null);
+	// sb.CStrBldrObjAddress = 0; // Error: Cannot convert int to intptr
+	const intptr ptr = sb.CStrBldrObjAddress;
+	if (ptr == sb.CStrBldrObjAddress)
+	{
+		Print("Pointers are same");
+	}
+	WriteLine("StringBuilder(%p){ %p }", { (object)sb, sb.CStrBldrObjAddress });
 	
 	return Go();
 }
