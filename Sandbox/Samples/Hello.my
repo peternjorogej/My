@@ -18,6 +18,7 @@ function int Main(const string[] Argv)
 	const StringBuilder sb = new StringBuilder(CStrBldrObjAddress: null);
 	// sb.CStrBldrObjAddress = 0; // Error: Cannot convert int to intptr
 	const intptr ptr = sb.CStrBldrObjAddress;
+	// sb.CStrBldrObjAddress = ptr; // Error: StringBuilder.CStrBldrObjAddress is readonly
 	if (ptr == sb.CStrBldrObjAddress)
 	{
 		Print("Pointers are same");
