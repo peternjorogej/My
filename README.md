@@ -34,7 +34,6 @@ does not work as intended */
 var float[] data = new float[5]();
 //   - 2D (representing a 3x3 matrix)
 var float[3, 3] m33 = new float[3, 3](); // Indexing: m33[i, j]
-
 ```
 
 3. Function Definition
@@ -63,7 +62,6 @@ function int Main(string[] Args)
     // indexing into the array: m[i, j]
     // ...
 }
-
 ```
 
 5. Forward Declarations - forward declared structs are defined natively (kind of like internal functions)
@@ -78,7 +76,6 @@ function int Main(string[] Args)
     // access fd.Dummy as usual
     // ...
 }
-
 ```
 
 6. Structs
@@ -168,7 +165,6 @@ int main()
     MyAssembly* pAss = Compiler::Build(pCtx, lpFilename, internals);
     // ...
 }
-
 ```
 Then on the scripting side:
 ```C#
@@ -179,7 +175,6 @@ function int Main(string[] Args)
     CppFunction("Hello", 69); // Prints: Hello, 69
     return 0;
 }
-
 ```
 
 ## The Future?
