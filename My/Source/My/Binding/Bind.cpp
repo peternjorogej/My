@@ -231,6 +231,7 @@ BoundBinaryOperator::BoundBinaryOperator(TokenKind Kind, BoundBinaryOperatorKind
 	: BoundBinaryOperator(Kind, OperatorKind, pOperandType, pOperandType, pResultType)
 { }
 
+#pragma region Definitions_For_Operator_Binding
 #define _Define_My_BoundBinaryOperator_Bind_X64_X64(__x, __TpX) \
 	static BoundBinaryOperator* _My_BoundBinaryOperator_Bind_##__x##_##__x(TokenKind Kind, MyType* pLhsType, MyType* pRhsType) noexcept \
 	{                                                                                                                \
@@ -308,7 +309,6 @@ BoundBinaryOperator::BoundBinaryOperator(TokenKind Kind, BoundBinaryOperatorKind
 		return nullptr;                                                                                                   \
 	}
 
-
 _Define_My_BoundBinaryOperator_Bind_X64_X64(Int, My_Defaults.IntType)
 _Define_My_BoundBinaryOperator_Bind_X64_X64(Uint, My_Defaults.UintType)
 
@@ -316,9 +316,9 @@ _Define_My_BoundBinaryOperator_Bind_X64_Y64(Int, Uint, My_Defaults.IntType, My_D
 _Define_My_BoundBinaryOperator_Bind_X64_Y64(Int, Float, My_Defaults.IntType, My_Defaults.FloatType)
 _Define_My_BoundBinaryOperator_Bind_X64_Y64(Uint, Float, My_Defaults.UintType, My_Defaults.FloatType)
 
-
 #undef _Define_My_BoundBinaryOperator_Bind_X64_X64
 #undef _Define_My_BoundBinaryOperator_Bind_X64_Y64
+#pragma endregion
 
 static BoundBinaryOperator* _My_BoundBinaryOperator_Bind_Float_Float(TokenKind Kind, MyType* pLhsType, MyType* pRhsType) noexcept
 {
@@ -366,6 +366,9 @@ BoundBinaryOperator* BoundBinaryOperator::Bind(TokenKind Kind, MyType* pLhsType,
 		{ TokenKind::LessLess,       BoundBinaryOperatorKind::LeftShift,  My_Defaults.UintType, My_Defaults.IntType,  My_Defaults.UintType },
 		{ TokenKind::GreaterGreater, BoundBinaryOperatorKind::RightShift, My_Defaults.UintType, My_Defaults.IntType,  My_Defaults.UintType },
 		{ TokenKind::Percent,        BoundBinaryOperatorKind::Modulo,     My_Defaults.UintType, My_Defaults.IntType,  My_Defaults.UintType },
+		
+		{ TokenKind::EqualsEquals, BoundBinaryOperatorKind::Equality,    My_Defaults.IntPtrType, My_Defaults.BooleanType },
+		{ TokenKind::BangEquals,   BoundBinaryOperatorKind::NonEquality, My_Defaults.IntPtrType, My_Defaults.BooleanType },
 		
 		{ TokenKind::Plus,         BoundBinaryOperatorKind::Addition,    My_Defaults.StringType },
 		{ TokenKind::EqualsEquals, BoundBinaryOperatorKind::Equality,    My_Defaults.StringType, My_Defaults.BooleanType },
