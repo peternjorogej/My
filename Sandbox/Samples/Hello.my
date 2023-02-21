@@ -3,6 +3,12 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
+extern function void   SbInit(StringBuilder sb, uint InitCapacity);
+extern function void   SbIndent(StringBuilder sb);
+extern function void   SbDedent(StringBuilder sb);
+extern function void   SbWriteLine(StringBuilder sb, string Text);
+extern function string SbToString(StringBuilder sb);
+
 using Matrix4x4 = float[4, 4,];
 
 function static int Go() nogc
@@ -16,14 +22,21 @@ function int Main(const string[] Argv)
 	Print(ReadLine());
 	
 	const StringBuilder sb = new StringBuilder(CStrBldrObjAddress: null);
-	// sb.CStrBldrObjAddress = 0; // Error: Cannot convert int to intptr
-	const intptr ptr = sb.CStrBldrObjAddress;
-	// sb.CStrBldrObjAddress = ptr; // Error: StringBuilder.CStrBldrObjAddress is readonly
-	if (ptr == sb.CStrBldrObjAddress)
-	{
-		Print("Pointers are same");
-	}
-	WriteLine("StringBuilder(%p){ %p }", { (object)sb, sb.CStrBldrObjAddress });
+	SbInit(sb, 64u);
+	WriteLine("StringBuilder{ %p }", { sb.CStrBldrObjAddress });
+	
+	SbWriteLine(sb, "Group(Scene)");
+		SbIndent(sb);
+		SbWriteLine(sb, "Group(Entity)");
+			SbIndent(sb);
+			SbWriteLine(sb, "GUID = 1234567890u");
+			SbWriteLine(sb, "Name = \"Floor\"");
+			SbDedent(sb);
+		SbWriteLine(sb, "EndGroup");
+		SbDedent(sb);
+	SbWriteLine(sb, "EndGroup");
+	const string text = SbToString(sb);
+	Print(text);
 	
 	return Go();
 }

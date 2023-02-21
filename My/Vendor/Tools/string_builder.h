@@ -103,13 +103,9 @@ StringBuilder SbCreate(int iInitialCapacity)
 void SbDestroy(StringBuilder* pSb)
 {
     assert(pSb && pSb->Buffer);
+    SbClear(pSb);
     free(pSb->Buffer);
     pSb->Buffer   = NULL;
-    pSb->Position = NULL;
-    pSb->Length   = 0;
-    pSb->Capacity = 0;
-    pSb->Indent   = 0;
-    //free(pSb);
 }
 
 void SbWriteChar(StringBuilder* pSb, char Character)

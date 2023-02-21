@@ -2,8 +2,7 @@
 
 #include "My/My.h"
 
-void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept;
+// Core Operations
 void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvToInt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvToUint(MyContext* pContext, MyVM* pVM) noexcept;
@@ -12,6 +11,7 @@ void _My_Builtin_CvIntToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept;
 
+// Std Operations
 void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_WriteLine(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Read(MyContext* pContext, MyVM* pVM) noexcept;
@@ -26,6 +26,7 @@ void _My_Builtin_Print(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Length(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Clock(MyContext* pContext, MyVM* pVM) noexcept;
 
+// Math
 void _My_Builtin_Sin(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Cos(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Tan(MyContext* pContext, MyVM* pVM) noexcept;
@@ -41,6 +42,19 @@ void _My_Builtin_Floor(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Ceil(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Sqrt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Cbrt(MyContext* pContext, MyVM* pVM) noexcept;
+
+// String
+void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept;
+
+// StringBuilder
+void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_Indent(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_Dedent(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_Write(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_WriteLine(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM);
+
 
 #if 0
 void _My_Builtin_Strcat(InternalCallbackContext* pCallbackContext) noexcept;

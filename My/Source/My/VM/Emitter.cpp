@@ -1741,8 +1741,6 @@ void _My_Initialize_BuiltinsMap() noexcept
     }
 
     // Core
-    RegisterBuiltin("__strcat",          _My_Builtin_Strcat,          2);
-    RegisterBuiltin("__strcmp",          _My_Builtin_Strcmp,          2);
     RegisterBuiltin("__equals",          _My_Builtin_Equals,          2);
     RegisterBuiltin("__cvtoint",         _My_Builtin_CvToInt,         1);
     RegisterBuiltin("__cvtouint",        _My_Builtin_CvToUint,        1);
@@ -1780,6 +1778,16 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Ceil",  _My_Builtin_Ceil,  1);
     RegisterBuiltin("Sqrt",  _My_Builtin_Sqrt,  1);
     RegisterBuiltin("Cbrt",  _My_Builtin_Cbrt,  1);
+    // String
+    RegisterBuiltin("__strcat", _My_Builtin_Strcat, 2);
+    RegisterBuiltin("__strcmp", _My_Builtin_Strcmp, 2);
+    // StringBuilder
+    RegisterBuiltin("SbInit",      _My_Builtin_StringBuilder_Init,      2);
+    RegisterBuiltin("SbIndent",    _My_Builtin_StringBuilder_Indent,    1);
+    RegisterBuiltin("SbDedent",    _My_Builtin_StringBuilder_Dedent,    1);
+    RegisterBuiltin("SbWrite",     _My_Builtin_StringBuilder_Write,     2);
+    RegisterBuiltin("SbWriteLine", _My_Builtin_StringBuilder_WriteLine, 2);
+    RegisterBuiltin("SbToString",  _My_Builtin_StringBuilder_ToString,  1);
 }
 #pragma endregion
 

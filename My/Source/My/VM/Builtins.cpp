@@ -2,26 +2,9 @@
 #include "My/Base/IO.h"
 #include "My/VM/VM.h"
 #include "My/Utils/Utils.h"
+#include "Tools/string_builder.h"
 
 // Core
-void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept
-{
-    MyString* const& pRhs = pVM->Stack.PopString();
-    MyString* const& pLhs = pVM->Stack.PopString();
-
-    const char* lpString = MyGetCachedStringV("%s%s", pLhs->Chars, pRhs->Chars);
-    MyString* pString = MyStringNew(pContext, lpString);
-    
-    pVM->Stack.Push(pString);
-}
-
-void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept
-{
-    MyString* const& pRhs = pVM->Stack.PopString();
-    MyString* const& pLhs = pVM->Stack.PopString();
-    pVM->Stack.Push(pLhs == pRhs);
-}
-
 void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept
 {
     const uint64_t kRhs = pVM->Stack.PopU64();
@@ -327,6 +310,93 @@ void _My_Builtin_Cbrt(MyContext* pContext, MyVM* pVM) noexcept
 {
     const double x = pVM->Stack.PopF64();
     pVM->Stack.Push(cbrt(x));
+}
+
+// String
+void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pRhs = pVM->Stack.PopString();
+    MyString* const& pLhs = pVM->Stack.PopString();
+
+    const char* lpString = MyGetCachedStringV("%s%s", pLhs->Chars, pRhs->Chars);
+    MyString* pString = MyStringNew(pContext, lpString);
+
+    pVM->Stack.Push(pString);
+}
+
+void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pRhs = pVM->Stack.PopString();
+    MyString* const& pLhs = pVM->Stack.PopString();
+    pVM->Stack.Push(pLhs == pRhs);
+}
+
+// StringBuilder
+static StringBuilder* GetCStrBldrObjAddress(MyObject* pStrBldr) noexcept
+{
+    MyField* pField = MyObjectGetField(pStrBldr, "CStrBldrObjAddress");
+    StringBuilder* pCStrBldrObjAddress = MyObjectFieldGetValueAs<StringBuilder*>(pStrBldr, pField);
+    return pCStrBldrObjAddress;
+}
+
+void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM)
+{
+    uint64_t kInitialCapacity = pVM->Stack.PopU64();
+    MyObject* const& pSb = pVM->Stack.PopObject();
+
+    MY_ASSERT(pSb->Klass == My_Defaults.StringBuilderStruct, "Not a StringBuilder");
+
+    StringBuilder* pCStrBldrObjAddress = new StringBuilder{ SbCreate((int)kInitialCapacity) };
+    
+    MyField* pField = MyObjectGetField(pSb, "CStrBldrObjAddress");
+    MyObjectFieldSetValueAs<uint64_t>(pSb, pField, (uint64_t)pCStrBldrObjAddress);
+}
+
+void _My_Builtin_StringBuilder_Indent(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pSb = pVM->Stack.PopObject();
+
+    StringBuilder* pCStrBldrObjAddress = GetCStrBldrObjAddress(pSb);
+    pCStrBldrObjAddress->Indent++;
+}
+
+void _My_Builtin_StringBuilder_Dedent(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pSb = pVM->Stack.PopObject();
+
+    StringBuilder* pCStrBldrObjAddress = GetCStrBldrObjAddress(pSb);
+    pCStrBldrObjAddress->Indent--;
+}
+
+void _My_Builtin_StringBuilder_Write(MyContext* pContext, MyVM* pVM)
+{
+    MyString* pText = pVM->Stack.PopString();
+    MyObject* const& pSb = pVM->Stack.PopObject();
+
+    StringBuilder* pCStrBldrObjAddress = GetCStrBldrObjAddress(pSb);
+    SbWrite(pCStrBldrObjAddress, pText->Chars);
+}
+
+void _My_Builtin_StringBuilder_WriteLine(MyContext* pContext, MyVM* pVM)
+{
+    MyString* pText = pVM->Stack.PopString();
+    MyObject* const& pSb = pVM->Stack.PopObject();
+
+    StringBuilder* pCStrBldrObjAddress = GetCStrBldrObjAddress(pSb);
+    SbWriteLine(pCStrBldrObjAddress, pText->Chars);
+}
+
+void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pSb = pVM->Stack.PopObject();
+
+    StringBuilder* pCStrBldrObjAddress = GetCStrBldrObjAddress(pSb);
+    MyString* pString = MyStringNew(pContext, SbGetString(pCStrBldrObjAddress));
+    
+    SbDestroy(pCStrBldrObjAddress);
+    MY_SAFEDELETE(pCStrBldrObjAddress);
+
+    pVM->Stack.Push(pString);
 }
 
 int64_t my_pow(int64_t base, int64_t exponent) noexcept
