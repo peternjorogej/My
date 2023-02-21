@@ -46,13 +46,6 @@ static Expression* MakeExpression_Parenthesized(const Token& LparenToken, Expres
 static Expression* MakeExpression_Name(const Token& Identifier);
 static Expression* MakeExpression_Assignment(Expression* pLhs, const Token& EqualsToken, Expression* pRhs);
 static Expression* MakeExpression_OperatorNew(
-	const Token& NewKeyword,
-	TypeSpec*    pType,
-	const Token& LparenToken,
-	Expression*  pInitializer,
-	const Token& RparenToken
-);
-static Expression* MakeExpression_OperatorNew(
 	const Token&      NewKeyword,
 	TypeSpec*         pType,
 	const Token&      LparenToken,
@@ -1167,11 +1160,8 @@ private:
 
 	Expression* ParseOperatorNewExpression() noexcept
 	{
-		TypeSpec*         pType   = nullptr;
-		Expression*       pInit   = nullptr;
-		FieldInitializer* pFields = nullptr;
-
-		bool bHasFieldInitializers = false;
+		TypeSpec*         pType         = nullptr;
+		FieldInitializer* pInitializers = nullptr;
 
 		const Token& NewKeyword = NextToken();
 		if (!(pType = ParseTypeSpec()))
@@ -1190,7 +1180,6 @@ private:
 			// FieldInitializers: new T(Field: Value, ...)
 			if (Peek(0).Kind == TokenKind::Identifier && Peek(1).Kind == TokenKind::Colon)
 			{
-				bHasFieldInitializers = true;
 				while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
 				{
 					FieldInitializer fi = {};
@@ -1201,7 +1190,7 @@ private:
 						return nullptr;
 					}
 
-					stbds_arrpush(pFields, fi);
+					stbds_arrpush(pInitializers, fi);
 
 					if (!CheckEndingOrSeparatorTokens(TokenKind::RParen, TokenKind::Comma, [this]() -> void
 						{
@@ -1212,10 +1201,12 @@ private:
 					}
 				}
 			}
-			/*else
+			else
 			{
-				pInit = ParseExpression();
-			}*/
+				m_Diagnostics.ReportFeatureNotImplemented(GetErrorLocation(), "operator new with expression [new T(expr)]");
+				m_Diagnostics.ReportUnexpectedToken(GetErrorLocation(), Current().Kind, TokenKind::Identifier);
+				return nullptr;
+			}
 		}
 
 		const Token& RparenToken = Current();
@@ -1223,15 +1214,8 @@ private:
 		{
 			return nullptr;
 		}
-		
-		if (bHasFieldInitializers)
-		{
-			return MakeExpression_OperatorNew(NewKeyword, pType, LparenToken, pFields, RparenToken);
-		}
-		else
-		{
-			return MakeExpression_OperatorNew(NewKeyword, pType, LparenToken, pInit, RparenToken);
-		}
+
+		return MakeExpression_OperatorNew(NewKeyword, pType, LparenToken, pInitializers, RparenToken);
 	}
 
 	Expression* ParseArrayExpression() noexcept
@@ -2655,19 +2639,11 @@ Expression* MakeExpression_Assignment(Expression* pLhs, const Token& EqualsToken
 	return pAssign;
 }
 
-Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LparenToken, Expression* pInitializer, const Token& RparenToken)
+Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LparenToken, FieldInitializer* pInitializers, const Token& RparenToken)
 {
 	Expression* pOperatorNew = Allocator::Create<Expression>(Allocator::Stage::Parser, ExpressionKind::OperatorNew);
-	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LparenToken, nullptr, RparenToken, false };
-	pOperatorNew->opnew.Initializer = pInitializer;
-	return pOperatorNew;
-}
-
-Expression* MakeExpression_OperatorNew(const Token& NewKeyword, TypeSpec* pType, const Token& LparenToken, FieldInitializer* pFields, const Token& RparenToken)
-{
-	Expression* pOperatorNew = Allocator::Create<Expression>(Allocator::Stage::Parser, ExpressionKind::OperatorNew);
-	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LparenToken, nullptr, RparenToken, true };
-	pOperatorNew->opnew.Fields = pFields;
+	new(&pOperatorNew->opnew) OperatorNewExpression{ NewKeyword, pType, LparenToken, nullptr, RparenToken, pInitializers != nullptr };
+	pOperatorNew->opnew.Fields = pInitializers;
 	return pOperatorNew;
 }
 
@@ -3139,7 +3115,7 @@ void PrettyPrint(Expression* pExpr, const std::string& Indent) noexcept
 			Console::Write("new ");
 			PrettyPrint(pExpr->opnew.Type);
 			Console::Write("(");
-			if (pExpr->opnew.IsStructInitializer)
+			if (pExpr->opnew.HasFieldInitializers)
 			{
 				const size_t kLength = stbds_arrlenu(pExpr->opnew.Fields);
 				for (size_t k = 0; k < kLength; k++)

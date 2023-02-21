@@ -37,6 +37,9 @@ function int Main(const string[] Argv)
 	PrintFloat2(Xdir);
 	PrintFloat2(Ydir);
 	
+	// const Float2 v = new Float2(-6.66); // Error: for now operator new only expects field initializers
+	// PrintFloat2(v);
+	
 	return Go();
 }
 

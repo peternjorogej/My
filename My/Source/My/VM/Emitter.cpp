@@ -994,7 +994,6 @@ void Emitter::EmitOperatorNewExpression(MyBytecodeProcessor& bp, BoundExpression
 {
     // TODO: This probably need some fixing
     BoundOperatorNewExpression& one = pOperatorNew->opnew;
-    // EmitExpression(bp, one.Expr);
 
     MyAssembly* const pAssembly = bp.GetAssembly();
 

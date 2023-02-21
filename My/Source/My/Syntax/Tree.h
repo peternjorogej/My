@@ -261,7 +261,7 @@ struct OperatorNewExpression
 		FieldInitializer* Fields;      // In case of struct member initializers
 	};
 	Token       RparenToken = {};
-	bool        IsStructInitializer = false;
+	bool        HasFieldInitializers = false;
 };
 
 struct CastExpression

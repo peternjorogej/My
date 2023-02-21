@@ -1080,7 +1080,7 @@ private:
 			return MakeBoundExpression_Error();
 		}
 
-		if (opnew.IsStructInitializer)
+		if (opnew.HasFieldInitializers)
 		{
 			const size_t kActualFieldCount = stbds_arrlenu(opnew.Fields);
 			const size_t kExpectedFieldCount = MyStructFieldCount(pType->Klass);
@@ -1108,59 +1108,6 @@ private:
 			}
 
 			return MakeBoundExpression_OperatorNew(pType, pInitializers);
-
-			/*using MemberMap = BoundInstanceExpression::MemberMap;
-
-			DebugLog::Warn("Struct initializers are being bound but not emitted");
-			pExpression = MakeExpressionFromType(pType, GetLocation(opnew.Type));
-			MY_ASSERT(pExpression->Kind == BoundExpressionKind::Instance, "Struct initializer used with non struct type");
-
-			BoundInstanceExpression& bie = pExpression->inst;
-			MemberMap* pMembers = nullptr;
-			{
-				static constexpr MemberMap mm = { nullptr, nullptr };
-				stbds_shdefault(pMembers, nullptr);
-				stbds_shdefaults(pMembers, mm);
-			}
-
-			const size_t kFieldCount = stbds_shlenu(bie.Members);
-			const size_t kInitializedCount = stbds_arrlenu(opnew.Fields);
-
-			if (kInitializedCount > kFieldCount)
-			{
-				const FieldInitializer& fi = opnew.Fields[kFieldCount];
-				m_Diagnostics.ReportUnknownError(
-					GetLocation(fi.Name),
-					Console::Format("Too many initializers for struct %s", pType->Fullname)
-				);
-				goto Error;
-			}
-			// Bind the initialized fields
-			for (size_t k = 0; k < kInitializedCount; k++)
-			{
-				FieldInitializer& fi = opnew.Fields[k];
-				BoundExpression* pOldFieldInitializer = stbds_shget(bie.Members, fi.Name.Id);
-				if (pOldFieldInitializer == nullptr)
-				{
-					m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(fi.Name), fi.Name.Id, pType);
-					goto Error;
-				}
-
-				BoundExpression* pNewFieldInitializer = BindConversion(fi.Value, pOldFieldInitializer->Type());
-				stbds_shput(pMembers, fi.Name.Id, pNewFieldInitializer);
-			}
-			// Bind the remaining uninitialized fields
-			for (size_t k = 0; k < kFieldCount; k++)
-			{
-				MemberMap& mm = bie.Members[k];
-				if (stbds_shget(pMembers, mm.key) == nullptr)
-				{
-					stbds_shput(pMembers, mm.key, mm.value);
-				}
-			}
-			MY_ASSERT(stbds_shlenu(bie.Members) == stbds_shlenu(pMembers), "Invalid member count");
-			stbds_shfree(bie.Members);
-			bie.Members = pMembers;*/
 		}
 		else
 		{
@@ -1172,7 +1119,7 @@ private:
 	{
 		CallExpression& call = pCall->call;
 
-		// Handle type casting/conversion and compile-time function calls first
+		// Handle conversion first
 		if (call.Callable->Kind == ExpressionKind::Name)
 		{
 			char* const& lpName = call.Callable->name.Identifier.Id;
