@@ -106,6 +106,10 @@ void MyInitializeStructs(MyContext* pContext)
     ud.UintStruct = MyStructCreate(pContext, "Uint", MY_STRUCT_ATTR_POD);
     ud.UintType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.UintStruct);
     ud.UintStruct->Size = 8ul;
+    // IntPtr
+    ud.IntPtrStruct = MyStructCreate(pContext, "IntPtr", MY_STRUCT_ATTR_POD);
+    ud.IntPtrType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.IntPtrStruct);
+    ud.IntPtrStruct->Size = 8ul;
     // Float
     ud.FloatStruct = MyStructCreate(pContext, "Float", MY_STRUCT_ATTR_POD);
     ud.FloatType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.FloatStruct);
@@ -125,7 +129,7 @@ void MyInitializeStructs(MyContext* pContext)
     ud.StringBuilderStruct = MyStructCreate(pContext, "StringBuilder", MY_STRUCT_ATTR_NONE);
     ud.StringBuilderType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.StringBuilderStruct);
     {
-        MyStructAddField(ud.StringBuilderStruct, "Value", ud.StringType);
+        MyStructAddField(ud.StringBuilderStruct, "CStrBldrObjAddress", ud.IntPtrType);
     }
     // File
     ud.FileStruct = MyStructCreate(pContext, "File", MY_STRUCT_ATTR_NONE);
@@ -146,6 +150,7 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.BooleanType);
     MY_SAFEDELETE(ud.IntType);
     MY_SAFEDELETE(ud.UintType);
+    MY_SAFEDELETE(ud.IntPtrType);
     MY_SAFEDELETE(ud.FloatType);
     MY_SAFEDELETE(ud.ComplexType);
     MY_SAFEDELETE(ud.StringType);
@@ -158,6 +163,7 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.BooleanStruct);
     MY_SAFEDELETE(ud.IntStruct);
     MY_SAFEDELETE(ud.UintStruct);
+    MY_SAFEDELETE(ud.IntPtrStruct);
     MY_SAFEDELETE(ud.FloatStruct);
     MY_SAFEDELETE(ud.ComplexStruct);
     MY_SAFEDELETE(ud.StringStruct);
@@ -311,9 +317,28 @@ const char* MyTypeGetName(const MyType* pType) noexcept
     {
         switch (pType->Kind)
         {
-            case 0: return pType->Klass->Name;
-            case 1: return pType->Array->Klass->Name;
-            case 2: return pType->Signature->Name;
+            case MY_TYPE_KIND_STRUCT:
+            {
+                return pType->Klass->Name;
+            }
+            case MY_TYPE_KIND_ARRAY:
+            {
+                const char* lpShape = nullptr;
+                switch (stbds_arrlenu(pType->Array->Lengths))
+                {
+                    case 0: lpShape = "[]"; break;
+                    case 1: lpShape = "[]"; break;
+                    case 2: lpShape = "[,]"; break;
+                    case 3: lpShape = "[,,]"; break;
+                    case 4: lpShape = "[,,,]"; break;
+                    default: break;
+                }
+                return MyGetCachedStringV("%s%s", pType->Array->Klass->Name, lpShape);
+            }
+            case MY_TYPE_KIND_FUNCTION:
+            {
+                return pType->Signature->Name;
+            }
             default: break;
         }
     }

@@ -207,6 +207,7 @@ struct MyDefaults
 	MyType* BooleanType = nullptr;
 	MyType* IntType     = nullptr;
 	MyType* UintType    = nullptr;
+	MyType* IntPtrType    = nullptr;
 	MyType* FloatType   = nullptr;
 	MyType* ComplexType = nullptr;
 	MyType* StringType  = nullptr;
@@ -219,6 +220,7 @@ struct MyDefaults
 	MyStruct* BooleanStruct = nullptr;
 	MyStruct* IntStruct     = nullptr;
 	MyStruct* UintStruct    = nullptr;
+	MyStruct* IntPtrStruct    = nullptr;
 	MyStruct* FloatStruct   = nullptr;
 	MyStruct* ComplexStruct = nullptr;
 	MyStruct* StringStruct  = nullptr;

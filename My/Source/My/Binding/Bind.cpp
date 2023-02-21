@@ -2022,6 +2022,7 @@ private:
 			{ "bool",   My_Defaults.BooleanType },
 			{ "int",    My_Defaults.IntType     },
 			{ "uint",   My_Defaults.UintType    },
+			{ "intptr", My_Defaults.IntPtrType  },
 			{ "float",  My_Defaults.FloatType   },
 			{ "string", My_Defaults.StringType  },
 		};
@@ -2185,11 +2186,29 @@ private:
 		switch (pTypeSpec->Kind)
 		{
 			case TypeSpecKind::Name:
+			{
 				return pTypeSpec->name.Name.Id;
+			}
 			case TypeSpecKind::Array:
-				return GetTypeName(pTypeSpec->array.Type);
+			{
+				const char* const lpBaseTypename = GetTypeName(pTypeSpec->array.Type);
+				const char* lpShape = nullptr;
+				switch (stbds_arrlenu(pTypeSpec->array.Counts))
+				{
+					case 0: lpShape = "[]"; break;
+					case 1: lpShape = "[]"; break;
+					case 2: lpShape = "[,]"; break;
+					case 3: lpShape = "[,,]"; break;
+					case 4: lpShape = "[,,,]"; break;
+					default: break;
+				}
+				return MyGetCachedStringV("%s%s", lpBaseTypename, lpShape);
+			}
 			case TypeSpecKind::Function:
-				return MY_NOT_IMPLEMENTED(), nullptr;
+			{
+				MY_NOT_IMPLEMENTED();
+				return nullptr;
+			}
 			default: break;
 		}
 		
