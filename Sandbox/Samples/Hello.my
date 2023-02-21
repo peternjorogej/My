@@ -5,6 +5,9 @@ extern function void   WriteLine(string Format, object[] Args,);
 
 using Matrix4x4 = float[4, 4,];
 
+// Registered internally (fields: int Value0, Value2)
+struct MyNativeStruct;
+
 struct Float2
 {
 	var float X;
@@ -39,6 +42,9 @@ function int Main(const string[] Argv)
 	
 	// const Float2 v = new Float2(-6.66); // Error: for now operator new only expects field initializers
 	// PrintFloat2(v);
+	
+	const MyNativeStruct mns = new MyNativeStruct(Value0: 234, Value1: 567);
+	WriteLine("MyNativeStruct{ Value0: %d, Value1: %d }", { mns.Value0, mns.Value1 });
 	
 	return Go();
 }

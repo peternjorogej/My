@@ -168,10 +168,12 @@ inline void MyObjectFieldSetValueAs(MyObject* pObject, MyField* pField, const Tp
 {
 	static_assert(std::is_standard_layout<Tp>::value);
 	
-	const uint32_t kKlassSize = pField->Klass->Attributes & MY_STRUCT_ATTR_POD ? pField->Klass->Size : sizeof(MyObject*);
+	const MyStruct* pFieldKlass = pField->Type->Klass;
+	const uint32_t kKlassSize = pFieldKlass->Attributes & MY_STRUCT_ATTR_POD ? pFieldKlass->Size : sizeof(MyObject*);
 	if (sizeof(Tp) != kKlassSize)
 	{
 		DebugLog::Error("[DEBUG]: Struct sizes mismatched (expected %I64u, got %u)", sizeof(Tp), kKlassSize);
 	}
+
 	MyObjectFieldSetValue(pObject, pField, &Data, kKlassSize);
 }

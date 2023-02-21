@@ -99,7 +99,7 @@ void MyGC::Mark(uint64_t& kAddress) noexcept
             for (size_t k = 0; k < stbds_arrlenu(pObject->Klass->Fields); k++)
             {
                 MyField* const& pField = pObject->Klass->Fields + k;
-                if (MyStructIsReference(pField->Klass))
+                if (MyStructIsReference(pField->Type->Klass))
                 {
                     uint64_t& kData = MyObjectFieldGetValueAs<uint64_t>(pObject, pField);
                     Mark(kData);

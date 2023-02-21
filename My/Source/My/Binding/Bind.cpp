@@ -1030,7 +1030,7 @@ private:
 			DebugLog::Warn("[DEBUG]: NotProperlyImplementedException: Assigning to index expressions");
 
 			MyType* pSequenceType = pLhs->index.Sequence->Type();
-			if (pSequenceType->Kind != 1u)
+			if (pSequenceType->Kind != MY_TYPE_KIND_ARRAY)
 			{
 				m_Diagnostics.ReportTypeCannotBeIndexed(GetLocation(assign.Lhs), pSequenceType);
 				goto Error;
@@ -1056,7 +1056,7 @@ private:
 			}
 			if (pField->Attributes & MY_FIELD_ATTR_CONST)
 			{
-				m_Diagnostics.ReportIllegalAssignment(GetLocation(assign.EqualsToken), fe.Field);
+				m_Diagnostics.ReportIllegalFieldAssignment(GetLocation(assign.EqualsToken), pType->Klass, fe.Field);
 				goto Error;
 			}
 
@@ -1851,9 +1851,7 @@ private:
 			for (size_t k = 0; k < stbds_arrlenu(pType->Klass->Fields); k++)
 			{
 				MyField* pField = pType->Klass->Fields + k;
-				MyType* pFieldType = GetTypeFromStruct(pField->Klass);
-
-				FieldSymbol fs = { pField->Name, pFieldType, nullptr };
+				FieldSymbol fs = { pField->Name, pField->Type, nullptr };
 				stbds_arrpush(pFields, fs);
 			}
 
@@ -1912,7 +1910,7 @@ private:
 			}
 
 			MyStruct* pMemberKlass = GetStructFromType(pMemberType);
-			MyStructAddFieldAutoOffset(pKlass, vds.Identifier.Id, pMemberType, pMemberKlass, kFieldAttribs);
+			MyStructAddField(pKlass, vds.Identifier.Id, pMemberType, kFieldAttribs);
 
 			FieldSymbol fs = { vds.Identifier.Id, pMemberType, nullptr };
 			stbds_arrpush(pFields, fs);
@@ -1928,7 +1926,7 @@ private:
 		{
 			// Empty struct
 			char* const lpName = MyGetCachedString("__padding");
-			MyStructAddFieldAutoOffset(pKlass, lpName, My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_CONST);
+			MyStructAddField(pKlass, lpName, My_Defaults.IntType, MY_FIELD_ATTR_CONST);
 		}
 		MySymbol* pSymbol = MakeSymbol_Struct(Name.Id, pType, pFields, pStruct);
 

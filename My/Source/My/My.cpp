@@ -11,7 +11,6 @@ static MyContext* s_CurrentContext = nullptr;
 
 static MyContext* _My_ContextCreate() noexcept;
 static void       _My_ContextDestroy(MyContext* pContext) noexcept;
-static void       _My_StructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept;
 
 
 MyGuid::MyGuid()
@@ -115,8 +114,8 @@ void MyInitializeStructs(MyContext* pContext)
     ud.ComplexStruct = MyStructCreate(pContext, "Complex", MY_STRUCT_ATTR_POD);
     ud.ComplexType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.ComplexStruct);
     {
-        MyStructAddFieldAutoOffset(ud.ComplexStruct, "Real", ud.FloatType, ud.FloatStruct);
-        MyStructAddFieldAutoOffset(ud.ComplexStruct, "Imag", ud.FloatType, ud.FloatStruct);
+        MyStructAddField(ud.ComplexStruct, "Real", ud.FloatType);
+        MyStructAddField(ud.ComplexStruct, "Imag", ud.FloatType);
     }
     // String
     ud.StringStruct = MyStructCreate(pContext, "String", MY_STRUCT_ATTR_NONE);
@@ -126,14 +125,14 @@ void MyInitializeStructs(MyContext* pContext)
     ud.StringBuilderStruct = MyStructCreate(pContext, "StringBuilder", MY_STRUCT_ATTR_NONE);
     ud.StringBuilderType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.StringBuilderStruct);
     {
-        MyStructAddFieldAutoOffset(ud.StringBuilderStruct, "Value", ud.StringType, ud.StringStruct);
+        MyStructAddField(ud.StringBuilderStruct, "Value", ud.StringType);
     }
     // File
     ud.FileStruct = MyStructCreate(pContext, "File", MY_STRUCT_ATTR_NONE);
     ud.FileType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.FileStruct);
     {
-        MyStructAddFieldAutoOffset(ud.FileStruct, "Handle",   ud.UintType,   ud.UintStruct, MY_FIELD_ATTR_CONST);
-        MyStructAddFieldAutoOffset(ud.FileStruct, "Filepath", ud.StringType, ud.StringStruct);
+        MyStructAddField(ud.FileStruct, "Handle",   ud.UintType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.FileStruct, "Filepath", ud.StringType);
     }
 }
 
@@ -235,29 +234,19 @@ bool MyStructIsReference(MyStruct* pKlass) noexcept
     }
 }
 
-void MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs) noexcept
+void MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, uint32_t kAttribs) noexcept
 {
-    MY_ASSERT(kOffset == pKlass->Size, "Error: Invalid field offset");
-
-    _My_StructAddField(pKlass, lpName, pType, pFieldKlass);
-    
-    MyField& field = stbds_arrlast(pKlass->Fields);
-    field.Offset     = kOffset;
-    field.Attributes = kAttribs;
-    
-    pKlass->Size += pFieldKlass->Size;
-}
-
-void MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs) noexcept
-{
-    _My_StructAddField(pKlass, lpName, pType, pFieldKlass);
-    
-    MyField& field = stbds_arrlast(pKlass->Fields);
+    MyField field = {};
+    field.Name       = MyGetCachedString(lpName);
+    field.Type       = pType;
+    field.Klass      = pKlass;
     field.Offset     = pKlass->Size;
     field.Attributes = kAttribs;
 
-    uint32_t kFieldSize = 0;
-    if (pType->Kind == 1u || !(pFieldKlass->Attributes & MY_STRUCT_ATTR_POD))
+    MyStruct* pFieldKlass = field.Type->Klass;
+
+    uint32_t kFieldSize = 0u;
+    if (pType->Kind == MY_TYPE_KIND_ARRAY || !(pFieldKlass->Attributes & MY_STRUCT_ATTR_POD))
     {
         kFieldSize = sizeof(void*);
     }
@@ -266,6 +255,8 @@ void MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pT
         kFieldSize = pFieldKlass->Size;
     }
     pKlass->Size += kFieldSize;
+
+    stbds_arrpush(pKlass->Fields, field);
 }
 
 MyField* MyStructGetField(MyStruct* pKlass, const char* lpField)
@@ -453,15 +444,6 @@ void _My_ContextDestroy(MyContext* pContext) noexcept
     pContext->CtCache = nullptr;
 
     delete pContext;
-}
-
-void _My_StructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass) noexcept
-{
-    MyField field = {};
-    field.Name   = MyGetCachedString(lpName);
-    field.Type   = pType;
-    field.Klass  = pFieldKlass;
-    stbds_arrpush(pKlass->Fields, field);
 }
 
 

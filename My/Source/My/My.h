@@ -111,7 +111,7 @@ struct MyMethod
 struct MyField
 {
 	char*       Name       = nullptr;
-	MyType*     Type       = nullptr;
+	MyType*     Type       = nullptr; // Type->Klass to get field's struct
 	MyStruct*   Klass      = nullptr; // Parent struct
 	const void* Data       = nullptr;
 	uint32_t    Offset     = 0ul;     // From the beginning of the object
@@ -244,8 +244,7 @@ MyMethod*   MyMethodCreate(
 ) noexcept;
 MyStruct*   MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAttribs) noexcept;
 bool        MyStructIsReference(MyStruct* pKlass) noexcept;
-void        MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kOffset, uint32_t kAttribs = 0ul) noexcept;
-void        MyStructAddFieldAutoOffset(MyStruct* pKlass, const char* lpName, MyType* pType, MyStruct* pFieldKlass, uint32_t kAttribs = 0ul) noexcept;
+void        MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, uint32_t kAttribs = MY_FIELD_ATTR_NONE) noexcept;
 MyField*    MyStructGetField(MyStruct* pKlass, const char* lpField);
 size_t      MyStructFieldCount(const MyStruct* pKlass);
 MyType*     MyTypeCreate(uint8_t kKind, void* pData, uint32_t kFlags = 0ul) noexcept;

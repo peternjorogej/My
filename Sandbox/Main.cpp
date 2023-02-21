@@ -56,9 +56,9 @@ int main(int iArgc, char** ppArgv)
 	}
 
 	// Try to register a type natively
-	MyStruct* pKlass = MyStructCreate(pContext, "MyStruct", MY_STRUCT_ATTR_NONE);
-	MyStructAddFieldAutoOffset(pKlass, "__Dummy0", My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_NONE);
-	MyStructAddFieldAutoOffset(pKlass, "__Dummy1", My_Defaults.IntType, My_Defaults.IntStruct, MY_FIELD_ATTR_NONE);
+	MyStruct* pKlass = MyStructCreate(pContext, "MyNativeStruct", MY_STRUCT_ATTR_NONE);
+	MyStructAddField(pKlass, "Value0", My_Defaults.IntType);
+	MyStructAddField(pKlass, "Value1", My_Defaults.IntType);
 
 	MyAssembly* pAss = Compiler::Build(pContext, "Samples/Hello.my", {}, { pKlass });
 	if (pAss)
@@ -163,16 +163,16 @@ void TestNewAPI(MyContext* pContext) noexcept
 		Console::WriteLine(Console::Color::Green, "Testing type creation & instantiation(T = MyData)");
 
 		MyStruct* pMyDataStruct = MyStructCreate(pContext, "MyData", MY_STRUCT_ATTR_NONE);
-		MyStructAddFieldAutoOffset(pMyDataStruct, "ID", My_Defaults.UintType, My_Defaults.UintStruct);
-		MyStructAddFieldAutoOffset(pMyDataStruct, "Key", My_Defaults.StringType, My_Defaults.StringStruct);
-		MyStructAddFieldAutoOffset(pMyDataStruct, "W", My_Defaults.ComplexType, My_Defaults.ComplexStruct);
-		MyStructAddFieldAutoOffset(pMyDataStruct, "Z", My_Defaults.ComplexType, My_Defaults.ComplexStruct);
+		MyStructAddField(pMyDataStruct, "ID", My_Defaults.UintType);
+		MyStructAddField(pMyDataStruct, "Key", My_Defaults.StringType);
+		MyStructAddField(pMyDataStruct, "W", My_Defaults.ComplexType);
+		MyStructAddField(pMyDataStruct, "Z", My_Defaults.ComplexType);
 		Console::WriteLine("struct ['%s'] MyData (%uB):", pMyDataStruct->Guid.AsString(), pMyDataStruct->Size);
 		{
 			for (size_t k = 0; k < stbds_arrlenu(pMyDataStruct->Fields); k++)
 			{
 				const MyField& field = pMyDataStruct->Fields[k];
-				Console::WriteLine("   - %.2u %s [%s]", field.Offset, field.Name, field.Klass->Name);
+				Console::WriteLine("   - %.2u %s [%s]", field.Offset, field.Name, field.Type->Klass->Name);
 			}
 		}
 
