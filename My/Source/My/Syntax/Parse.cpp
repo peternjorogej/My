@@ -3,7 +3,6 @@
 #include "My/Base/IO.h"
 #include "My/Object.h"
 #include "Stb/stb_ds.h"
-#include "Tools/string_builder.h"
 
 /// Keyword Map
 using KeywordMap = Pair<const char* const, TokenKind>;
@@ -421,7 +420,7 @@ private:
 
 
 		m_Position++; // Skip '"'
-		StringBuilder sb = SbCreate(8);
+		std::string str;
 
 		bool bDone = false;
 		while (!bDone)
@@ -447,7 +446,7 @@ private:
 					}
 					else
 					{
-						SbWriteChar(&sb, e);
+						str.push_back(e);
 					}
 					m_Position++;
 					break;
@@ -460,21 +459,18 @@ private:
 					else
 					{
 						m_Position++;
-						SbWriteChar(&sb, 0);
 						bDone = true;
 					}
 					break;
 				default:
-					SbWriteChar(&sb, Ch);
+					str.push_back(Ch);
 					m_Position++;
 					break;
 			}
 		}
 
 		m_Token.Kind = TokenKind::String;
-		m_Token.Str  = MyStringNew(m_Context, SbGetString(&sb));
-
-		SbDestroy(&sb);
+		m_Token.Str  = MyStringNew(m_Context, str);
 	}
 
 	void ReadNumber() noexcept

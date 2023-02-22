@@ -2,7 +2,6 @@
 #include "My/Base/IO.h"
 #include "My/VM/VM.h"
 #include "My/Utils/Utils.h"
-#include "Tools/string_builder.h"
 
 // Core
 void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept
