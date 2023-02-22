@@ -129,7 +129,10 @@ void MyInitializeStructs(MyContext* pContext)
     ud.StringBuilderStruct = MyStructCreate(pContext, "StringBuilder", MY_STRUCT_ATTR_NONE);
     ud.StringBuilderType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.StringBuilderStruct);
     {
-        MyStructAddField(ud.StringBuilderStruct, "CStrBldrObjAddress", ud.IntPtrType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.StringBuilderStruct, "CString", ud.IntPtrType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.StringBuilderStruct, "Length", ud.UintType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.StringBuilderStruct, "Capacity", ud.UintType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.StringBuilderStruct, "Indent", ud.IntType);
     }
     // File
     ud.FileStruct = MyStructCreate(pContext, "File", MY_STRUCT_ATTR_NONE);

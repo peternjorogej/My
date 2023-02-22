@@ -332,206 +332,136 @@ void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept
 }
 
 // StringBuilder
-static StringBuilder* CStrBldrGet(MyObject* pStrBldr) noexcept
+static void StrBldr_CheckAndResizeBuffer(MyObject* pStrBldr, uint64_t kSize) noexcept
 {
-    MyField* pField = MyObjectGetField(pStrBldr, "CStrBldrObjAddress");
-    StringBuilder* pCStrBldr = MyObjectFieldGetValueAs<StringBuilder*>(pStrBldr, pField);
-    return pCStrBldr;
+    char*& pBuffer = MyObjectFieldGetValueAs<char*>(pStrBldr, MyObjectGetField(pStrBldr, "CString"));
+    uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Capacity"));
+    uint64_t kLength = MyObjectFieldGetValueAs<uint64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Length"));
+
+    const uint64_t iAvailCapacity = kCapacity - kLength;
+    if (iAvailCapacity < kSize)
+    {
+        uint64_t kNewCapacity = kCapacity + (kCapacity / 2ul) + kSize;
+        char* pNewBuffer = (char*)realloc(pBuffer, kNewCapacity);
+        if (pNewBuffer)
+        {
+            pBuffer = pNewBuffer;
+            kCapacity = kNewCapacity;
+            
+            memset(pBuffer + kLength, 0, kCapacity - kLength);
+        }
+    }
 }
 
-static void CStrBldrAppend(StringBuilder* pCStrBldr, MyString* pFormat, MyArray* pArgs, bool bAppend = false, bool bNewLine = false) noexcept
+static void StrBldr_Write(MyObject* pStrBldr, const char* lpText, uint64_t kTextLength, bool bNewLine = false) noexcept
 {
-    if (MyArrayCount(pArgs) == 0ull)
-    {
-        if (bAppend)
-        {
-            SbAppend(pCStrBldr, pFormat->Chars);
-        }
-        else
-        {
-            SbWrite(pCStrBldr, pFormat->Chars);
-        }
-        return;
-    }
+    char* pBuffer = MyObjectFieldGetValueAs<char*>(pStrBldr, MyObjectGetField(pStrBldr, "CString"));
+    uint64_t& kLength = MyObjectFieldGetValueAs<uint64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Length"));
 
-    char* lpBegin = pFormat->Chars;
-    char* lpEnd = pFormat->Chars + pFormat->Length;
-    size_t kIndex = 0ull;
-
-    while (true)
-    {
-        char* pIt = std::find(lpBegin, lpEnd, '%');
-        if (pIt == lpEnd)
-        {
-            SbAppend(pCStrBldr, lpBegin);
-            break;
-        }
-        else
-        {
-            if (pIt[1] != '%')
-            {
-                if (bAppend)
-                {
-                    SbAppendV(pCStrBldr, "%.*s", pIt - lpBegin, lpBegin);
-                }
-                else
-                {
-                    SbWriteV(pCStrBldr, "%.*s", pIt - lpBegin, lpBegin);
-                }
-            }
-
-            switch (pIt[1])
-            {
-                case '%':
-                    SbAppendChar(pCStrBldr, '%');
-                    break;
-                case 'b':
-                    SbAppend(pCStrBldr, MyArrayGet(pArgs, uint64_t, kIndex++) ? "true" : "false");
-                    break;
-                case 'd':
-                case 'i':
-                    SbAppendV(pCStrBldr, "%I64d", MyArrayGet(pArgs, int64_t, kIndex++));
-                    break;
-                case 'f':
-                case 'g':
-                    SbAppendV(pCStrBldr, "%1.9g", MyArrayGet(pArgs, double, kIndex++));
-                    break;
-                case 'u':
-                    SbAppendV(pCStrBldr, "%I64u", MyArrayGet(pArgs, uint64_t, kIndex++));
-                    break;
-                case 's':
-                {
-                    MyString* const& pString = MyArrayGet(pArgs, MyString*, kIndex++);
-                    SbAppend(pCStrBldr, pString->Chars);
-                    break;
-                }
-                case 'p':
-                {
-                    void* const& pObject = MyArrayGet(pArgs, void*, kIndex++);
-                    SbAppendV(pCStrBldr, "0x%p", pObject);
-                    break;
-                }
-                case 'v':
-                {
-                    MyArray* const& pArray = MyArrayGet(pArgs, MyArray*, kIndex++);
-                    SbAppend(pCStrBldr, "{ ");
-                    for (size_t k = 0; k < pArray->Count; k++)
-                    {
-                        const char* const lpSeparator = k == pArray->Count - 1 ? "" : ", ";
-                        SbAppendV(pCStrBldr, "%1.9g%s", MyArrayGet(pArray, double, k), lpSeparator);
-                    }
-                    SbAppend(pCStrBldr, " }");
-                    break;
-                }
-                default: break;
-            }
-
-            pIt += 2;
-            lpBegin = pIt;
-        }
-    }
+    memcpy(pBuffer + kLength, lpText, kTextLength);
+    kLength += kTextLength;
 
     if (bNewLine)
     {
-        SbAppendChar(pCStrBldr, '\n');
+        pBuffer[kLength++] = '\n';
+    }
+}
+
+static void StrBldr_Indent(MyObject* pStrBldr) noexcept
+{
+    static constexpr int s_IndentSize = 4;
+    static constexpr const char* s_Space = "                                                                                                                                               ";
+
+    int64_t iIndent = MyObjectFieldGetValueAs<int64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Indent"));
+    int64_t iFullIndentLength = iIndent * s_IndentSize;
+
+    StrBldr_CheckAndResizeBuffer(pStrBldr, iFullIndentLength);
+    if (iFullIndentLength > 0ll)
+    {
+        StrBldr_Write(pStrBldr, s_Space, iFullIndentLength);
     }
 }
 
 void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM)
 {
-    uint64_t kInitialCapacity = pVM->Stack.PopU64();
-    MyObject* pSb = pVM->Stack.PopObject();
+    MyObject* pStrBldr = pVM->Stack.PopObject();
 
-    MY_ASSERT(pSb->Klass == My_Defaults.StringBuilderStruct, "Not a StringBuilder");
-
-    StringBuilder* pCStrBldr = new StringBuilder{ SbCreate((int)kInitialCapacity) };
+    uint64_t& kInitialCapacity = MyObjectFieldGetValueAs<uint64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Capacity"));
+    if (kInitialCapacity == 0ull)
+    {
+        kInitialCapacity = 64ull;
+    }
     
-    MyField* pField = MyObjectGetField(pSb, "CStrBldrObjAddress");
-    MyObjectFieldSetValueAs<StringBuilder*>(pSb, pField, pCStrBldr);
-}
-
-void _My_Builtin_StringBuilder_Indent(MyContext* pContext, MyVM* pVM)
-{
-    MyObject* pSb = pVM->Stack.PopObject();
-
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    pCStrBldr->Indent++;
-}
-
-void _My_Builtin_StringBuilder_Dedent(MyContext* pContext, MyVM* pVM)
-{
-    MyObject* pSb = pVM->Stack.PopObject();
-
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    pCStrBldr->Indent--;
+    if (char* pBuffer = (char*)malloc(kInitialCapacity); pBuffer)
+    {
+        MyObjectFieldSetValueAs<char*>(pStrBldr, MyObjectGetField(pStrBldr, "CString"), pBuffer);
+        MyObjectFieldSetValueAs<uint64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Length"), 0ull);
+        MyObjectFieldSetValueAs<int64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Indent"), 0ll);
+    }
 }
 
 void _My_Builtin_StringBuilder_Append(MyContext* pContext, MyVM* pVM)
 {
     MyString* pText = pVM->Stack.PopString();
-    MyObject* pSb = pVM->Stack.PopObject();
+    MyObject* pStrBldr = pVM->Stack.PopObject();
 
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    SbAppend(pCStrBldr, pText->Chars);
+    if (pText->Length > 0ul)
+    {
+        StrBldr_CheckAndResizeBuffer(pStrBldr, pText->Length);
+        StrBldr_Write(pStrBldr, pText->Chars, pText->Length);
+    }
 }
 
 void _My_Builtin_StringBuilder_AppendV(MyContext* pContext, MyVM* pVM)
 {
-    MyArray* pArgs = pVM->Stack.PopArray();
-    MyString* pFormat = pVM->Stack.PopString();
-    MyObject* pSb = pVM->Stack.PopObject();
-
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    CStrBldrAppend(pCStrBldr, pFormat, pArgs, true);
+    MY_NOT_IMPLEMENTED();
 }
 
 void _My_Builtin_StringBuilder_Write(MyContext* pContext, MyVM* pVM)
 {
     MyString* pText = pVM->Stack.PopString();
-    MyObject* pSb = pVM->Stack.PopObject();
+    MyObject* pStrBldr = pVM->Stack.PopObject();
 
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    SbWrite(pCStrBldr, pText->Chars);
+    if (pText->Length > 0ul)
+    {
+        StrBldr_Indent(pStrBldr);
+        StrBldr_CheckAndResizeBuffer(pStrBldr, pText->Length);
+        StrBldr_Write(pStrBldr, pText->Chars, pText->Length);
+    }
 }
 
 void _My_Builtin_StringBuilder_WriteV(MyContext* pContext, MyVM* pVM)
 {
-    MyArray* pArgs = pVM->Stack.PopArray();
-    MyString* pFormat = pVM->Stack.PopString();
-    MyObject* pSb = pVM->Stack.PopObject();
-
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    CStrBldrAppend(pCStrBldr, pFormat, pArgs);
+    MY_NOT_IMPLEMENTED();
 }
 
 void _My_Builtin_StringBuilder_WriteLine(MyContext* pContext, MyVM* pVM)
 {
-    MyString* pText = pVM->Stack.PopString();
-    MyObject* const& pSb = pVM->Stack.PopObject();
+    MyString* pText    = pVM->Stack.PopString();
+    MyObject* pStrBldr = pVM->Stack.PopObject();
 
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    SbWriteLine(pCStrBldr, pText->Chars);
+    if (pText->Length > 0ul)
+    {
+        StrBldr_Indent(pStrBldr);
+        StrBldr_CheckAndResizeBuffer(pStrBldr, pText->Length + 1ul); // +1 for the new line char
+        StrBldr_Write(pStrBldr, pText->Chars, pText->Length, true);
+    }
 }
 
 void _My_Builtin_StringBuilder_WriteLineV(MyContext* pContext, MyVM* pVM)
 {
-    MyArray* pArgs = pVM->Stack.PopArray();
-    MyString* pFormat = pVM->Stack.PopString();
-    MyObject* pSb = pVM->Stack.PopObject();
-
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    CStrBldrAppend(pCStrBldr, pFormat, pArgs, false, true);
+    MY_NOT_IMPLEMENTED();
 }
 
 void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM)
 {
-    MyObject* pSb = pVM->Stack.PopObject();
+    MyObject* pStrBldr = pVM->Stack.PopObject();
 
-    StringBuilder* pCStrBldr = CStrBldrGet(pSb);
-    MyString* pString = MyStringNew(pContext, SbGetString(pCStrBldr));
+    char*& pCString = MyObjectFieldGetValueAs<char*>(pStrBldr, MyObjectGetField(pStrBldr, "CString"));
+    MyString* pString = MyStringNew(pContext, pCString);
     
-    SbDestroy(pCStrBldr);
-    MY_SAFEDELETE(pCStrBldr);
+    free(pCString);
+    pCString = nullptr;
 
     pVM->Stack.Push(pString);
 }

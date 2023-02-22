@@ -3,11 +3,8 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function void   SbInit(StringBuilder sb, uint InitCapacity);
-extern function void   SbIndent(StringBuilder sb);
-extern function void   SbDedent(StringBuilder sb);
+extern function void   SbInit(StringBuilder sb);
 extern function void   SbWriteLine(StringBuilder sb, string Text);
-extern function void   SbWriteLineV(StringBuilder sb, string Format, object[] Args);
 extern function string SbToString(StringBuilder sb);
 
 using Matrix4x4 = float[4, 4,];
@@ -22,23 +19,24 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const StringBuilder sb = new StringBuilder(CStrBldrObjAddress: null);
-	SbInit(sb, 64u);
-	WriteLine("StringBuilder{ %p }", { sb.CStrBldrObjAddress });
+	const StringBuilder sb = new StringBuilder(CString: null, Capacity: 32u);
+	SbInit(sb);
+	WriteLine("StringBuilder{ %p, %u, %u, %u }", { (object)sb.CString, sb.Capacity, sb.Length, sb.Indent });
 	
 	SbWriteLine(sb, "Group(Scene)");
-		SbIndent(sb);
+		sb.Indent = sb.Indent + 1;
 		SbWriteLine(sb, "Group(Entity)");
-			SbIndent(sb);
-			SbWriteLineV(sb, "GUID = %u", { 1234567890u });
+			sb.Indent = sb.Indent + 1;
+			SbWriteLine(sb, "GUID = 1234567890");
 			SbWriteLine(sb, "Name = \"Floor\"");
-			SbWriteLineV(sb, "Cold = %b", { false });
-			SbWriteLineV(sb, "Year = %d", { 1987 });
-			SbDedent(sb);
+			SbWriteLine(sb, "Cold = false");
+			SbWriteLine(sb, "Year = 1987");
+			sb.Indent = sb.Indent - 1;
 		SbWriteLine(sb, "EndGroup");
-		SbDedent(sb);
+		sb.Indent = sb.Indent - 1;
 	SbWriteLine(sb, "EndGroup");
 	
+	WriteLine("StringBuilder{ %p, %u, %u, %u }", { (object)sb.CString, sb.Capacity, sb.Length, sb.Indent });
 	const string text = SbToString(sb); // Gets the string and then clears the internal string builder
 	Print(text);
 	
