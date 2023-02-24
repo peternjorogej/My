@@ -3,9 +3,8 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function void   SbInit(StringBuilder sb);
-extern function void   SbWriteLine(StringBuilder sb, string Text);
-extern function string SbToString(StringBuilder sb);
+extern function string   __strstr(string Text, uint kStart, uint kLength);
+extern function string[] __strsplit(string Text, string Separator);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -19,26 +18,11 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const StringBuilder sb = new StringBuilder(CString: null, Capacity: 32u);
-	SbInit(sb);
-	WriteLine("StringBuilder{ %p, %u, %u, %u }", { (object)sb.CString, sb.Capacity, sb.Length, sb.Indent });
+	const string[] ss = __strsplit("Hello, *World *from *My", " *");
+	WriteLine("Splits{ '%s', '%s', '%s', '%s' }", ss); // ('Hello,', '*World', '*from', '*My')
 	
-	SbWriteLine(sb, "Group(Scene)");
-		sb.Indent = sb.Indent + 1;
-		SbWriteLine(sb, "Group(Entity)");
-			sb.Indent = sb.Indent + 1;
-			SbWriteLine(sb, "GUID = 1234567890");
-			SbWriteLine(sb, "Name = \"Floor\"");
-			SbWriteLine(sb, "Cold = false");
-			SbWriteLine(sb, "Year = 1987");
-			sb.Indent = sb.Indent - 1;
-		SbWriteLine(sb, "EndGroup");
-		sb.Indent = sb.Indent - 1;
-	SbWriteLine(sb, "EndGroup");
-	
-	WriteLine("StringBuilder{ %p, %u, %u, %u }", { (object)sb.CString, sb.Capacity, sb.Length, sb.Indent });
-	const string text = SbToString(sb); // Gets the string and then clears the internal string builder
-	Print(text);
+	const string str = __strstr("Hello, *World *from *My", 8, 5);
+	Print(str); // World
 	
 	return Go();
 }

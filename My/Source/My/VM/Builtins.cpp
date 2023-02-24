@@ -2,6 +2,7 @@
 #include "My/Base/IO.h"
 #include "My/VM/VM.h"
 #include "My/Utils/Utils.h"
+#include "Stb/stb_ds.h"
 
 // Core
 void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept
@@ -312,7 +313,7 @@ void _My_Builtin_Cbrt(MyContext* pContext, MyVM* pVM) noexcept
 }
 
 // String
-void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_String_Concat(MyContext* pContext, MyVM* pVM) noexcept
 {
     MyString* const& pRhs = pVM->Stack.PopString();
     MyString* const& pLhs = pVM->Stack.PopString();
@@ -323,11 +324,82 @@ void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(pString);
 }
 
-void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_String_Compare(MyContext* pContext, MyVM* pVM) noexcept
 {
     MyString* const& pRhs = pVM->Stack.PopString();
     MyString* const& pLhs = pVM->Stack.PopString();
     pVM->Stack.Push(pLhs == pRhs);
+}
+
+void _My_Builtin_String_Find(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pSubstr = pVM->Stack.PopString();
+    MyString* const& pString = pVM->Stack.PopString();
+
+    const std::string_view sv = std::string_view(pString->Chars);
+
+    pVM->Stack.Push(sv.find(pSubstr->Chars, 0ull));
+}
+
+void _My_Builtin_String_Substr(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kLength = pVM->Stack.PopU64();
+    uint64_t kStart  = pVM->Stack.PopU64();
+    MyString* const& pString = pVM->Stack.PopString();
+
+    if (kStart > pString->Length)
+    {
+        kStart = 0ull;
+    }
+    if (kLength == 0ul || kLength > pString->Length)
+    {
+        kLength = pString->Length;
+    }
+
+    const char* lpBegin = pString->Chars + kStart;
+    MyString* pSubstr = MyStringNew(pContext, lpBegin, kLength);
+
+    pVM->Stack.Push(pSubstr);
+}
+
+void _My_Builtin_String_Split(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pSubstr = pVM->Stack.PopString();
+    MyString* const& pString = pVM->Stack.PopString();
+
+    const std::string_view sv = std::string_view(pString->Chars);
+
+    MyString** ppStrings = nullptr;
+
+    uint64_t kNextSubstrStart = 0ull, k = 0ull;
+    while (true)
+    {
+        if (k = sv.find(pSubstr->Chars, k); k != std::string::npos)
+        {
+            const uint64_t kLength = k - kNextSubstrStart;
+            MyString* const pSplit_k = MyStringNew(pContext, pString->Chars + kNextSubstrStart, kLength);
+            stbds_arrpush(ppStrings, pSplit_k);
+
+            kNextSubstrStart += kLength + pSubstr->Length;
+            k++;
+        }
+        else
+        {
+            MyString* const pSplit_k = MyStringNew(pContext, pString->Chars + kNextSubstrStart);
+            stbds_arrpush(ppStrings, pSplit_k);
+
+            break;
+        }
+    }
+
+
+    const uint64_t kCount = stbds_arrlenu(ppStrings);
+    MyArray* pSplits = MyArrayNew(pContext, My_Defaults.StringStruct, kCount, kCount);
+    memcpy(pSplits->Data, ppStrings, kCount*sizeof(MyString*));
+
+    stbds_arrfree(ppStrings);
+
+    pVM->Stack.Push(pSplits);
 }
 
 // StringBuilder

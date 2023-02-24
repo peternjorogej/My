@@ -44,8 +44,11 @@ void _My_Builtin_Sqrt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Cbrt(MyContext* pContext, MyVM* pVM) noexcept;
 
 // String
-void _My_Builtin_Strcat(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Strcmp(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_Concat(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_Compare(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_Find(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_Substr(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_Split(MyContext* pContext, MyVM* pVM) noexcept;
 
 // StringBuilder
 void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM);
