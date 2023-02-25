@@ -1797,6 +1797,14 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("SbWriteLine",  _My_Builtin_StringBuilder_WriteLine,  2);
     RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV, 3);
     RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString,   1);
+    // File
+    RegisterBuiltin("Open",   _My_Builtin_File_Open,   2);
+    RegisterBuiltin("Close",  _My_Builtin_File_Close,  1);
+    RegisterBuiltin("IsOpen", _My_Builtin_File_IsOpen, 1);
+    RegisterBuiltin("Read",   _My_Builtin_File_Read,   1);
+    RegisterBuiltin("ReadN",  _My_Builtin_File_ReadN,  2);
+    RegisterBuiltin("Write",  _My_Builtin_File_Write,  1);
+    RegisterBuiltin("WriteN", _My_Builtin_File_WriteN, 2);
 }
 #pragma endregion
 

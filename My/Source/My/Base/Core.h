@@ -40,7 +40,8 @@
 
 #define MY_NOT_IMPLEMENTED() MY_ASSERT(false, "NotImplemented")
 
-#define MY_SAFEDELETE(ptr) delete ptr, ptr = nullptr
+#define MY_SAFEDELETE(ptr)  delete ptr, ptr = nullptr
+#define MY_SAFEDELETEA(arr) delete[] arr, arr = nullptr
 
 #define MY_VERSION "0.0.1"
 

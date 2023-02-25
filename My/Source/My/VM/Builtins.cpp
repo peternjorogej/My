@@ -4,6 +4,8 @@
 #include "My/Utils/Utils.h"
 #include "Stb/stb_ds.h"
 
+#include <filesystem>
+
 // Core
 void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept
 {
@@ -598,6 +600,128 @@ void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM)
     pCString = nullptr;
 
     pVM->Stack.Push(pString);
+}
+
+// File
+void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM)
+{
+    static const auto ValidateOpenMode = [&pContext](MyString* pOpenMode) -> const MyString*
+    {
+        static MyString* const s_DefaultOpenMode = MyStringNew(pContext, "rt");
+
+        const char* const lpOpenMode = pOpenMode->Chars;
+
+        if (pOpenMode->Length != 2ul)
+        {
+            return s_DefaultOpenMode;
+        }
+        if (lpOpenMode[0] != 'r' && lpOpenMode[0] != 'w' && lpOpenMode[0] != 'a')
+        {
+            return s_DefaultOpenMode;
+        }
+        if (lpOpenMode[1] != 't' && lpOpenMode[1] != 'b')
+        {
+            return s_DefaultOpenMode;
+        }
+
+        return nullptr;
+    };
+
+    MyString* const& pOpenMode = pVM->Stack.PopString();
+    MyString* const& pFilepath = pVM->Stack.PopString();
+
+    MyObject* pFile = MyObjectNew(pContext, My_Defaults.FileStruct);
+    MyObjectFieldSetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "Filepath"), pFilepath);
+    MyObjectFieldSetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"), pOpenMode);
+    MyObjectFieldSetValueAs<int64_t>(pFile, MyObjectGetField(pFile, "FileSize"), -1LL);
+
+    if (std::filesystem::exists(pFilepath->Chars))
+    {
+        if (const MyString* pNewOpenMode = ValidateOpenMode(pOpenMode); pNewOpenMode)
+        {
+            MyObjectFieldSetValueAs<const MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"), pNewOpenMode);
+        }
+
+        if (FILE* pCFile = fopen(pFilepath->Chars, pOpenMode->Chars); pCFile)
+        {
+            fseek(pCFile, 0, SEEK_END);
+            const int64_t iFileSize = ftell(pCFile);
+            fseek(pCFile, 0, SEEK_SET);
+
+            MyObjectFieldSetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"), pCFile);
+            MyObjectFieldSetValueAs<int64_t>(pFile, MyObjectGetField(pFile, "FileSize"), iFileSize);
+        }
+    }
+
+    pVM->Stack.Push(pFile);
+}
+
+void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pFile = pVM->Stack.PopObject();
+    FILE*& pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    if (pCFile)
+    {
+        fclose(pCFile);
+        pCFile = nullptr;
+    }
+}
+
+void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pFile = pVM->Stack.PopObject();
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    pVM->Stack.Push(pCFile != nullptr);
+}
+
+void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pFile = pVM->Stack.PopObject();
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+
+    fseek(pCFile, 0, SEEK_SET);
+    fseek(pCFile, 0, SEEK_END);
+    const size_t kLength = ftell(pCFile);
+    fseek(pCFile, 0, SEEK_SET);
+
+    MyString* pContents = nullptr;
+
+    char* pBuffer = new char[kLength + 1]; // char* represents both strings and raw bytes
+    if (pBuffer)
+    {
+        size_t kBytesWritten = fread(pBuffer, sizeof(char), kLength, pCFile);
+        if (kBytesWritten > kLength)
+        {
+            kBytesWritten = kLength;
+        };
+        pBuffer[kBytesWritten] = 0;
+
+        // Must be opened in text mode
+        //const MyString* const& pOpenMode = MyObjectFieldGetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"))
+        pContents = MyStringNew(pContext, pBuffer, kLength);
+        MY_SAFEDELETEA(pBuffer);
+    }
+    else
+    {
+        pContents = MyStringNew(pContext, "", kLength);
+    }
+
+    pVM->Stack.Push(pContents);
+}
+
+void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM)
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM)
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM)
+{
+    MY_NOT_IMPLEMENTED();
 }
 
 int64_t my_pow(int64_t base, int64_t exponent) noexcept

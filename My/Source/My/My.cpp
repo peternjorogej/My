@@ -138,8 +138,10 @@ void MyInitializeStructs(MyContext* pContext)
     ud.FileStruct = MyStructCreate(pContext, "File", MY_STRUCT_ATTR_NONE);
     ud.FileType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.FileStruct);
     {
-        MyStructAddField(ud.FileStruct, "Handle",   ud.UintType, MY_FIELD_ATTR_CONST);
-        MyStructAddField(ud.FileStruct, "Filepath", ud.StringType);
+        MyStructAddField(ud.FileStruct, "CFile",   ud.IntPtrType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.FileStruct, "Filepath", ud.StringType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.FileStruct, "OpenMode", ud.StringType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.FileStruct, "FileSize", ud.IntType, MY_FIELD_ATTR_CONST);
     }
 }
 

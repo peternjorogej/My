@@ -64,6 +64,15 @@ void _My_Builtin_StringBuilder_WriteLine(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_WriteLineV(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM);
 
+// File
+void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM);
+
 
 #if 0
 void _My_Builtin_Strcat(InternalCallbackContext* pCallbackContext) noexcept;

@@ -3,12 +3,13 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function string   __strstr(string Text, uint kStart, uint kLength);
-extern function string[] __strsplit(string Text, string Separator);
-extern function bool     __strstartsw(string Text, string Prefix);
-extern function bool     __strendsw(string Text, string Suffix);
-extern function string   __strtoupper(string Text);
-extern function string   __strtolower(string Text);
+extern function File   Open(string Path, string Mode);
+extern function void   Close(File file);
+extern function bool   IsOpen(File file);
+extern function string Read(File file);
+extern function string ReadN(File file, uint kLength);
+extern function void   Write(File file);
+extern function void   WriteN(File file, uint kLength);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -22,17 +23,14 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const string[] ss = __strsplit("Hello, *World *from *My", " *");
-	WriteLine("Splits{ '%s', '%s', '%s', '%s' }", ss); // ('Hello,', '*World', '*from', '*My')
-	
-	const string str = __strstr("Hello, *World *from *My", 8, 5);
-	Print(str); // World
-	
-	const string text = "HeLlO, wOrLd FrOm My";
-	Print(string(__strstartsw(text, "HeLlO")));
-	Print(string(__strendsw(text, "My")));
-	Print(__strtoupper(text));
-	Print(__strtolower(text));
+	const File f = Open("Samples/Basic.my", "rt");
+	if (IsOpen(f))
+	{
+		const string content = Read(f);
+		Print(content);
+
+		Close(f);
+	}
 	
 	return Go();
 }
