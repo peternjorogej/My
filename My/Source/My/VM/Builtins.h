@@ -49,6 +49,10 @@ void _My_Builtin_String_Compare(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_Find(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_Substr(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_Split(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_StartsWith(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_EndsWith(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_ToUpper(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_ToLower(MyContext* pContext, MyVM* pVM) noexcept;
 
 // StringBuilder
 void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM);

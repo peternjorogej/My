@@ -402,6 +402,69 @@ void _My_Builtin_String_Split(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(pSplits);
 }
 
+void _My_Builtin_String_StartsWith(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pPrefix = pVM->Stack.PopString();
+    MyString* const& pString = pVM->Stack.PopString();
+
+    if (pPrefix->Length > pString->Length)
+    {
+        pVM->Stack.Push(false);
+    }
+    else
+    {
+        const bool bStartsWithX = strncmp(pString->Chars, pPrefix->Chars, pPrefix->Length) == 0;
+        pVM->Stack.Push(bStartsWithX);
+    }
+}
+
+void _My_Builtin_String_EndsWith(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pSuffix = pVM->Stack.PopString();
+    MyString* const& pString = pVM->Stack.PopString();
+
+    if (pSuffix->Length > pString->Length)
+    {
+        pVM->Stack.Push(false);
+    }
+    else
+    {
+        const uint64_t kOffset = pString->Length - pSuffix->Length;
+        const bool bEndsWithX = strncmp(pString->Chars + kOffset, pSuffix->Chars, pSuffix->Length) == 0;
+        pVM->Stack.Push(bEndsWithX);
+    }
+}
+
+void _My_Builtin_String_ToUpper(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pString = pVM->Stack.PopString();
+
+    char* lpUpperCaseString = _strdup(pString->Chars);
+    for (size_t k = 0; k < pString->Length; k++)
+    {
+        lpUpperCaseString[k] = toupper(lpUpperCaseString[k]);
+    }
+
+    MyString* pUpper = MyStringNew(pContext, lpUpperCaseString);
+    free(lpUpperCaseString), lpUpperCaseString = nullptr;
+    pVM->Stack.Push(pUpper);
+}
+
+void _My_Builtin_String_ToLower(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pString = pVM->Stack.PopString();
+
+    char* lpLowerCaseString = _strdup(pString->Chars);
+    for (size_t k = 0; k < pString->Length; k++)
+    {
+        lpLowerCaseString[k] = tolower(lpLowerCaseString[k]);
+    }
+
+    MyString* pLower = MyStringNew(pContext, lpLowerCaseString);
+    free(lpLowerCaseString), lpLowerCaseString = nullptr;
+    pVM->Stack.Push(pLower);
+}
+
 // StringBuilder
 static void StrBldr_CheckAndResizeBuffer(MyObject* pStrBldr, uint64_t kSize) noexcept
 {

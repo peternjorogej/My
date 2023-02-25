@@ -5,6 +5,10 @@ extern function void   WriteLine(string Format, object[] Args,);
 
 extern function string   __strstr(string Text, uint kStart, uint kLength);
 extern function string[] __strsplit(string Text, string Separator);
+extern function bool     __strstartsw(string Text, string Prefix);
+extern function bool     __strendsw(string Text, string Suffix);
+extern function string   __strtoupper(string Text);
+extern function string   __strtolower(string Text);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -23,6 +27,12 @@ function int Main(const string[] Argv)
 	
 	const string str = __strstr("Hello, *World *from *My", 8, 5);
 	Print(str); // World
+	
+	const string text = "HeLlO, wOrLd FrOm My";
+	Print(string(__strstartsw(text, "HeLlO")));
+	Print(string(__strendsw(text, "My")));
+	Print(__strtoupper(text));
+	Print(__strtolower(text));
 	
 	return Go();
 }

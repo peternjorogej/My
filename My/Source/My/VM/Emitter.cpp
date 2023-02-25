@@ -1779,11 +1779,15 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Sqrt",  _My_Builtin_Sqrt,  1);
     RegisterBuiltin("Cbrt",  _My_Builtin_Cbrt,  1);
     // String
-    RegisterBuiltin("__strcat",   _My_Builtin_String_Concat,  2);
-    RegisterBuiltin("__strcmp",   _My_Builtin_String_Compare, 2);
-    RegisterBuiltin("__strfind",  _My_Builtin_String_Find,    3);
-    RegisterBuiltin("__strstr",   _My_Builtin_String_Substr,  2);
-    RegisterBuiltin("__strsplit", _My_Builtin_String_Split,   2);
+    RegisterBuiltin("__strcat",     _My_Builtin_String_Concat,     2);
+    RegisterBuiltin("__strcmp",     _My_Builtin_String_Compare,    2);
+    RegisterBuiltin("__strfind",    _My_Builtin_String_Find,       3);
+    RegisterBuiltin("__strstr",     _My_Builtin_String_Substr,     2);
+    RegisterBuiltin("__strsplit",   _My_Builtin_String_Split,      2);
+    RegisterBuiltin("__strstartsw", _My_Builtin_String_StartsWith, 2);
+    RegisterBuiltin("__strendsw",   _My_Builtin_String_EndsWith,   2);
+    RegisterBuiltin("__strtoupper", _My_Builtin_String_ToUpper,    2);
+    RegisterBuiltin("__strtolower", _My_Builtin_String_ToLower,    2);
     // StringBuilder
     RegisterBuiltin("SbInit",       _My_Builtin_StringBuilder_Init,       1);
     RegisterBuiltin("SbAppend",     _My_Builtin_StringBuilder_Append,     2);
