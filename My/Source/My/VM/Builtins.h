@@ -65,13 +65,15 @@ void _My_Builtin_StringBuilder_WriteLineV(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM);
 
 // File
-void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FOpen(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FClose(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FIsOpen(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FRead(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FReadN(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FWrite(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FWriteN(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FWriteBytes(MyContext* pContext, MyVM* pVM);
+void _My_Builtin_File_FWriteBytesN(MyContext* pContext, MyVM* pVM);
 
 
 #if 0

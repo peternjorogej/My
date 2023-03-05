@@ -3,13 +3,13 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function File   Open(string Path, string Mode);
-extern function void   Close(File file);
-extern function bool   IsOpen(File file);
-extern function string Read(File file);
-extern function string ReadN(File file, uint kLength);
-extern function void   Write(File file);
-extern function void   WriteN(File file, uint kLength);
+extern function File   FOpen(string Path, string Mode);
+extern function void   FClose(File file);
+extern function bool   FIsOpen(File file);
+extern function string FRead(File file);
+extern function string FReadN(File file, uint kLength);
+extern function void   FWrite(File file, string Content);
+extern function void   FWriteN(File file, string Content, uint kLength);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -18,20 +18,43 @@ function static int Go() nogc
 	return 0;
 }
 
+function static File OpenFile(string path, string mode)
+{
+	const File f = FOpen(path, mode);
+	if (FIsOpen(f))
+	{
+		Print(f.Filepath);
+		Print(f.OpenMode);
+		Print(string(f.FileSize));
+		
+		return f;
+	}
+	return (File)null;
+}
+
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const File f = Open("Samples/Basic.my", "rt");
-	if (IsOpen(f))
+	const File f = OpenFile("Samples/Script.my", "rt");
+	if (object(f) != null)
 	{
-		const string content = Read(f);
+		const string content = FRead(f);
 		Print(content);
-
-		Close(f);
+		
+		const File g = OpenFile("Samples/Script.txt", "wt");
+		if (object(g) != null)
+		{
+			// Doesn't work as expected
+			// either FWrite() or FClose()
+			FWrite(g, content);
+			FClose(g);
+		}
+		
+		FClose(f);
 	}
-	
+
 	return Go();
 }
 

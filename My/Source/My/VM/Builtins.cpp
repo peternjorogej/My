@@ -603,7 +603,7 @@ void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM)
 }
 
 // File
-void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FOpen(MyContext* pContext, MyVM* pVM)
 {
     static const auto ValidateOpenMode = [&pContext](MyString* pOpenMode) -> const MyString*
     {
@@ -627,39 +627,62 @@ void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM)
         return nullptr;
     };
 
-    MyString* const& pOpenMode = pVM->Stack.PopString();
-    MyString* const& pFilepath = pVM->Stack.PopString();
+    MyString* pOpenMode = pVM->Stack.PopString();
+    MyString* pFilepath = pVM->Stack.PopString();
+
+    const MyString* pValidOpenMode = ValidateOpenMode(pOpenMode);
+    if (pValidOpenMode)
+    {
+        pOpenMode = (MyString*)pValidOpenMode;
+    }
+    const char* lpOpenMode = pOpenMode->Chars;
+    const bool bReadMode = lpOpenMode[0] == 'r' || lpOpenMode[0] == 'a';
 
     MyObject* pFile = MyObjectNew(pContext, My_Defaults.FileStruct);
     MyObjectFieldSetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "Filepath"), pFilepath);
-    MyObjectFieldSetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"), pOpenMode);
+    if (const MyString* pNewOpenMode = ValidateOpenMode(pOpenMode); pNewOpenMode)
+    {
+        lpOpenMode = pNewOpenMode->Chars;
+        MyObjectFieldSetValueAs<const MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"), pNewOpenMode);
+    }
+    else
+    {
+        lpOpenMode = pOpenMode->Chars;
+        MyObjectFieldSetValueAs<const MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"), pOpenMode);
+    }
     MyObjectFieldSetValueAs<int64_t>(pFile, MyObjectGetField(pFile, "FileSize"), -1LL);
 
-    if (std::filesystem::exists(pFilepath->Chars))
+    if (bReadMode && !std::filesystem::exists(pFilepath->Chars))
     {
-        if (const MyString* pNewOpenMode = ValidateOpenMode(pOpenMode); pNewOpenMode)
-        {
-            MyObjectFieldSetValueAs<const MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"), pNewOpenMode);
-        }
+        // Read
+        pVM->Stack.Push(pFile);
+        return;
+    }
 
-        if (FILE* pCFile = fopen(pFilepath->Chars, pOpenMode->Chars); pCFile)
+    if (FILE* pCFile = fopen(pFilepath->Chars, pOpenMode->Chars); pCFile)
+    {
+        int64_t iFileSize = -1LL;
+
+        if (bReadMode)
         {
             fseek(pCFile, 0, SEEK_END);
-            const int64_t iFileSize = ftell(pCFile);
+            iFileSize = ftell(pCFile);
             fseek(pCFile, 0, SEEK_SET);
-
-            MyObjectFieldSetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"), pCFile);
-            MyObjectFieldSetValueAs<int64_t>(pFile, MyObjectGetField(pFile, "FileSize"), iFileSize);
         }
+
+        MyObjectFieldSetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"), pCFile);
+        MyObjectFieldSetValueAs<int64_t>(pFile, MyObjectGetField(pFile, "FileSize"), iFileSize);
     }
 
     pVM->Stack.Push(pFile);
 }
 
-void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FClose(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
     FILE*& pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    // TODO: Doesn't work. FWrite works well, but after closing
+    // the file, some extra bytes are added to it.
     if (pCFile)
     {
         fclose(pCFile);
@@ -667,14 +690,14 @@ void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM)
     }
 }
 
-void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FIsOpen(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
     FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
     pVM->Stack.Push(pCFile != nullptr);
 }
 
-void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FRead(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
     FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
@@ -709,17 +732,31 @@ void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM)
     pVM->Stack.Push(pContents);
 }
 
-void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FReadN(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FWrite(MyContext* pContext, MyVM* pVM)
+{
+    MyString* const& pStr = pVM->Stack.PopString();
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    fwrite(pStr->Chars, sizeof(char), pStr->Length, pCFile);
+}
+
+void _My_Builtin_File_FWriteN(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_FWriteBytes(MyContext* pContext, MyVM* pVM)
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_File_FWriteBytesN(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }

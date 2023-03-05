@@ -750,7 +750,7 @@ int64_t MyVM::Execute(bool& bRunning)
             {
                 // array type casts
                 MyArray* const& pArray = Stack.Top<MyArray*>();
-                if (pArray->Object.Klass != Assembly->Klasses[IP->Arg0])
+                if (pArray && pArray->Object.Klass != Assembly->Klasses[IP->Arg0])
                 {
                     return MY_RC_INVALID_CAST;
                 }
@@ -759,7 +759,7 @@ int64_t MyVM::Execute(bool& bRunning)
             {
                 // struct type casts
                 MyObject* const& pObject = Stack.Top<MyObject*>();
-                if (pObject->Klass != Assembly->Klasses[IP->Arg0])
+                if (pObject && pObject->Klass != Assembly->Klasses[IP->Arg0])
                 {
                     return MY_RC_INVALID_CAST;
                 }
