@@ -3,13 +3,11 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function File   FOpen(string Path, string Mode);
-extern function void   FClose(File file);
-extern function bool   FIsOpen(File file);
-extern function string FRead(File file);
-extern function string FReadN(File file, uint kLength);
-extern function void   FWrite(File file, string Content);
-extern function void   FWriteN(File file, string Content, uint kLength);
+extern function File   FileOpen(string Path, string Mode);
+extern function void   FileClose(File file);
+extern function bool   FileIsOpen(File file);
+extern function string FileRead(File file);
+extern function void   FileWrite(File file, string Content);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -20,8 +18,8 @@ function static int Go() nogc
 
 function static File OpenFile(string path, string mode)
 {
-	const File f = FOpen(path, mode);
-	if (FIsOpen(f))
+	const File f = FileOpen(path, mode);
+	if (FileIsOpen(f))
 	{
 		Print(f.Filepath);
 		Print(f.OpenMode);
@@ -48,11 +46,11 @@ function int Main(const string[] Argv)
 		{
 			// Doesn't work as expected
 			// either FWrite() or FClose()
-			FWrite(g, content);
-			FClose(g);
+			FileWrite(g, content);
+			FileClose(g);
 		}
 		
-		FClose(f);
+		FileClose(f);
 	}
 
 	return Go();

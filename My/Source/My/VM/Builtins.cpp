@@ -603,7 +603,7 @@ void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM)
 }
 
 // File
-void _My_Builtin_File_FOpen(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM)
 {
     static const auto ValidateOpenMode = [&pContext](MyString* pOpenMode) -> const MyString*
     {
@@ -677,7 +677,7 @@ void _My_Builtin_File_FOpen(MyContext* pContext, MyVM* pVM)
     pVM->Stack.Push(pFile);
 }
 
-void _My_Builtin_File_FClose(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
     FILE*& pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
@@ -690,14 +690,14 @@ void _My_Builtin_File_FClose(MyContext* pContext, MyVM* pVM)
     }
 }
 
-void _My_Builtin_File_FIsOpen(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
     FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
     pVM->Stack.Push(pCFile != nullptr);
 }
 
-void _My_Builtin_File_FRead(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
     FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
@@ -732,12 +732,12 @@ void _My_Builtin_File_FRead(MyContext* pContext, MyVM* pVM)
     pVM->Stack.Push(pContents);
 }
 
-void _My_Builtin_File_FReadN(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_File_FWrite(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM)
 {
     MyString* const& pStr = pVM->Stack.PopString();
     MyObject* const& pFile = pVM->Stack.PopObject();
@@ -746,17 +746,17 @@ void _My_Builtin_File_FWrite(MyContext* pContext, MyVM* pVM)
     fwrite(pStr->Chars, sizeof(char), pStr->Length, pCFile);
 }
 
-void _My_Builtin_File_FWriteN(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_File_FWriteBytes(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_WriteBytes(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_File_FWriteBytesN(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_WriteBytesN(MyContext* pContext, MyVM* pVM)
 {
     MY_NOT_IMPLEMENTED();
 }

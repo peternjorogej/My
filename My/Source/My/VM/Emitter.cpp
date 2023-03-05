@@ -1798,15 +1798,15 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV, 3);
     RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString,   1);
     // File
-    RegisterBuiltin("FOpen",        _My_Builtin_File_FOpen,        2);
-    RegisterBuiltin("FClose",       _My_Builtin_File_FClose,       1);
-    RegisterBuiltin("FIsOpen",      _My_Builtin_File_FIsOpen,      1);
-    RegisterBuiltin("FRead",        _My_Builtin_File_FRead,        1);
-    RegisterBuiltin("FReadN",       _My_Builtin_File_FReadN,       2);
-    RegisterBuiltin("FWrite",       _My_Builtin_File_FWrite,       2);
-    RegisterBuiltin("FWriteN",      _My_Builtin_File_FWriteN,      2);
-    RegisterBuiltin("FWriteBytes",  _My_Builtin_File_FWriteBytes,  2);
-    RegisterBuiltin("FWriteBytesN", _My_Builtin_File_FWriteBytesN, 2);
+    RegisterBuiltin("FileOpen",        _My_Builtin_File_Open,        2);
+    RegisterBuiltin("FileClose",       _My_Builtin_File_Close,       1);
+    RegisterBuiltin("FileIsOpen",      _My_Builtin_File_IsOpen,      1);
+    RegisterBuiltin("FileRead",        _My_Builtin_File_Read,        1);
+    RegisterBuiltin("FileReadN",       _My_Builtin_File_ReadN,       2);
+    RegisterBuiltin("FileWrite",       _My_Builtin_File_Write,       2);
+    RegisterBuiltin("FileWriteN",      _My_Builtin_File_WriteN,      2);
+    RegisterBuiltin("FileWriteBytes",  _My_Builtin_File_WriteBytes,  2);
+    RegisterBuiltin("FileWriteBytesN", _My_Builtin_File_WriteBytesN, 2);
 }
 #pragma endregion
 
