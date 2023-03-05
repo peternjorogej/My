@@ -675,6 +675,7 @@ public:
 			stbds_shput(s_UserDefinedTypes, md.StringStruct->Name,        md.StringType);
 			stbds_shput(s_UserDefinedTypes, md.StringBuilderStruct->Name, md.StringBuilderType);
 			stbds_shput(s_UserDefinedTypes, md.ComplexStruct->Name,       md.ComplexType);
+			stbds_shput(s_UserDefinedTypes, md.BytesStruct->Name,         md.BytesType);
 			stbds_shput(s_UserDefinedTypes, md.FileStruct->Name,          md.FileType);
 		}
 		if (!s_ForwardedTypes)

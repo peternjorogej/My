@@ -3,11 +3,13 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function File   FileOpen(string Path, string Mode);
-extern function void   FileClose(File file);
-extern function bool   FileIsOpen(File file);
-extern function string FileRead(File file);
-extern function void   FileWrite(File file, string Content);
+extern function Bytes BytesCreate(uint kInitialCapacity);
+extern function void  BytesFree(Bytes b);
+extern function void  BytesAddInt64(Bytes b, int Value);
+extern function void  BytesAddUInt64(Bytes b, uint Value);
+extern function void  BytesAddFloat64(Bytes b, float Value);
+extern function void  BytesAddString(Bytes b, string Value);
+extern function void  BytesAppend(Bytes b, const Bytes Other);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -16,43 +18,20 @@ function static int Go() nogc
 	return 0;
 }
 
-function static File OpenFile(string path, string mode)
-{
-	const File f = FileOpen(path, mode);
-	if (FileIsOpen(f))
-	{
-		Print(f.Filepath);
-		Print(f.OpenMode);
-		Print(string(f.FileSize));
-		
-		return f;
-	}
-	return (File)null;
-}
-
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const File f = OpenFile("Samples/Script.my", "rt");
-	if (object(f) != null)
-	{
-		const string content = FRead(f);
-		Print(content);
-		
-		const File g = OpenFile("Samples/Script.txt", "wt");
-		if (object(g) != null)
-		{
-			// Doesn't work as expected
-			// either FWrite() or FClose()
-			FileWrite(g, content);
-			FileClose(g);
-		}
-		
-		FileClose(f);
-	}
-
+	const Bytes b = BytesCreate(32u);
+	BytesAddInt64(b, 12345);
+	BytesAddUInt64(b, 67890u);
+	BytesAddFloat64(b, 2.718281828459045);
+	BytesAddUInt64(b, 12); // Length of "Hello, World"
+	BytesAddString(b, "Hello, World");
+	BytesAppend(b, b);
+	BytesFree(b);
+	
 	return Go();
 }
 

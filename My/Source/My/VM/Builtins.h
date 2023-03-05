@@ -64,6 +64,19 @@ void _My_Builtin_StringBuilder_WriteLine(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_WriteLineV(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM);
 
+// Bytes
+// NOTE: WriteX32, ReadX32 - Hoping for 32-bit types?
+void _My_Builtin_Bytes_Create(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_Free(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddInt32(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddInt64(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddUInt32(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddUInt64(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddFloat32(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddFloat64(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_AddString(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_Append(MyContext* pContext, MyVM* pVM) noexcept;
+
 // File
 void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM);

@@ -212,6 +212,7 @@ struct MyDefaults
 	MyType* ComplexType = nullptr;
 	MyType* StringType  = nullptr;
 	MyType* StringBuilderType = nullptr;
+	MyType* BytesType   = nullptr;
 	MyType* FileType    = nullptr;
 
 	MyStruct* ErrorStruct   = nullptr;
@@ -225,6 +226,7 @@ struct MyDefaults
 	MyStruct* ComplexStruct = nullptr;
 	MyStruct* StringStruct  = nullptr;
 	MyStruct* StringBuilderStruct = nullptr;
+	MyStruct* BytesStruct   = nullptr;
 	MyStruct* FileStruct    = nullptr;
 };
 

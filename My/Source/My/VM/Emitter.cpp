@@ -1797,6 +1797,17 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("SbWriteLine",  _My_Builtin_StringBuilder_WriteLine,  2);
     RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV, 3);
     RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString,   1);
+    // Bytes
+    RegisterBuiltin("BytesCreate",     _My_Builtin_Bytes_Create, 1);
+    RegisterBuiltin("BytesFree",       _My_Builtin_Bytes_Free,   1);
+    // RegisterBuiltin("BytesAddInt32",  _My_Builtin_Bytes_Create, 1);
+    // RegisterBuiltin("BytesAddUInt32",  _My_Builtin_Bytes_Create, 1);
+    // RegisterBuiltin("BytesAddFloat32",  _My_Builtin_Bytes_Create, 1);
+    RegisterBuiltin("BytesAddInt64",   _My_Builtin_Bytes_AddInt64,   2);
+    RegisterBuiltin("BytesAddUInt64",  _My_Builtin_Bytes_AddUInt64,  2);
+    RegisterBuiltin("BytesAddFloat64", _My_Builtin_Bytes_AddFloat64, 2);
+    RegisterBuiltin("BytesAddString",  _My_Builtin_Bytes_AddString,  2);
+    RegisterBuiltin("BytesAppend",     _My_Builtin_Bytes_Append,     2);
     // File
     RegisterBuiltin("FileOpen",        _My_Builtin_File_Open,        2);
     RegisterBuiltin("FileClose",       _My_Builtin_File_Close,       1);

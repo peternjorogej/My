@@ -134,6 +134,14 @@ void MyInitializeStructs(MyContext* pContext)
         MyStructAddField(ud.StringBuilderStruct, "Capacity", ud.UintType, MY_FIELD_ATTR_CONST);
         MyStructAddField(ud.StringBuilderStruct, "Indent", ud.IntType);
     }
+    // Bytes
+    ud.BytesStruct = MyStructCreate(pContext, "Bytes", MY_STRUCT_ATTR_NONE);
+    ud.BytesType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.BytesStruct);
+    {
+        MyStructAddField(ud.BytesStruct, "CBuffer", ud.IntPtrType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.BytesStruct, "Length", ud.UintType, MY_FIELD_ATTR_CONST);
+        MyStructAddField(ud.BytesStruct, "Capacity", ud.UintType, MY_FIELD_ATTR_CONST);
+    }
     // File
     ud.FileStruct = MyStructCreate(pContext, "File", MY_STRUCT_ATTR_NONE);
     ud.FileType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.FileStruct);
@@ -160,6 +168,7 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.ComplexType);
     MY_SAFEDELETE(ud.StringType);
     MY_SAFEDELETE(ud.StringBuilderType);
+    MY_SAFEDELETE(ud.BytesType);
     MY_SAFEDELETE(ud.FileType);
 
     MY_SAFEDELETE(ud.ErrorStruct);
@@ -173,6 +182,7 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.ComplexStruct);
     MY_SAFEDELETE(ud.StringStruct);
     MY_SAFEDELETE(ud.StringBuilderStruct);
+    MY_SAFEDELETE(ud.BytesStruct);
     MY_SAFEDELETE(ud.FileStruct);
 }
 
