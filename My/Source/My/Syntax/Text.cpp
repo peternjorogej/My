@@ -1,6 +1,6 @@
 #include "Text.h"
 
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 #include "My/Utils/Utils.h"
 
 // Text Location

@@ -2,7 +2,7 @@
 #include "BoundTree.h"
 #include "My/Base/Core.h"
 #include "My/Base/IO.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 
 /// HELPER CLASSES

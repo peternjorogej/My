@@ -2,7 +2,7 @@
 #include "VM.h"
 #include "Builtins.h"
 #include "My/Base/IO.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 #include "Serializer/PnBinarySerializer.hpp"
 
 static InternalFunction* s_Builtins = nullptr;

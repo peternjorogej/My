@@ -4,7 +4,7 @@
 #include "My/Object.h"
 #include "My/Syntax/Tree.h"
 #include "My/Binding/BoundTree.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 #include <random>
 

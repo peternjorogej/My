@@ -1,6 +1,6 @@
 #include "Lowerer.h"
 #include "My/Base/IO.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 // NextUpperBoundVariableName(), NextStepVariableName() Used by regular for loops
 static char* NextUpperBoundVariableName() noexcept

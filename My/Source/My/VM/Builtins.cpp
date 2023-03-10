@@ -2,7 +2,7 @@
 #include "My/Base/IO.h"
 #include "My/VM/VM.h"
 #include "My/Utils/Utils.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 #include <stdint.h>
 #include <filesystem>

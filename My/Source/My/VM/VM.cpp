@@ -3,7 +3,7 @@
 #include "My/My.h"
 #include "My/Base/IO.h"
 #include "My/Utils/Utils.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 #include <unordered_set>
 

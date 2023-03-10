@@ -2,7 +2,7 @@
 #include "ControlFlowGraph.h"
 #include "Lowerer.h"
 #include "My/Base/IO.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 
 static bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcept;
