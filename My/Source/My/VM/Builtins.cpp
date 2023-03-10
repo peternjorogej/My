@@ -233,6 +233,25 @@ void _My_Builtin_HeapAlloc(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(kAddress);
 }
 
+void _My_Builtin_HeapCopy(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kRhsAddress = pVM->Stack.PopU64();
+    uint64_t kLhsAddress = pVM->Stack.PopU64();
+
+    Buffer lbuffer = Buffer{ (uint8_t*)kLhsAddress };
+    Buffer rbuffer = Buffer{ (uint8_t*)kRhsAddress };
+
+    if (!lbuffer || !rbuffer)
+    {
+        return;
+    }
+
+    lbuffer.Write((void*)rbuffer, rbuffer.Length());
+    
+    uint64_t kAddress = lbuffer ? (uint64_t)(void*)lbuffer : uint64_t();
+    pVM->Stack.Push(kAddress);
+}
+
 void _My_Builtin_HeapResize(MyContext* pContext, MyVM* pVM) noexcept
 {
     uint64_t kAddress = pVM->Stack.PopU64();
@@ -251,6 +270,22 @@ void _My_Builtin_HeapFree(MyContext* pContext, MyVM* pVM) noexcept
 
     uint8_t* const pAddress = (uint8_t*)kAddress;
     Buffer::Delete(Buffer{ pAddress });
+}
+
+void _My_Builtin_Buffer_Length(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    const Buffer buffer = Buffer{ (uint8_t*)kAddress };
+    pVM->Stack.Push((uint64_t)buffer.Length());
+}
+
+void _My_Builtin_Buffer_Capacity(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    const Buffer buffer = Buffer{ (uint8_t*)kAddress };
+    pVM->Stack.Push((uint64_t)buffer.Capacity());
 }
 
 void _My_Builtin_Buffer_WriteI32(MyContext* pContext, MyVM* pVM) noexcept
@@ -335,7 +370,8 @@ void _My_Builtin_Buffer_WriteString(MyContext* pContext, MyVM* pVM) noexcept
     buffer.CheckAndResize(kRequiredSize);
 
     // Write the length
-    buffer.Write(&pString->Length, sizeof(uint64_t));
+    const uint32_t kLength = (uint32_t)pString->Length;
+    buffer.Write(&kLength, sizeof(uint32_t));
     // Write the characters
     buffer.Write(pString->Chars, pString->Length);
 }
@@ -354,6 +390,98 @@ void _My_Builtin_Buffer_Append(MyContext* pContext, MyVM* pVM) noexcept
     }
 
     lbuffer.Write((void*)rbuffer, rbuffer.Length());
+}
+
+void _My_Builtin_Buffer_ReadI32(MyContext* pContext, MyVM* pVM) noexcept
+{
+    _My_Builtin_Buffer_ReadU32(pContext, pVM);
+}
+
+void _My_Builtin_Buffer_ReadI64(MyContext* pContext, MyVM* pVM) noexcept
+{
+    _My_Builtin_Buffer_ReadU64(pContext, pVM);
+}
+
+void _My_Builtin_Buffer_ReadU32(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    uint32_t kValue32 = 0ul;
+    buffer.Read(&kValue32, sizeof(uint32_t));
+    pVM->Stack.Push((uint64_t)kValue32);
+}
+
+void _My_Builtin_Buffer_ReadU64(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    uint64_t kValue64 = 0ull;
+    buffer.Read(&kValue64, sizeof(uint64_t));
+    pVM->Stack.Push(kValue64);
+}
+
+void _My_Builtin_Buffer_ReadF32(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    float fValue32 = 0ul;
+    buffer.Read(&fValue32, sizeof(float));
+    pVM->Stack.Push(fValue32);
+}
+
+void _My_Builtin_Buffer_ReadF64(MyContext* pContext, MyVM* pVM) noexcept
+{
+    _My_Builtin_Buffer_ReadU64(pContext, pVM);
+}
+
+void _My_Builtin_Buffer_ReadString(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    // Read the length
+    uint32_t kLength = 0ul;
+    buffer.Read(&kLength, sizeof(uint32_t));
+    // Read the characters
+    Buffer strbuf = Buffer::Create((uint64_t)kLength + 1);
+    buffer.Read((void*)strbuf, kLength);
+
+    MyString* pString = MyStringNew(pContext, (char*)strbuf, kLength);
+    Buffer::Delete(strbuf);
+
+    pVM->Stack.Push(pString);
+}
+
+void _My_Builtin_Buffer_Get(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
 }
 
 // Math

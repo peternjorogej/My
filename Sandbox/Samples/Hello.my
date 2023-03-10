@@ -6,7 +6,8 @@ extern function void   WriteLine(string Format, object[] Args,);
 extern function intptr HeapAlloc(uint kCapacity);
 extern function void   HeapFree(intptr pBuffer);
 extern function void   BufferWriteString(intptr pBuffer, string Value);
-extern function void   BufferAppend(intptr pBuffer, const intptr pOtherBuffer);
+extern function string BufferReadString(intptr pBuffer);
+extern function void   BufferAppend(intptr pBuffer, intptr pOtherBuffer);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -22,8 +23,11 @@ function int Main(const string[] Argv)
 	
 	const intptr buffer = HeapAlloc(0);
 	BufferWriteString(buffer, "Hello, World");
-	BufferWriteString(buffer, "World, Hello");
 	BufferAppend(buffer, buffer);
+	
+	Print(BufferReadString(buffer));
+	Print(BufferReadString(buffer));
+	
 	HeapFree(buffer);
 	
 	return Go();
