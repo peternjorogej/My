@@ -8,6 +8,53 @@
 enum class TokenKind;
 
 /// <summary>
+/// - Does *NOT* own the pointer
+/// - Assumes that the 12 bytes before *m_Pointer* (i.e m_Pointer - 12) store the
+///   1. length (4 bytes)
+///   2. capacity (4 bytes) and;
+///   3. read offset (4 bytes) (used when reading from the buffer)
+/// </summary>
+class Buffer
+{
+public:
+	static constexpr size_t MinimumAllocSize = 128ull;
+	static constexpr size_t MaximumAllocSize = uint32_t(-1) / 2ul;
+
+public:
+	struct SizeInfo
+	{
+		uint32_t Length   = 0ul;
+		uint32_t Capacity = 0ul;
+		uint32_t ROffset  = 0ul;
+	};
+
+public:
+	constexpr Buffer(uint8_t* pBuffer = nullptr);
+
+	static Buffer Create(size_t kSize) noexcept;
+	static void   Delete(Buffer buffer) noexcept;
+
+	void Write(const void* pBlock, size_t kBlockSize) noexcept;
+	void Read(void* pBlock, size_t kBlockSize) noexcept;
+
+	void     Resize(size_t kNewCapacity) noexcept;
+	void     CheckAndResize(size_t kRequiredSize) noexcept;
+	uint32_t Length() const noexcept;
+	uint32_t Capacity() const noexcept;
+
+	inline operator bool() const noexcept;
+
+	template<typename T>
+	inline operator T*() const noexcept
+	{
+		return (T*)m_Pointer;
+	}
+
+private:
+	uint8_t* m_Pointer = nullptr;
+};
+
+/// <summary>
 /// - This is not an allocator for everything. It creates parse tree and bound tree objects
 /// to collect them afterwards. Collection is done after emitting bytecode
 /// - Runtime memory allocation is done by the garbage collector

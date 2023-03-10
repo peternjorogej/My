@@ -8,7 +8,7 @@
 
 #include <random>
 
-#pragma region Memory_Allocation_Cleanup
+#pragma region Memory Allocation Cleanup
 using AllocationMap = Pair<void*, void*>;
 
 struct Allocation
@@ -117,7 +117,142 @@ void* Allocator::AllocateInternal(size_t kSize, Stage stage) noexcept
 }
 #pragma endregion
 
-#pragma region Random_Number_Generation
+#pragma region Heap Memory Management
+constexpr Buffer::Buffer(uint8_t* pBuffer)
+	: m_Pointer(pBuffer)
+{ }
+
+Buffer Buffer::Create(size_t kSize) noexcept
+{
+	kSize = std::clamp(kSize, MinimumAllocSize, MaximumAllocSize);
+
+	if (uint8_t* pMemory = (uint8_t*)malloc(kSize + sizeof(SizeInfo)); pMemory)
+	{
+		SizeInfo* pSizeInfo = (SizeInfo*)pMemory;
+		pSizeInfo->Length = 0ul;
+		pSizeInfo->Capacity = kSize;
+		uint8_t* pPointer = pMemory + sizeof(SizeInfo);
+
+		return Buffer{ pPointer };
+	}
+
+	return Buffer{};
+}
+
+void Buffer::Delete(Buffer buffer) noexcept
+{
+	if (!buffer)
+	{
+		return;
+	}
+
+	uint8_t* pMemory = buffer.m_Pointer - sizeof(SizeInfo);
+
+	SizeInfo* pSizeInfo = (SizeInfo*)pMemory;
+	pSizeInfo->Length = 0ul;
+	pSizeInfo->Capacity = 0ul;
+
+	free(pMemory);
+	pMemory = nullptr;
+	buffer.m_Pointer = nullptr;
+}
+
+void Buffer::Write(const void* pBlock, size_t kBlockSize) noexcept
+{
+	if (!m_Pointer)
+	{
+		return;
+	}
+
+	SizeInfo* pSizeInfo = (SizeInfo*)(m_Pointer - sizeof(SizeInfo));
+
+	CheckAndResize(kBlockSize);
+	memcpy(m_Pointer + pSizeInfo->Length, pBlock, kBlockSize);
+	pSizeInfo->Length += kBlockSize;
+}
+
+void Buffer::Read(void* pBlock, size_t kBlockSize) noexcept
+{
+	if (!m_Pointer)
+	{
+		return;
+	}
+
+	SizeInfo* pSizeInfo = (SizeInfo*)(m_Pointer - sizeof(SizeInfo));
+	memcpy(pBlock, m_Pointer + pSizeInfo->ROffset, kBlockSize);
+	pSizeInfo->ROffset += kBlockSize;
+}
+
+void Buffer::Resize(size_t kNewCapacity) noexcept
+{
+	if (!m_Pointer)
+	{
+		return;
+	}
+
+	uint8_t* pMemory = m_Pointer - sizeof(SizeInfo);
+
+	uint32_t kOldLength = ((SizeInfo*)pMemory)->Length;
+	uint32_t kOldCapacity = ((SizeInfo*)pMemory)->Capacity;
+
+	if (kNewCapacity <= kOldCapacity)
+	{
+		return;
+	}
+
+	if (uint8_t* pNewMemory = (uint8_t*)realloc(pMemory, kNewCapacity); pNewMemory)
+	{
+		SizeInfo* pSizeInfo = (SizeInfo*)pNewMemory;
+		pSizeInfo->Length = kOldLength;
+		pSizeInfo->Capacity = kNewCapacity;
+		m_Pointer = pNewMemory + sizeof(SizeInfo);
+	}
+	else
+	{
+		// Reallocation failed. Clean up and invalidate buffer
+		Delete(*this);
+		m_Pointer = nullptr;
+	}
+}
+
+void Buffer::CheckAndResize(size_t kRequiredSize) noexcept
+{
+	if (!m_Pointer)
+	{
+		return;
+	}
+
+	uint8_t* pMemory = m_Pointer - sizeof(SizeInfo);
+
+	uint64_t kCurrentLength = ((SizeInfo*)pMemory)->Length;
+	uint64_t kCurrentCapacity = ((SizeInfo*)pMemory)->Capacity;
+
+	uint64_t kAvailCapacity = kCurrentCapacity - kCurrentLength;
+
+	if (kRequiredSize > kAvailCapacity)
+	{
+		const size_t kNewCapacity = kCurrentCapacity + (kCurrentCapacity / 2ul) + kRequiredSize;
+		Resize(kNewCapacity);
+	}
+}
+
+uint32_t Buffer::Length() const noexcept
+{
+	return m_Pointer ? ((SizeInfo*)(m_Pointer - sizeof(SizeInfo)))->Length : 0ul;
+}
+
+uint32_t Buffer::Capacity() const noexcept
+{
+	return m_Pointer ? ((SizeInfo*)(m_Pointer - sizeof(SizeInfo)))->Capacity : 0ul;
+}
+
+inline Buffer::operator bool() const noexcept
+{
+	return (bool)m_Pointer;
+}
+#pragma endregion
+
+#pragma region Random Number Generation
 static std::mt19937_64 s_RandomEngine = std::mt19937_64(std::random_device{}());
 static std::uniform_int_distribution<int64_t>  s_IntDistribution  = {};
 static std::uniform_int_distribution<uint64_t> s_UintDistribution = {};
@@ -145,10 +280,9 @@ double Random::Float(double First, double Last) noexcept
 	const double t = Float();
 	return First + (Last - First)*t;
 }
-
 #pragma endregion
 
-#pragma region Diagnostic_Reporting
+#pragma region Diagnostic Reporting
 DiagnosticBag::DiagnosticBag()
 	: Super()
 { }
@@ -642,3 +776,5 @@ char* MyGetCachedStringV(const char* lpFormat, ...) noexcept
 
 	return MyGetCachedString(lpBuffer, strlen(lpBuffer));
 }
+
+
