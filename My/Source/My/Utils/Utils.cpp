@@ -132,6 +132,7 @@ Buffer Buffer::Create(size_t kSize) noexcept
 		pSizeInfo->Length = 0ul;
 		pSizeInfo->Capacity = kSize;
 		uint8_t* pPointer = pMemory + sizeof(SizeInfo);
+		memset(pPointer, 0, pSizeInfo->Capacity);
 
 		return Buffer{ pPointer };
 	}
@@ -206,6 +207,10 @@ void Buffer::Resize(size_t kNewCapacity) noexcept
 		pSizeInfo->Length = kOldLength;
 		pSizeInfo->Capacity = kNewCapacity;
 		m_Pointer = pNewMemory + sizeof(SizeInfo);
+		{
+			const size_t kAllocatedCapacity = pSizeInfo->Capacity - kOldCapacity;
+			memset(m_Pointer + pSizeInfo->Length, 0, kAllocatedCapacity);
+		}
 	}
 	else
 	{

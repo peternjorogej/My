@@ -1727,7 +1727,7 @@ void _My_Emitter_Deserialize(MyAssembly* pAssembly, const std::string& Path) noe
 
 void _My_Initialize_BuiltinsMap() noexcept
 {
-    static const auto RegisterBuiltin = [&](char* const& lpName, pfnMyInternalFunction pfnBuiltin, int32_t iArgc) -> void
+    static const auto RegisterBuiltin = [&](char* const& lpName, pfnMyInternalFunction pfnBuiltin) -> void
     {
         const InternalFunction ifunc = { MyGetCachedString(lpName), pfnBuiltin };
         stbds_shputs(s_Builtins, ifunc);
@@ -1741,83 +1741,95 @@ void _My_Initialize_BuiltinsMap() noexcept
     }
 
     // Core
-    RegisterBuiltin("__equals",          _My_Builtin_Equals,          2);
-    RegisterBuiltin("__cvtoint",         _My_Builtin_CvToInt,         1);
-    RegisterBuiltin("__cvtouint",        _My_Builtin_CvToUint,        1);
-    RegisterBuiltin("__cvtofloat",       _My_Builtin_CvToFloat,       1);
-    RegisterBuiltin("__cvinttostring",   _My_Builtin_CvIntToString,   1);
-    RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString,  1);
-    RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString, 1);
+    RegisterBuiltin("__equals",          _My_Builtin_Equals);
+    RegisterBuiltin("__cvtoint",         _My_Builtin_CvToInt);
+    RegisterBuiltin("__cvtouint",        _My_Builtin_CvToUint);
+    RegisterBuiltin("__cvtofloat",       _My_Builtin_CvToFloat);
+    RegisterBuiltin("__cvinttostring",   _My_Builtin_CvIntToString);
+    RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString);
+    RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString);
     // Std
-    RegisterBuiltin("Write",       _My_Builtin_Write,       2);
-    RegisterBuiltin("WriteLine",   _My_Builtin_WriteLine,   2);
-    RegisterBuiltin("Read",        _My_Builtin_Read,        0);
-    RegisterBuiltin("ReadLine",    _My_Builtin_ReadLine,    0);
-    RegisterBuiltin("ReadInt",     _My_Builtin_ReadInt,     0);
-    RegisterBuiltin("ReadUint",    _My_Builtin_ReadUint,    0);
-    RegisterBuiltin("ReadFloat",   _My_Builtin_ReadFloat,   0);
-    RegisterBuiltin("RandomInt",   _My_Builtin_RandomInt,   1);
-    RegisterBuiltin("RandomUint",  _My_Builtin_RandomUint,  1);
-    RegisterBuiltin("RandomFloat", _My_Builtin_RandomFloat, 0);
-    RegisterBuiltin("Print",       _My_Builtin_Print,       1);
-    RegisterBuiltin("Length",      _My_Builtin_Length,      1);
-    RegisterBuiltin("Clock",       _My_Builtin_Clock,       0);
+    RegisterBuiltin("Write",       _My_Builtin_Write);
+    RegisterBuiltin("WriteLine",   _My_Builtin_WriteLine);
+    RegisterBuiltin("Read",        _My_Builtin_Read);
+    RegisterBuiltin("ReadLine",    _My_Builtin_ReadLine);
+    RegisterBuiltin("ReadInt",     _My_Builtin_ReadInt);
+    RegisterBuiltin("ReadUint",    _My_Builtin_ReadUint);
+    RegisterBuiltin("ReadFloat",   _My_Builtin_ReadFloat);
+    RegisterBuiltin("RandomInt",   _My_Builtin_RandomInt);
+    RegisterBuiltin("RandomUint",  _My_Builtin_RandomUint);
+    RegisterBuiltin("RandomFloat", _My_Builtin_RandomFloat);
+    RegisterBuiltin("Print",       _My_Builtin_Print);
+    RegisterBuiltin("Length",      _My_Builtin_Length);
+    RegisterBuiltin("Clock",       _My_Builtin_Clock);
+
+    RegisterBuiltin("HeapAlloc",         _My_Builtin_HeapAlloc);
+    RegisterBuiltin("HeapResize",        _My_Builtin_HeapResize);
+    RegisterBuiltin("HeapFree",          _My_Builtin_HeapFree);
+    RegisterBuiltin("BufferWriteI32",    _My_Builtin_Buffer_WriteI32);
+    RegisterBuiltin("BufferWriteI64",    _My_Builtin_Buffer_WriteI64);
+    RegisterBuiltin("BufferWriteU32",    _My_Builtin_Buffer_WriteU32);
+    RegisterBuiltin("BufferWriteU64",    _My_Builtin_Buffer_WriteU64);
+    RegisterBuiltin("BufferWriteF32",    _My_Builtin_Buffer_WriteF32);
+    RegisterBuiltin("BufferWriteF64",    _My_Builtin_Buffer_WriteF64);
+    RegisterBuiltin("BufferWriteString", _My_Builtin_Buffer_WriteString);
+    RegisterBuiltin("BufferAppend",      _My_Builtin_Buffer_Append);
     // Math
-    RegisterBuiltin("Sin",   _My_Builtin_Sin,   1);
-    RegisterBuiltin("Cos",   _My_Builtin_Cos,   1);
-    RegisterBuiltin("Tan",   _My_Builtin_Tan,   1);
-    RegisterBuiltin("Asin",  _My_Builtin_Asin,  1);
-    RegisterBuiltin("Acos",  _My_Builtin_Acos,  1);
-    RegisterBuiltin("Atan",  _My_Builtin_Atan,  1);
-    RegisterBuiltin("Atan2", _My_Builtin_Atan2, 2);
-    RegisterBuiltin("Log",   _My_Builtin_Log,   1);
-    RegisterBuiltin("Log10", _My_Builtin_Log10, 1);
-    RegisterBuiltin("Logb",  _My_Builtin_Logb,  2);
-    RegisterBuiltin("Exp",   _My_Builtin_Exp,   1);
-    RegisterBuiltin("Floor", _My_Builtin_Floor, 1);
-    RegisterBuiltin("Ceil",  _My_Builtin_Ceil,  1);
-    RegisterBuiltin("Sqrt",  _My_Builtin_Sqrt,  1);
-    RegisterBuiltin("Cbrt",  _My_Builtin_Cbrt,  1);
+    RegisterBuiltin("Sin",   _My_Builtin_Sin);
+    RegisterBuiltin("Cos",   _My_Builtin_Cos);
+    RegisterBuiltin("Tan",   _My_Builtin_Tan);
+    RegisterBuiltin("Asin",  _My_Builtin_Asin);
+    RegisterBuiltin("Acos",  _My_Builtin_Acos);
+    RegisterBuiltin("Atan",  _My_Builtin_Atan);
+    RegisterBuiltin("Atan2", _My_Builtin_Atan2);
+    RegisterBuiltin("Log",   _My_Builtin_Log);
+    RegisterBuiltin("Log10", _My_Builtin_Log10);
+    RegisterBuiltin("Logb",  _My_Builtin_Logb);
+    RegisterBuiltin("Exp",   _My_Builtin_Exp);
+    RegisterBuiltin("Floor", _My_Builtin_Floor);
+    RegisterBuiltin("Ceil",  _My_Builtin_Ceil);
+    RegisterBuiltin("Sqrt",  _My_Builtin_Sqrt);
+    RegisterBuiltin("Cbrt",  _My_Builtin_Cbrt);
     // String
-    RegisterBuiltin("__strcat",     _My_Builtin_String_Concat,     2);
-    RegisterBuiltin("__strcmp",     _My_Builtin_String_Compare,    2);
-    RegisterBuiltin("__strfind",    _My_Builtin_String_Find,       3);
-    RegisterBuiltin("__strstr",     _My_Builtin_String_Substr,     2);
-    RegisterBuiltin("__strsplit",   _My_Builtin_String_Split,      2);
-    RegisterBuiltin("__strstartsw", _My_Builtin_String_StartsWith, 2);
-    RegisterBuiltin("__strendsw",   _My_Builtin_String_EndsWith,   2);
-    RegisterBuiltin("__strtoupper", _My_Builtin_String_ToUpper,    2);
-    RegisterBuiltin("__strtolower", _My_Builtin_String_ToLower,    2);
+    RegisterBuiltin("__strcat",     _My_Builtin_String_Concat);
+    RegisterBuiltin("__strcmp",     _My_Builtin_String_Compare);
+    RegisterBuiltin("__strfind",    _My_Builtin_String_Find);
+    RegisterBuiltin("__strstr",     _My_Builtin_String_Substr);
+    RegisterBuiltin("__strsplit",   _My_Builtin_String_Split);
+    RegisterBuiltin("__strstartsw", _My_Builtin_String_StartsWith);
+    RegisterBuiltin("__strendsw",   _My_Builtin_String_EndsWith);
+    RegisterBuiltin("__strtoupper", _My_Builtin_String_ToUpper);
+    RegisterBuiltin("__strtolower", _My_Builtin_String_ToLower);
     // StringBuilder
-    RegisterBuiltin("SbInit",       _My_Builtin_StringBuilder_Init,       1);
-    RegisterBuiltin("SbAppend",     _My_Builtin_StringBuilder_Append,     2);
-    RegisterBuiltin("SbAppendV",    _My_Builtin_StringBuilder_AppendV,    3);
-    RegisterBuiltin("SbWrite",      _My_Builtin_StringBuilder_Write,      2);
-    RegisterBuiltin("SbWriteV",     _My_Builtin_StringBuilder_WriteV,     3);
-    RegisterBuiltin("SbWriteLine",  _My_Builtin_StringBuilder_WriteLine,  2);
-    RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV, 3);
-    RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString,   1);
+    RegisterBuiltin("SbInit",       _My_Builtin_StringBuilder_Init);
+    RegisterBuiltin("SbAppend",     _My_Builtin_StringBuilder_Append);
+    RegisterBuiltin("SbAppendV",    _My_Builtin_StringBuilder_AppendV);
+    RegisterBuiltin("SbWrite",      _My_Builtin_StringBuilder_Write);
+    RegisterBuiltin("SbWriteV",     _My_Builtin_StringBuilder_WriteV);
+    RegisterBuiltin("SbWriteLine",  _My_Builtin_StringBuilder_WriteLine);
+    RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV);
+    RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString);
     // Bytes
-    RegisterBuiltin("BytesCreate",     _My_Builtin_Bytes_Create, 1);
-    RegisterBuiltin("BytesFree",       _My_Builtin_Bytes_Free,   1);
-    // RegisterBuiltin("BytesAddInt32",  _My_Builtin_Bytes_Create, 1);
-    // RegisterBuiltin("BytesAddUInt32",  _My_Builtin_Bytes_Create, 1);
-    // RegisterBuiltin("BytesAddFloat32",  _My_Builtin_Bytes_Create, 1);
-    RegisterBuiltin("BytesAddInt64",   _My_Builtin_Bytes_AddInt64,   2);
-    RegisterBuiltin("BytesAddUInt64",  _My_Builtin_Bytes_AddUInt64,  2);
-    RegisterBuiltin("BytesAddFloat64", _My_Builtin_Bytes_AddFloat64, 2);
-    RegisterBuiltin("BytesAddString",  _My_Builtin_Bytes_AddString,  2);
-    RegisterBuiltin("BytesAppend",     _My_Builtin_Bytes_Append,     2);
+    RegisterBuiltin("BytesCreate",     _My_Builtin_Bytes_Create);
+    RegisterBuiltin("BytesFree",       _My_Builtin_Bytes_Free);
+    // RegisterBuiltin("BytesAddInt32",  _My_Builtin_Bytes_Create);
+    // RegisterBuiltin("BytesAddUInt32",  _My_Builtin_Bytes_Create);
+    // RegisterBuiltin("BytesAddFloat32",  _My_Builtin_Bytes_Create);
+    RegisterBuiltin("BytesAddInt64",   _My_Builtin_Bytes_AddInt64);
+    RegisterBuiltin("BytesAddUInt64",  _My_Builtin_Bytes_AddUInt64);
+    RegisterBuiltin("BytesAddFloat64", _My_Builtin_Bytes_AddFloat64);
+    RegisterBuiltin("BytesAddString",  _My_Builtin_Bytes_AddString);
+    RegisterBuiltin("BytesAppend",     _My_Builtin_Bytes_Append);
     // File
-    RegisterBuiltin("FileOpen",        _My_Builtin_File_Open,        2);
-    RegisterBuiltin("FileClose",       _My_Builtin_File_Close,       1);
-    RegisterBuiltin("FileIsOpen",      _My_Builtin_File_IsOpen,      1);
-    RegisterBuiltin("FileRead",        _My_Builtin_File_Read,        1);
-    RegisterBuiltin("FileReadN",       _My_Builtin_File_ReadN,       2);
-    RegisterBuiltin("FileWrite",       _My_Builtin_File_Write,       2);
-    RegisterBuiltin("FileWriteN",      _My_Builtin_File_WriteN,      2);
-    RegisterBuiltin("FileWriteBytes",  _My_Builtin_File_WriteBytes,  2);
-    RegisterBuiltin("FileWriteBytesN", _My_Builtin_File_WriteBytesN, 2);
+    RegisterBuiltin("FileOpen",        _My_Builtin_File_Open);
+    RegisterBuiltin("FileClose",       _My_Builtin_File_Close);
+    RegisterBuiltin("FileIsOpen",      _My_Builtin_File_IsOpen);
+    RegisterBuiltin("FileRead",        _My_Builtin_File_Read);
+    RegisterBuiltin("FileReadN",       _My_Builtin_File_ReadN);
+    RegisterBuiltin("FileWrite",       _My_Builtin_File_Write);
+    RegisterBuiltin("FileWriteN",      _My_Builtin_File_WriteN);
+    RegisterBuiltin("FileWriteBytes",  _My_Builtin_File_WriteBytes);
+    RegisterBuiltin("FileWriteBytesN", _My_Builtin_File_WriteBytesN);
 }
 #pragma endregion
 

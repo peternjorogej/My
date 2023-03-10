@@ -4,6 +4,7 @@
 #include "My/Utils/Utils.h"
 #include "Stb/stb_ds.h"
 
+#include <stdint.h>
 #include <filesystem>
 
 // Core
@@ -219,6 +220,105 @@ void _My_Builtin_Clock(MyContext* pContext, MyVM* pVM) noexcept
 {
     const double dNow = double(clock()) / double(CLOCKS_PER_SEC);
     pVM->Stack.Push(dNow);
+}
+
+
+void _My_Builtin_HeapAlloc(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kSize = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer::Create(kSize);
+
+    uint64_t kAddress = buffer ? (uint64_t)(void*)buffer : uint64_t();
+    pVM->Stack.Push(kAddress);
+}
+
+void _My_Builtin_HeapResize(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+    uint64_t kNewSize = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+    buffer.Resize(kNewSize);
+
+    kAddress = buffer ? (uint64_t)(void*)buffer : uint64_t();
+    pVM->Stack.Push(kAddress);
+}
+
+void _My_Builtin_HeapFree(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    uint8_t* const pAddress = (uint8_t*)kAddress;
+    Buffer::Delete(Buffer{ pAddress });
+}
+
+void _My_Builtin_Buffer_WriteI32(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_Buffer_WriteI64(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_Buffer_WriteU32(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_Buffer_WriteU64(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_Buffer_WriteF32(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_Buffer_WriteF64(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MY_NOT_IMPLEMENTED();
+}
+
+void _My_Builtin_Buffer_WriteString(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* pString = pVM->Stack.PopString();
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    // Write both the string and it's length
+    const uint64_t kRequiredSize = sizeof(uint32_t) + pString->Length;
+    buffer.CheckAndResize(kRequiredSize);
+
+    // Write the length
+    buffer.Write(&pString->Length, sizeof(uint64_t));
+    // Write the characters
+    buffer.Write(pString->Chars, pString->Length);
+}
+
+void _My_Builtin_Buffer_Append(MyContext* pContext, MyVM* pVM) noexcept
+{
+    uint64_t kRhsAddress = pVM->Stack.PopU64();
+    uint64_t kLhsAddress = pVM->Stack.PopU64();
+
+    Buffer lbuffer = Buffer{ (uint8_t*)kLhsAddress };
+    Buffer rbuffer = Buffer{ (uint8_t*)kRhsAddress };
+
+    if (!lbuffer || !rbuffer)
+    {
+        return;
+    }
+
+    lbuffer.Write((void*)rbuffer, rbuffer.Length());
 }
 
 // Math

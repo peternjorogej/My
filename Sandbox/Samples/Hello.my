@@ -3,13 +3,10 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function Bytes BytesCreate(uint kInitialCapacity);
-extern function void  BytesFree(Bytes b);
-extern function void  BytesAddInt64(Bytes b, int Value);
-extern function void  BytesAddUInt64(Bytes b, uint Value);
-extern function void  BytesAddFloat64(Bytes b, float Value);
-extern function void  BytesAddString(Bytes b, string Value);
-extern function void  BytesAppend(Bytes b, const Bytes Other);
+extern function intptr HeapAlloc(uint kCapacity);
+extern function void   HeapFree(intptr pBuffer);
+extern function void   BufferWriteString(intptr pBuffer, string Value);
+extern function void   BufferAppend(intptr pBuffer, const intptr pOtherBuffer);
 
 using Matrix4x4 = float[4, 4,];
 
@@ -23,14 +20,11 @@ function int Main(const string[] Argv)
 	Print("Hello, World from My");
 	Print(ReadLine());
 	
-	const Bytes b = BytesCreate(32u);
-	BytesAddInt64(b, 12345);
-	BytesAddUInt64(b, 67890u);
-	BytesAddFloat64(b, 2.718281828459045);
-	BytesAddUInt64(b, 12); // Length of "Hello, World"
-	BytesAddString(b, "Hello, World");
-	BytesAppend(b, b);
-	BytesFree(b);
+	const intptr buffer = HeapAlloc(0);
+	BufferWriteString(buffer, "Hello, World");
+	BufferWriteString(buffer, "World, Hello");
+	BufferAppend(buffer, buffer);
+	HeapFree(buffer);
 	
 	return Go();
 }

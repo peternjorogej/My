@@ -26,6 +26,18 @@ void _My_Builtin_Print(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Length(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Clock(MyContext* pContext, MyVM* pVM) noexcept;
 
+void _My_Builtin_HeapAlloc(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_HeapResize(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_HeapFree(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteI32(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteI64(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteU32(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteU64(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteF32(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteF64(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_WriteString(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Buffer_Append(MyContext* pContext, MyVM* pVM) noexcept;
+
 // Math
 void _My_Builtin_Sin(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Cos(MyContext* pContext, MyVM* pVM) noexcept;
