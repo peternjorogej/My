@@ -226,9 +226,9 @@ MyString* MyStringNew(MyContext* pContext, const char* lpStr)
 
 MyString* MyStringNew(MyContext* pContext, const char* lpStr, size_t kLength)
 {
-    uint64_t kHash = MyHashBytes(lpStr, kLength, 0ul);
+    uint64_t kHash = MyHashBytes(lpStr, kLength);
 
-    if (MyString* pString = stbds_hmget(pContext->RtCache, kHash); pString != nullptr)
+    if (MyString* pString = stbds_hmget(pContext->RtCache, kHash); pString)
     {
         return pString;
     }
