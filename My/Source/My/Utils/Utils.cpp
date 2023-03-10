@@ -126,14 +126,17 @@ Buffer Buffer::Create(size_t kSize) noexcept
 {
 	kSize = std::clamp(kSize, MinimumAllocSize, MaximumAllocSize);
 
-	if (uint8_t* pMemory = (uint8_t*)malloc(kSize + sizeof(SizeInfo)); pMemory)
+	const uint64_t kAllocSize = kSize + sizeof(SizeInfo);
+	if (uint8_t* pMemory = (uint8_t*)malloc(kAllocSize); pMemory)
 	{
+		memset(pMemory, 0, kAllocSize);
+
 		SizeInfo* pSizeInfo = (SizeInfo*)pMemory;
 		pSizeInfo->Length = 0ul;
 		pSizeInfo->Capacity = kSize;
-		uint8_t* pPointer = pMemory + sizeof(SizeInfo);
-		memset(pPointer, 0, pSizeInfo->Capacity);
+		pSizeInfo->ROffset = 0ul;
 
+		uint8_t* const pPointer = pMemory + sizeof(SizeInfo);
 		return Buffer{ pPointer };
 	}
 
@@ -152,6 +155,7 @@ void Buffer::Delete(Buffer buffer) noexcept
 	SizeInfo* pSizeInfo = (SizeInfo*)pMemory;
 	pSizeInfo->Length = 0ul;
 	pSizeInfo->Capacity = 0ul;
+	pSizeInfo->ROffset = 0ul;
 
 	free(pMemory);
 	pMemory = nullptr;
