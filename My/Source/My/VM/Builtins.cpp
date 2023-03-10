@@ -1088,29 +1088,21 @@ void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM)
 void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM)
 {
     MyObject* const& pFile = pVM->Stack.PopObject();
+
     FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
 
-    fseek(pCFile, 0, SEEK_SET);
     fseek(pCFile, 0, SEEK_END);
     const size_t kLength = ftell(pCFile);
     fseek(pCFile, 0, SEEK_SET);
 
     MyString* pContents = nullptr;
 
-    char* pBuffer = new char[kLength + 1]; // char* represents both strings and raw bytes
-    if (pBuffer)
+    if (Buffer buffer = Buffer::Create(kLength + 1); buffer)
     {
-        size_t kBytesWritten = fread(pBuffer, sizeof(char), kLength, pCFile);
-        if (kBytesWritten > kLength)
-        {
-            kBytesWritten = kLength;
-        };
-        pBuffer[kBytesWritten] = 0;
-
-        // Must be opened in text mode
-        //const MyString* const& pOpenMode = MyObjectFieldGetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "OpenMode"))
-        pContents = MyStringNew(pContext, pBuffer, kLength);
-        MY_SAFEDELETEA(pBuffer);
+        fread((void*)buffer, sizeof(char), kLength, pCFile);
+        pContents = MyStringNew(pContext, (char*)buffer, kLength);
+        
+        Buffer::Delete(buffer);
     }
     else
     {
@@ -1122,7 +1114,69 @@ void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM)
 
 void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM)
 {
-    MY_NOT_IMPLEMENTED();
+    uint64_t kLengthToRead = pVM->Stack.PopU64();
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+
+    fseek(pCFile, 0, SEEK_END);
+    kLengthToRead = std::min(kLengthToRead, (uint64_t)ftell(pCFile));
+    fseek(pCFile, 0, SEEK_SET);
+
+    MyString* pContents = nullptr;
+
+    if (Buffer buffer = Buffer::Create(kLengthToRead + 1); buffer)
+    {
+        fread((void*)buffer, sizeof(char), kLengthToRead, pCFile);
+        pContents = MyStringNew(pContext, (char*)buffer, kLengthToRead);
+
+        Buffer::Delete(buffer);
+    }
+    else
+    {
+        pContents = MyStringNew(pContext, "");
+    }
+
+    pVM->Stack.Push(pContents);
+}
+
+void _My_Builtin_File_ReadBytes(MyContext* pContext, MyVM* pVM)
+{
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+
+    fseek(pCFile, 0, SEEK_END);
+    const size_t kLength = ftell(pCFile);
+    fseek(pCFile, 0, SEEK_SET);
+
+    Buffer buffer = Buffer::Create(kLength);
+    if (buffer)
+    {
+        fread((void*)buffer, sizeof(char), kLength, pCFile);
+    }
+
+    pVM->Stack.Push((uint64_t)(void*)buffer);
+}
+
+void _My_Builtin_File_ReadNBytes(MyContext* pContext, MyVM* pVM)
+{
+    uint64_t kLengthToRead = pVM->Stack.PopU64();
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+
+    fseek(pCFile, 0, SEEK_END);
+    kLengthToRead = std::min(kLengthToRead, (uint64_t)ftell(pCFile));
+    fseek(pCFile, 0, SEEK_SET);
+
+    Buffer buffer = Buffer::Create(kLengthToRead);
+    if (buffer)
+    {
+        fread((void*)buffer, sizeof(char), kLengthToRead, pCFile);
+    }
+
+    pVM->Stack.Push((uint64_t)(void*)buffer);
 }
 
 void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM)
@@ -1136,17 +1190,46 @@ void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM)
 
 void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM)
 {
-    MY_NOT_IMPLEMENTED();
+    uint64_t kSizeToWrite = pVM->Stack.PopU64();
+    MyString* pString = pVM->Stack.PopString();
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    if (pCFile)
+    {
+        kSizeToWrite = std::min(kSizeToWrite, pString->Length);
+        fwrite(pString->Chars, sizeof(uint8_t), kSizeToWrite, pCFile);
+    }
 }
 
 void _My_Builtin_File_WriteBytes(MyContext* pContext, MyVM* pVM)
 {
-    MY_NOT_IMPLEMENTED();
+    uint64_t kAddress = pVM->Stack.PopU64();
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    if (pCFile)
+    {
+        fwrite((void*)buffer, sizeof(uint8_t), buffer.Length(), pCFile);
+    }
 }
 
-void _My_Builtin_File_WriteBytesN(MyContext* pContext, MyVM* pVM)
+void _My_Builtin_File_WriteNBytes(MyContext* pContext, MyVM* pVM)
 {
-    MY_NOT_IMPLEMENTED();
+    uint64_t kSizeToWrite = pVM->Stack.PopU64();
+    uint64_t kAddress = pVM->Stack.PopU64();
+    MyObject* const& pFile = pVM->Stack.PopObject();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    FILE* pCFile = MyObjectFieldGetValueAs<FILE*>(pFile, MyObjectGetField(pFile, "CFile"));
+    if (pCFile)
+    {
+        kSizeToWrite = std::min(kSizeToWrite, (uint64_t)buffer.Length());
+        fwrite((void*)buffer, sizeof(uint8_t), kSizeToWrite, pCFile);
+    }
 }
 
 int64_t my_pow(int64_t base, int64_t exponent) noexcept

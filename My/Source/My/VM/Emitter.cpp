@@ -1837,10 +1837,12 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("FileIsOpen",      _My_Builtin_File_IsOpen);
     RegisterBuiltin("FileRead",        _My_Builtin_File_Read);
     RegisterBuiltin("FileReadN",       _My_Builtin_File_ReadN);
+    RegisterBuiltin("FileReadBytes",   _My_Builtin_File_ReadBytes);
+    RegisterBuiltin("FileReadNBytes",  _My_Builtin_File_ReadNBytes);
     RegisterBuiltin("FileWrite",       _My_Builtin_File_Write);
     RegisterBuiltin("FileWriteN",      _My_Builtin_File_WriteN);
     RegisterBuiltin("FileWriteBytes",  _My_Builtin_File_WriteBytes);
-    RegisterBuiltin("FileWriteBytesN", _My_Builtin_File_WriteBytesN);
+    RegisterBuiltin("FileWriteNBytes", _My_Builtin_File_WriteNBytes);
 }
 #pragma endregion
 
