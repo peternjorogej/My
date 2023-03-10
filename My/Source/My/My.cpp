@@ -3,7 +3,7 @@
 #include "Object.h"
 #include "VM/VM.h"
 #include "Utils/Utils.h"
-#include "Stb/stb_ds.h"
+#include "stb/stb_ds.h"
 
 #include <sstream>
 
