@@ -255,32 +255,67 @@ void _My_Builtin_HeapFree(MyContext* pContext, MyVM* pVM) noexcept
 
 void _My_Builtin_Buffer_WriteI32(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MY_NOT_IMPLEMENTED();
+    _My_Builtin_Buffer_WriteU32(pContext, pVM);
 }
 
 void _My_Builtin_Buffer_WriteI64(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MY_NOT_IMPLEMENTED();
+    _My_Builtin_Buffer_WriteU64(pContext, pVM);
 }
 
 void _My_Builtin_Buffer_WriteU32(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MY_NOT_IMPLEMENTED();
+    uint64_t kValue32 = pVM->Stack.PopU64();
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    buffer.CheckAndResize(sizeof(uint32_t));
+    const uint32_t U32 = (uint32_t)kValue32;
+    buffer.Write(&U32, sizeof(uint32_t));
 }
 
 void _My_Builtin_Buffer_WriteU64(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MY_NOT_IMPLEMENTED();
+    uint64_t kValue64 = pVM->Stack.PopU64();
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    buffer.CheckAndResize(sizeof(uint64_t));
+    buffer.Write(&kValue64, sizeof(uint64_t));
 }
 
 void _My_Builtin_Buffer_WriteF32(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MY_NOT_IMPLEMENTED();
+    double dValue32 = pVM->Stack.PopF64();
+    uint64_t kAddress = pVM->Stack.PopU64();
+
+    Buffer buffer = Buffer{ (uint8_t*)kAddress };
+
+    if (!buffer)
+    {
+        return;
+    }
+
+    buffer.CheckAndResize(sizeof(float));
+    const float F32 = (float)dValue32;
+    buffer.Write(&F32, sizeof(float));
 }
 
 void _My_Builtin_Buffer_WriteF64(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MY_NOT_IMPLEMENTED();
+    _My_Builtin_Buffer_WriteU64(pContext, pVM);
 }
 
 void _My_Builtin_Buffer_WriteString(MyContext* pContext, MyVM* pVM) noexcept
