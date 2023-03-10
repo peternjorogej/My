@@ -210,11 +210,16 @@ MyString* MyGC::CreateString(const char* lpString, size_t kLength) noexcept
     MyString* pString = reinterpret_cast<MyString*>(pBuffer);
     pString->Object.Klass = My_Defaults.StringStruct;
     pString->Object.Data  = reinterpret_cast<Byte*>(pBuffer);
-    pString->Hash = MyHashBytes(lpString, kLength, 0ul);
     pString->Length = kLength;
     pString->Chars = pBuffer + sizeof(MyString);
-    strncpy(pString->Chars, lpString, kLength);
-    pString->Chars[kLength] = 0;
+    memset(pString->Chars, 0, pString->Length);
+    
+    if (lpString)
+    {
+        pString->Hash = MyHashBytes(lpString, kLength, 0ul);
+        strncpy(pString->Chars, lpString, kLength);
+        pString->Chars[kLength] = 0;
+    }
 
     return pString;
 }
@@ -435,8 +440,8 @@ FunctionCallInfo::FunctionCallInfo(MyInstruction* pCaller)
 { }
 
 
-#pragma region Virtual_Machine
-#pragma region Virtual_Machine_Utilities
+#pragma region Virtual Machine
+#pragma region Virtual Machine Utilities
 #define _My_VM_BinaryOp(__name, __op) \
     template<typename Number>                                     \
     static inline void __name(MyVM* pVM) noexcept                \
@@ -574,7 +579,7 @@ int64_t MyVM::Execute(bool& bRunning)
 {
     switch (IP->Code)
     {
-#pragma region Stack_Operations
+#pragma region Stack Operations
         case MyOpCode::Ldc:
         {
             _My_VM_CheckOverflow(Stack);
@@ -656,7 +661,7 @@ int64_t MyVM::Execute(bool& bRunning)
             break;
         }
 #pragma endregion
-#pragma region DataStructure_Operations
+#pragma region Data Structure Operations
         case MyOpCode::Newobj:
         {
             MyObject* const& pObject = MyObjectNew(Context, Assembly->Klasses[IP->Arg0]);
@@ -743,7 +748,7 @@ int64_t MyVM::Execute(bool& bRunning)
             break;
         }
 #pragma endregion
-#pragma region Casting_Conversion_Operations
+#pragma region Casting & Conversion Operations
         case MyOpCode::Cast:
         {
             if (IP->Arg1 == 1u)
@@ -790,7 +795,7 @@ int64_t MyVM::Execute(bool& bRunning)
             break;
         }
 #pragma endregion
-#pragma region Arithmetic_Operations
+#pragma region Arithmetic Operations
         case MyOpCode::Add:  Add<int64_t>(this); IP++; break;
         case MyOpCode::Sub:  Sub<int64_t>(this); IP++; break;
         case MyOpCode::Mul:  Mul<int64_t>(this); IP++; break;
@@ -859,7 +864,7 @@ int64_t MyVM::Execute(bool& bRunning)
             break;
         }
 #pragma endregion
-#pragma region Jump_Operations
+#pragma region Jump Operations
         case MyOpCode::Jmp:
         {
             if (IP->Arg0 >= stbds_arrlenu(Assembly->Code))
@@ -970,7 +975,7 @@ int64_t MyVM::Execute(bool& bRunning)
             break;
         }
 #pragma endregion
-#pragma region Misc_Operations
+#pragma region Misc Operations
         // Others
         case MyOpCode::Nop:
         {
