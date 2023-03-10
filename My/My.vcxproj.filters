@@ -81,8 +81,9 @@
     <ClInclude Include="Vendor\Serializer\PnBinarySerializer.hpp">
       <Filter>Vendor\Serializer</Filter>
     </ClInclude>
-    <ClInclude Include="Vendor\Stb\stb_ds.h" />
+    <ClInclude Include="Vendor\stb\stb_ds.h" />
     <ClInclude Include="Source\My\My.h" />
+    <ClInclude Include="Vendor\argparse\argparse.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\My\Base\Core.cpp">
@@ -127,7 +128,8 @@
     <ClCompile Include="Vendor\Serializer\PnBinarySerializer.cpp">
       <Filter>Vendor\Serializer</Filter>
     </ClCompile>
-    <ClCompile Include="Vendor\Stb\stb_ds.cpp" />
+    <ClCompile Include="Vendor\stb\stb_ds.cpp" />
     <ClCompile Include="Source\My\My.cpp" />
+    <ClCompile Include="Vendor\argparse\argparse.c" />
   </ItemGroup>
 </Project>

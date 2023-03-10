@@ -1286,10 +1286,11 @@ namespace PnBS
             Out << uint16_t(Value.Kind);
             switch (Value.Kind)
             {
-                case MyValueKind::Bool:    Out << Value.B08; break;
-                case MyValueKind::Int64:   Out << Value.I64; break;
-                case MyValueKind::Uint64:  Out << Value.U64; break;
-                case MyValueKind::Float64: Out << Value.F64; break;
+                case MyValueKind::Null:    Out << uint64_t(); break;
+                case MyValueKind::Bool:    Out << Value.B08;  break;
+                case MyValueKind::Int64:   Out << Value.I64;  break;
+                case MyValueKind::Uint64:  Out << Value.U64;  break;
+                case MyValueKind::Float64: Out << Value.F64;  break;
                 case MyValueKind::String:
                 {
                     Out << std::string(Value.Str->Chars);
@@ -1354,14 +1355,14 @@ namespace PnBS
 
             uint32_t kCount = 0ul;
 
-            kCount = (uint32_t)stbds_shlenu(pKlass->Fields);
+            kCount = (uint32_t)stbds_arrlenu(pKlass->Fields);
             Out << kCount;
             for (size_t k = 0; k < kCount; k++)
             {
                 Out << pKlass->Fields[k];
             }
 
-            /*kCount = (uint32_t)stbds_shlenu(pKlass->Methods);
+            /*kCount = (uint32_t)stbds_arrlenu(pKlass->Methods);
             Out << kCount;
             for (size_t k = 0; k < kCount; k++)
             {
@@ -1412,6 +1413,7 @@ namespace PnBS
             
             switch (Value.Kind)
             {
+                case MyValueKind::Null:    In >> Value.U64; break;
                 case MyValueKind::Bool:    In >> Value.B08; break;
                 case MyValueKind::Int64:   In >> Value.I64; break;
                 case MyValueKind::Uint64:  In >> Value.U64; break;

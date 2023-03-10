@@ -104,8 +104,9 @@
     <ClInclude Include="Source\My\VM\Compiler.h" />
     <ClInclude Include="Source\My\VM\Emitter.h" />
     <ClInclude Include="Source\My\VM\VM.h" />
+    <ClInclude Include="Vendor\argparse\argparse.h" />
     <ClInclude Include="Vendor\Serializer\PnBinarySerializer.hpp" />
-    <ClInclude Include="Vendor\Stb\stb_ds.h" />
+    <ClInclude Include="Vendor\stb\stb_ds.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\My\Base\Core.cpp" />
@@ -122,8 +123,9 @@
     <ClCompile Include="Source\My\VM\Compiler.cpp" />
     <ClCompile Include="Source\My\VM\Emitter.cpp" />
     <ClCompile Include="Source\My\VM\VM.cpp" />
+    <ClCompile Include="Vendor\argparse\argparse.c" />
     <ClCompile Include="Vendor\Serializer\PnBinarySerializer.cpp" />
-    <ClCompile Include="Vendor\Stb\stb_ds.cpp" />
+    <ClCompile Include="Vendor\stb\stb_ds.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

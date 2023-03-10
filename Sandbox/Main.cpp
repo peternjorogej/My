@@ -1,28 +1,23 @@
 ﻿
 /// Major problems that need to be fixed
-///  1. Rewriting the parser to remove all the goto statements, and sometimes, to defer
-///     error reporting to the later stages of parsing (I want some of the functions to
-///     return nullptrs and NOT report errors).
-///  2. Passing functions (pointers/addresses) as parameters to functions so that
+///  1. Passing functions (pointers/addresses) as parameters to functions so that
 ///     we can have callbacks
-///  3. Proper FFI with C/C++. Something like P/Invoke in C# would (kind of) work,
-///     but is there a way to implement internal calls (defined as extern here)?
-///  4. Structs:
+///  2. Proper FFI with C/C++. Something like P/Invoke in C# would (kind of) work,
+///     but is there a way to better implement internal calls (defined as extern here)?
+///  3. Structs:
 ///     - Implementing pod structs
+///     - Constructors (and maybe Destructors)
 ///     - Using the defined methods
-///  5. Proper type serialization (Maybe Relfection in (distant) future?)
-///  6. const should modify the type and not the variable itself. This means that
+///  4. Proper type serialization (Maybe Relfection in (distant) future?)
+///  5. const should modify the type and not the variable itself. This means that
 ///     we can't assign to variables that have a const modifier on their types
-///  7. Initializers/(implicit)constructors: sth to initialize struct members
-///  8. Improve some of the instructions (e.g ldfld, stfld, ldelem, stelem), they do
+///  6. Improve some of the instructions (e.g ldfld, stfld, ldelem, stelem), they do
 ///     a lot and slow down the vm. Also think about inplace operations, especially
 ///     in loops, e.q clt 0, 1 means cmp less than between local 0 & 1 (not pushing
 ///     into evaluation stack then setting it back)
-///  9. Compile time functions:
+///  7. Compile time functions:
 ///     - static_assert, ...
-/// 10. Debugging *?
-/// 
-/// 
+///  8. Debugging *?
 /// 
 /// 
 
@@ -30,48 +25,133 @@
 #include <My/Object.h>
 #include <My/VM/VM.h>
 #include <My/Utils/Utils.h>
-#include <Stb/stb_ds.h>
 #include <My/VM/Compiler.h>
 
-static void DataTypeSizes() noexcept;
-static void TestNewAPI(MyContext* pContext) noexcept;
+#include <stb/stb_ds.h>
+#include <argparse/argparse.h>
 
-struct Complex
+static const char* const lpUsages[] =
 {
-	double Real = 0.0;
-	double Imag = 0.0;
+	"myc [options] [[--] args]",
+	NULL,
 };
+
+
+static void PrintDataTypeSizes() noexcept;
+
+static void CppFunction_Native(MyContext* pContext, MyVM* pVM) noexcept
+{
+	int64_t i = pVM->Stack.PopI64();
+	MyString* s = pVM->Stack.PopString();
+	Console::WriteLine("%s, %I64d", s->Chars, i);
+}
 
 int main(int iArgc, char** ppArgv)
 {
 	MyContext* pContext = MyInitialize();
 
-	if constexpr (false)
+	std::vector<char*> Argv(iArgc);
+	for (int k = 0; k < iArgc; k++)
 	{
-		DataTypeSizes();
-	}
-	if constexpr (false)
-	{
-		TestNewAPI(pContext);
+		Argv[k] = ppArgv[k];
 	}
 
-	// Try to register a type natively
-	MyStruct* pKlass = MyStructCreate(pContext, "MyNativeStruct", MY_STRUCT_ATTR_NONE);
-	MyStructAddField(pKlass, "Value0", My_Defaults.IntType);
-	MyStructAddField(pKlass, "Value1", My_Defaults.IntType);
+	int  bPrintDataTypeSizes = false;
+	const char* lpBuildFilepath = nullptr;
+	const char* lpRunFilepath = nullptr;
+	const char* lpRunSourceFilepath = nullptr;
+	const char* lpDecompFilepath = nullptr;
 
-	MyAssembly* pAss = Compiler::Build(pContext, "Samples/Hello.my", {}, { pKlass });
-	if (pAss)
+	struct argparse_option pOptions[] =
 	{
-		MyDecompile(pAss);
-		int64_t kResult = Compiler::Run(pContext, pAss, iArgc, ppArgv);
+		OPT_HELP(),
+		
+		OPT_GROUP("Basic options"),
+		OPT_STRING('b', "build",  &lpBuildFilepath,     "Build the .MY file to a .MYBC", nullptr, (intptr_t)0, 0),
+		OPT_STRING('r', "run",    &lpRunFilepath,       "Run the compiled .MYBC file",   nullptr, (intptr_t)0, 0),
+		OPT_STRING('r', "runsrc", &lpRunSourceFilepath, "Run the .MY file",              nullptr, (intptr_t)0, 0),
+		OPT_STRING('d', "decomp", &lpDecompFilepath,    "Decompile the .MYBC file",      nullptr, (intptr_t)0, 0),
+		
+		OPT_BOOLEAN(0, "dtype-sizes", &bPrintDataTypeSizes, "Print the sizes for the data types in My", nullptr, (intptr_t)0, 0),
+
+		OPT_END(),
+	};
+
+	struct argparse ArgpParser;
+	argparse_init(&ArgpParser, pOptions, lpUsages, 0);
+	argparse_describe(&ArgpParser, "\nMy Language Compiler.", nullptr);
+	iArgc = argparse_parse(&ArgpParser, iArgc, (const char**)ppArgv);
+
+	List<InternalFunction> Internals =
+	{
+		{ "CppFunction", CppFunction_Native },
+	};
+
+	if (bPrintDataTypeSizes)
+	{
+		PrintDataTypeSizes();
+	}
+
+	if (lpBuildFilepath)
+	{
+		MyAssembly* pAss = Compiler::Build(pContext, lpBuildFilepath, Internals, {});
+		const std::string Filename = Console::Format("%sbc", lpBuildFilepath);
+		if (Compiler::Dump(pContext, pAss, Filename.c_str()))
 		{
+			Console::WriteLine(Console::Color::Green, "Build successful (output: %s)", Filename.c_str());
+		}
+		else
+		{
+			Console::WriteLine(Console::Color::Red, "Build failed (could not compile %s)", lpBuildFilepath);
+		}
+	}
+	if (lpRunFilepath)
+	{
+		MyAssembly* pAss = Compiler::Load(pContext, lpRunFilepath);
+		if (pAss)
+		{
+			int64_t iResult = Compiler::Run(pContext, pAss, (int)Argv.size(), Argv.data());
 			Console::Color Color = Console::Color::Green;
-			if (kResult != MY_RC_SUCCESS)
+			if (iResult != MY_RC_SUCCESS)
 			{
 				Color = Console::Color::Red;
 			}
-			Console::WriteLine(Color, "\nProgram exited with code %I64d (%s)\n", kResult, MyReturnCodeString(kResult));
+			Console::WriteLine(Color, "\nProgram exited with code %I64d (%s)\n", iResult, MyReturnCodeString(iResult));
+		}
+		else
+		{
+			Console::WriteLine(Console::Color::Red, "Failed to load bytecode file '%s' for execution", lpRunFilepath);
+		}
+	}
+	if (lpRunSourceFilepath)
+	{
+		MyAssembly* pAss = Compiler::Build(pContext, lpRunSourceFilepath, Internals, {});
+		if (pAss)
+		{
+			int64_t iResult = Compiler::Run(pContext, pAss, (int)Argv.size(), Argv.data());
+			Console::Color Color = Console::Color::Green;
+			if (iResult != MY_RC_SUCCESS)
+			{
+				Color = Console::Color::Red;
+			}
+			Console::WriteLine(Color, "\nProgram exited with code %I64d (%s)\n", iResult, MyReturnCodeString(iResult));
+		}
+		else
+		{
+			Console::WriteLine(Console::Color::Red, "Build failed (could not compile %s)", lpRunSourceFilepath);
+		}
+	}
+	if (lpDecompFilepath)
+	{
+		MyAssembly* pAss = Compiler::Load(pContext, lpDecompFilepath);
+		if (pAss)
+		{
+			MyDecompile(pAss);
+			Console::WriteLine("(Successful decompilation)");
+		}
+		else
+		{
+			Console::WriteLine(Console::Color::Red, "Failed to load bytecode file '%s' for decompilation", lpDecompFilepath);
 		}
 	}
 
@@ -79,7 +159,7 @@ int main(int iArgc, char** ppArgv)
 	return 0;
 }
 
-void DataTypeSizes() noexcept
+void PrintDataTypeSizes() noexcept
 {
 	Console::WriteLine(Console::Color::Magenta, "Hello, World from My\n");
 
@@ -107,92 +187,3 @@ void DataTypeSizes() noexcept
 	Console::WriteLine();
 }
 
-void TestNewAPI(MyContext* pContext) noexcept
-{
-	{
-		Console::WriteLine(Console::Color::Green, "Testing array of strings");
-
-		MyArrayShape shape = { 3ul, 0ul, 0ul, 0ul };
-		MyArray* pNames = MyArrayNew(pContext, My_Defaults.StringStruct, shape);
-		MyArraySet2(pNames, MyString*, 0, MyStringNew(pContext, "Peter"));
-		MyArraySet2(pNames, MyString*, 1, MyStringNew(pContext, "Njoroge"));
-		MyArraySet2(pNames, MyString*, 2, MyStringNew(pContext, "Julius"));
-
-		for (size_t k = 0; k < MyArrayCount(pNames); k++)
-		{
-			MyString* pName = MyArrayGet(pNames, MyString*, k);
-			Console::WriteLine(pName->Chars);
-		}
-	}
-	{
-		Console::WriteLine(Console::Color::Green, "Testing array of objects(T = Complex)");
-
-		MyArrayShape shape = { 3ul, 0ul, 0ul, 0ul };
-		MyArray* pNums = MyArrayNew(pContext, My_Defaults.ComplexStruct, shape);
-		for (size_t k = 0; k < MyArrayCount(pNums); k++)
-		{
-			const Complex Z = Complex{ Random::Float(1, 10), Random::Float(1, 10) };
-			Console::WriteLine("Complex{ %.4g, %.4gi }", Z.Real, Z.Imag);
-			MyArraySet2(pNums, Complex, k, Z);
-		}
-
-		for (size_t k = 0; k < MyArrayCount(pNums); k++)
-		{
-			const Complex& Z = MyArrayGet(pNums, Complex, k);
-			Console::WriteLine("Complex{ %.4g, %.4gi }", Z.Real, Z.Imag);
-		}
-	}
-	{
-		Console::WriteLine(Console::Color::Green, "Testing object(T = File)");
-
-		MyObject* pFile = MyObjectNew(pContext, My_Defaults.FileStruct);
-		{
-			const uint64_t kHandle = Random::Uint();
-			MyString* pPath = MyStringNew(pContext, __FILE__);
-			Console::WriteLine("File{ %I64u, %s }", kHandle, pPath->Chars);
-			MyObjectFieldSetValueAs<uint64_t>(pFile, MyObjectGetField(pFile, "Handle"), kHandle);
-			MyObjectFieldSetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "Filepath"), pPath);
-		}
-		{
-			const uint64_t& kHandle = MyObjectFieldGetValueAs<uint64_t>(pFile, MyObjectGetField(pFile, "Handle"));
-			const MyString* const& pPath = MyObjectFieldGetValueAs<MyString*>(pFile, MyObjectGetField(pFile, "Filepath"));
-			Console::WriteLine("File{ %I64u, %s }", kHandle, pPath->Chars);
-		}
-	}
-	{
-		Console::WriteLine(Console::Color::Green, "Testing type creation & instantiation(T = MyData)");
-
-		MyStruct* pMyDataStruct = MyStructCreate(pContext, "MyData", MY_STRUCT_ATTR_NONE);
-		MyStructAddField(pMyDataStruct, "ID", My_Defaults.UintType);
-		MyStructAddField(pMyDataStruct, "Key", My_Defaults.StringType);
-		MyStructAddField(pMyDataStruct, "W", My_Defaults.ComplexType);
-		MyStructAddField(pMyDataStruct, "Z", My_Defaults.ComplexType);
-		Console::WriteLine("struct ['%s'] MyData (%uB):", pMyDataStruct->Guid.AsString(), pMyDataStruct->Size);
-		{
-			for (size_t k = 0; k < stbds_arrlenu(pMyDataStruct->Fields); k++)
-			{
-				const MyField& field = pMyDataStruct->Fields[k];
-				Console::WriteLine("   - %.2u %s [%s]", field.Offset, field.Name, field.Type->Klass->Name);
-			}
-		}
-
-		MyObject* pMyData = MyObjectNew(pContext, pMyDataStruct);
-		{
-			const uint64_t kId = Random::Uint();
-			MyString* pKey = MyStringNew(pContext, pMyDataStruct->Guid.AsString());
-
-			MyObjectFieldSetValueAs<uint64_t>(pMyData, MyObjectGetField(pMyData, "ID"), kId);
-			MyObjectFieldSetValueAs<MyString*>(pMyData, MyObjectGetField(pMyData, "Key"), pKey);
-			MyObjectFieldSetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "W"), Complex{ 1.234, 5.678 });
-			MyObjectFieldSetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "Z"), Complex{ 9.123, 4.567 });
-		}
-		{
-			const uint64_t& kId = MyObjectFieldGetValueAs<uint64_t>(pMyData, MyObjectGetField(pMyData, "ID"));
-			MyString* const& pKey = MyObjectFieldGetValueAs<MyString*>(pMyData, MyObjectGetField(pMyData, "Key"));
-			const auto& [Wx, Wy] = MyObjectFieldGetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "W"));
-			const auto& [Zx, Zy] = MyObjectFieldGetValueAs<Complex>(pMyData, MyObjectGetField(pMyData, "Z"));
-			Console::WriteLine("MyData{ %I64u, '%s', Complex{ %.4g, %.4g }, Complex{ %.4g, %.4g } }", kId, pKey->Chars, Wx, Wy, Zx, Zy);
-}
-	}
-	Console::WriteLine();
-}
