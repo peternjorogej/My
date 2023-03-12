@@ -69,7 +69,7 @@ int main(int iArgc, char** ppArgv)
 		OPT_GROUP("Basic options"),
 		OPT_STRING('b', "build",  &lpBuildFilepath,     "Build the .MY file to a .MYBC", nullptr, (intptr_t)0, 0),
 		OPT_STRING('r', "run",    &lpRunFilepath,       "Run the compiled .MYBC file",   nullptr, (intptr_t)0, 0),
-		OPT_STRING('r', "runsrc", &lpRunSourceFilepath, "Run the .MY file",              nullptr, (intptr_t)0, 0),
+		OPT_STRING('s', "runsrc", &lpRunSourceFilepath, "Run the .MY file",              nullptr, (intptr_t)0, 0),
 		OPT_STRING('d', "decomp", &lpDecompFilepath,    "Decompile the .MYBC file",      nullptr, (intptr_t)0, 0),
 		
 		OPT_BOOLEAN(0, "dtype-sizes", &bPrintDataTypeSizes, "Print the sizes for the data types in My", nullptr, (intptr_t)0, 0),
