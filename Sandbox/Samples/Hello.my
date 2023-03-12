@@ -5,9 +5,11 @@ extern function void   WriteLine(string Format, object[] Args,);
 
 using Matrix4x4 = float[4, 4,];
 
+// Testing function inlining
 function static inline int Go() nogc
 {
-	return 0;
+	const int ret = true ? 0 : 1;
+	return ret;
 }
 
 function int Main(const string[] Argv)

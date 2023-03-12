@@ -96,13 +96,14 @@ int main(int iArgc, char** ppArgv)
 	{
 		MyAssembly* pAss = Compiler::Build(pContext, lpBuildFilepath, Internals, {});
 		const std::string Filename = Console::Format("%sbc", lpBuildFilepath);
-		if (Compiler::Dump(pContext, pAss, Filename.c_str()))
+		if (pAss && Compiler::Dump(pContext, pAss, Filename.c_str()))
 		{
 			Console::WriteLine(Console::Color::Green, "Build successful (output: %s)", Filename.c_str());
 		}
 		else
 		{
 			Console::WriteLine(Console::Color::Red, "Build failed (could not compile %s)", lpBuildFilepath);
+			goto Error;
 		}
 	}
 	if (lpRunFilepath)
@@ -121,6 +122,7 @@ int main(int iArgc, char** ppArgv)
 		else
 		{
 			Console::WriteLine(Console::Color::Red, "Failed to load bytecode file '%s' for execution", lpRunFilepath);
+			goto Error;
 		}
 	}
 	if (lpRunSourceFilepath)
@@ -139,6 +141,7 @@ int main(int iArgc, char** ppArgv)
 		else
 		{
 			Console::WriteLine(Console::Color::Red, "Build failed (could not compile %s)", lpRunSourceFilepath);
+			goto Error;
 		}
 	}
 	if (lpDecompFilepath)
@@ -152,9 +155,11 @@ int main(int iArgc, char** ppArgv)
 		else
 		{
 			Console::WriteLine(Console::Color::Red, "Failed to load bytecode file '%s' for decompilation", lpDecompFilepath);
+			goto Error;
 		}
 	}
 
+Error:
 	MyUninitialize(pContext);
 	return 0;
 }

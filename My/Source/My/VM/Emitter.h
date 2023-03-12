@@ -129,7 +129,11 @@ private:
 	void EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression* pConversion);
 	void EmitInstanceExpression(MyBytecodeProcessor& bp, BoundExpression* pInstance);
 
+	void EmitFunctionBody(MyBytecodeProcessor& bp, BoundStatement** pStatements, bool bIsInline = false);
+
 private:
+	const BoundProgram::FunctionMap* m_FunctionBodies = nullptr;
+
 	DiagnosticBag m_Diagnostics = {};
 };
 

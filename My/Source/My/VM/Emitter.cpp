@@ -407,6 +407,8 @@ MyAssembly* Emitter::Build(MyContext* pContext, const BoundProgram* pProgram, co
 
 void Emitter::EmitProgram(MyBytecodeProcessor& bp, const BoundProgram* pProgram)
 {
+    m_FunctionBodies = pProgram->FunctionBodies;
+
     EmitTypes(bp, pProgram);
     EmitInternalFunctions(bp);
 
@@ -424,15 +426,15 @@ void Emitter::EmitProgram(MyBytecodeProcessor& bp, const BoundProgram* pProgram)
     bp.Emit(MyOpCode::Call, "Main");
     bp.Emit(MyOpCode::Jmp, "__end");
 
-    const size_t kFunctionCount = stbds_shlenu(pProgram->FunctionBodies);
+    const size_t kFunctionCount = stbds_shlenu(m_FunctionBodies);
 
-    // pProgram->FunctionBodies is a map so there is the likelihood of attempting 
+    // m_FunctionBodies is a map so there is the likelihood of attempting 
     // to call an extern-ed function before it has been emitted as an extern.
     // So we do 2 passes: the first to declare the extern-ed functions...
     for (size_t k = 0; k < kFunctionCount; k++)
     {
-        const auto&[lpName, Fun] = pProgram->FunctionBodies[k];
-        const auto&[pFunction, pBody] = Fun;
+        const auto& [lpName, Fun] = m_FunctionBodies[k];
+        const auto& [pFunction, pBody] = Fun;
 
         if (!pBody)
         {
@@ -446,7 +448,7 @@ void Emitter::EmitProgram(MyBytecodeProcessor& bp, const BoundProgram* pProgram)
                 continue;
             }
 
-            if (auto&[name, pfnBuiltin] = stbds_shgets(s_Builtins, lpName); pfnBuiltin != nullptr)
+            if (auto& [name, pfnBuiltin] = stbds_shgets(s_Builtins, lpName); pfnBuiltin != nullptr)
             {
                 bp.RegisterFunction(lpName, pfnBuiltin);
             }
@@ -461,7 +463,7 @@ void Emitter::EmitProgram(MyBytecodeProcessor& bp, const BoundProgram* pProgram)
     // ...and the second to emit the user defined functions
     for (size_t k = 0; k < kFunctionCount; k++)
     {
-        const auto&[lpName, Fun] = pProgram->FunctionBodies[k];
+        const auto& [lpName, Fun] = m_FunctionBodies[k];
         const auto&[pFunction, pBody] = Fun;
 
         if (pBody)
@@ -488,12 +490,14 @@ void Emitter::EmitFunction(MyBytecodeProcessor& bp, const MySymbol* pFunction, B
         bp.Emit(MyOpCode::Ldarg, fs.Parameters[k]);
     }
 
-    iCount = stbds_arrlen(pBody->block.Statements);
+    EmitFunctionBody(bp, pBody->block.Statements);
+
+    /*iCount = stbds_arrlen(pBody->block.Statements);
     for (int32_t k = 0; k < iCount; k++)
     {
         BoundStatement* const& pStmt = pBody->block.Statements[k];
         EmitStatement(bp, pStmt);
-    }
+    }*/
 
     bp.EndFunction();
 }
@@ -941,7 +945,8 @@ void Emitter::EmitCallExpression(MyBytecodeProcessor& bp, BoundExpression* pCall
 {
     BoundCallExpression& ce = pCall->call;
 
-    for (size_t k = 0; k < stbds_arrlenu(ce.Arguments); k++)
+    const size_t kArgc = stbds_arrlenu(ce.Arguments);
+    for (size_t k = 0; k < kArgc; k++)
     {
         EmitExpression(bp, ce.Arguments[k]);
     }
@@ -961,7 +966,23 @@ void Emitter::EmitCallExpression(MyBytecodeProcessor& bp, BoundExpression* pCall
     }
     else
     {
-        bp.Emit(MyOpCode::Call, lpName);
+        // Inline the functions defined as inline
+        FunctionSymbol& fs = ce.Function->funcsym;
+        if (fs.IsInline && kArgc == 0u)
+        {
+            const BoundProgram::BoundFunction& bf = stbds_shget(m_FunctionBodies, lpName);
+            const auto&[_, pBody] = bf;
+            EmitFunctionBody(bp, pBody->block.Statements, true);
+        }
+        else
+        {
+            if (fs.IsInline)
+            {
+                DebugLog::Warn("[NotImplemented]: Failed to inlining function ('%s') with arguments", lpName);
+            }
+
+            bp.Emit(MyOpCode::Call, lpName);
+        }
     }
 }
 
@@ -1193,6 +1214,43 @@ void Emitter::EmitInstanceExpression(MyBytecodeProcessor& bp, BoundExpression* p
 
     bp.Emit(MyOpCode::Newobj, ie.Type->Fullname);
     bp.Emit(MyOpCode::Call, ie.Type->Fullname);*/
+}
+
+void Emitter::EmitFunctionBody(MyBytecodeProcessor& bp, BoundStatement** pStatements, bool bIsInline)
+{
+    const size_t kCount = stbds_arrlenu(pStatements);
+    if (bIsInline)
+    {
+        for (int32_t k = 0; k < kCount; k++)
+        {
+            BoundStatement* const& pStmt = pStatements[k];
+            switch (pStmt->Kind)
+            {
+                case BoundStatementKind::Return:
+                {
+                    BoundReturnStatement& rs = pStmt->ret;
+                    if (rs.Expr)
+                    {
+                        EmitExpression(bp, rs.Expr);
+                    }
+                    break;
+                }
+                default:
+                {
+                    EmitStatement(bp, pStmt);
+                    break;
+                }
+            }
+        }
+    }
+    else
+    {
+        for (int32_t k = 0; k < kCount; k++)
+        {
+            BoundStatement* const& pStmt = pStatements[k];
+            EmitStatement(bp, pStmt);
+        }
+    }
 }
 #pragma endregion
 
