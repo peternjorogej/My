@@ -825,8 +825,8 @@ private:
 	// Expressions
 	Expression* ParseExpression() noexcept
 	{
-		// return ParseTernaryExpression();
-		return ParseAssignmentExpression();
+		return ParseTernaryExpression();
+		// return ParseAssignmentExpression();
 	}
 
 	Expression* ParsePrimaryExpression() noexcept
@@ -1036,7 +1036,7 @@ private:
 		Expression* pThen = nullptr;
 		Expression* pElse = nullptr;
 
-		if (!(pCond = ParseExpression()))
+		if (!(pCond = ParseAssignmentExpression()))
 		{
 			return nullptr;
 		}
@@ -1070,7 +1070,7 @@ private:
 		Expression* pLhs = nullptr;
 		Expression* pRhs = nullptr;
 
-		if (!(pLhs = ParseBinaryExpression()))
+		if (!(pLhs = ParseSecondaryExpression()))
 		{
 			return nullptr;
 		}
