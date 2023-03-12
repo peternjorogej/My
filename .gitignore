@@ -3,4 +3,4 @@
 bin-int
 bin
 **.user
-**.mybc
+Sandbox/Samples/*.mybc
