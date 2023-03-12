@@ -8,8 +8,7 @@ using Matrix4x4 = float[4, 4,];
 // Testing function inlining
 function static inline int Go() nogc
 {
-	const int ret = true ? 0 : 1;
-	return ret;
+	return 0;
 }
 
 function int Main(const string[] Argv)

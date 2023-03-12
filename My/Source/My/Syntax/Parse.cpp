@@ -1070,7 +1070,7 @@ private:
 		Expression* pLhs = nullptr;
 		Expression* pRhs = nullptr;
 
-		if (!(pLhs = ParseSecondaryExpression()))
+		if (!(pLhs = ParseBinaryExpression()))
 		{
 			return nullptr;
 		}
