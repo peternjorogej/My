@@ -2080,22 +2080,30 @@ private:
 	FunctionSignature ParseFunctionSignature() noexcept
 	{
 		// Signature is invalid if:
-		//     1. FunctionSignature.Name.Kind != Identifier
+		//     1. FunctionSignature.Name.Kind == Invalid
 		//     2. FunctionSignature.Return == nullptr;
 		static const FunctionSignature s_InvalidSignature = {};
 
 		// Signature: inline? static? rtype name(constexpr? argtype argname, ...) nogc?
 		FunctionSignature fs = {};
 
-		if (Current().Kind == TokenKind::InlineKeyword)
+		// We don't know what keyword, if any, will come and in what order. But we know how many
+		// we expect, so we can loop through them until we're done:
+		static constexpr size_t s_ExpectedFunctionModifiersCount = 2; // inline, static
+		for (size_t k = 0; k < s_ExpectedFunctionModifiersCount; k++)
 		{
-			fs.InlineKeyword = Allocator::Create<Token>(Allocator::Stage::Parser, NextToken());
-			fs.Attributes |= MY_FUNC_ATTR_INLINE;
-		}
-		if (Current().Kind == TokenKind::StaticKeyword)
-		{
-			fs.StaticKeyword = Allocator::Create<Token>(Allocator::Stage::Parser, NextToken());
-			fs.Attributes |= MY_FUNC_ATTR_STATIC;
+			switch (Current().Kind)
+			{
+				case TokenKind::InlineKeyword:
+					fs.InlineKeyword = Allocator::Create<Token>(Allocator::Stage::Parser, NextToken());
+					fs.Attributes |= MY_FUNC_ATTR_INLINE;
+					break;
+				case TokenKind::StaticKeyword:
+					fs.StaticKeyword = Allocator::Create<Token>(Allocator::Stage::Parser, NextToken());
+					fs.Attributes |= MY_FUNC_ATTR_STATIC;
+					break;
+				default: break;
+			}
 		}
 
 		if (!(fs.Return = ParseTypeSpec()))

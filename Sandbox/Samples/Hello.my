@@ -3,20 +3,9 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function intptr HeapAlloc(uint kCapacity);
-extern function void   HeapFree(intptr pBuffer);
-extern function string BufferReadString(intptr pBuffer);
-extern function void   BufferWriteString(intptr pBuffer, string Value);
-extern function void   BufferAppend(intptr pBuffer, intptr pOtherBuffer);
-
-extern function File   FileOpen(string Path, string Mode);
-extern function void   FileClose(File f);
-extern function intptr FileReadBytes(File f);
-extern function void   FileWriteBytes(File f, intptr Buffer);
-
 using Matrix4x4 = float[4, 4,];
 
-function static int Go() nogc
+function static inline int Go() nogc
 {
 	return 0;
 }
@@ -25,28 +14,6 @@ function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
 	Print(ReadLine());
-	
-	const intptr buffer = HeapAlloc(0);
-	BufferWriteString(buffer, "Hello, World");
-	BufferAppend(buffer, buffer);
-	
-	{
-		const File f = FileOpen("Samples/Out.bin", "wb");
-		FileWriteBytes(f, buffer);
-		FileClose(f);
-	}
-	{
-		const File f = FileOpen("Samples/Out.bin", "rb");
-		const intptr contents = FileReadBytes(f);
-		FileClose(f);
-		
-		Print(BufferReadString(contents));
-		Print(BufferReadString(contents));
-		
-		HeapFree(contents);
-	}
-	
-	HeapFree(buffer);
 	
 	return Go();
 }
