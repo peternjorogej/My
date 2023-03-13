@@ -743,7 +743,9 @@ int64_t MyVM::Execute(bool& bRunning)
             // TODO: Will come back to this later (improvement)
             MyObject* pObject = Stack.PopObject();
             MyField* pField = MyObjectGetField(pObject, Assembly->Fields[IP->Arg0].key);
-            MyObjectFieldSetValueAs<uint64_t>(pObject, pField, Stack.PopU64());
+            uint64_t kValue = Stack.PopU64();
+            MyObjectFieldSetValue(pObject, pField, &kValue, sizeof(uint64_t));
+            //MyObjectFieldSetValueAs<uint64_t>(pObject, pField, Stack.PopU64());
             IP++;
             break;
         }

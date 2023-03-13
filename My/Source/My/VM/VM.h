@@ -12,9 +12,9 @@ struct MyGC
 {
     struct RuntimeAllocation
     {
-        void*        Object = nullptr;
+        void*       Object = nullptr;
         MyValueKind Kind   = MyValueKind::Invalid;
-        bool         Marked = false;
+        bool        Marked = false;
     };
 
     using MemoryMap = Pair<void*, RuntimeAllocation>;
@@ -76,7 +76,7 @@ struct MyStack
     }
 
     template<typename Tp>
-    inline Tp& At(uint32_t kIndex) noexcept
+    inline Tp& At(size_t kIndex) noexcept
     {
         return *reinterpret_cast<Tp*>(&Stack[SP - ((kIndex + 1u) * sizeof(Tp))]);
     }
