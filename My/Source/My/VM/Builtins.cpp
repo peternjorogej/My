@@ -88,26 +88,76 @@ void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept
             {
                 Console::Write("%.*s", pIt - lpBegin, lpBegin);
             }
+            else
+            {
+                Console::Write("$");
+            }
 
             switch (pIt[1])
             {
-                case '$':
-                    Console::Write("$");
+                case '*':
+                {
+                    const char Character = (++pIt)[1];
+                    MyArray* const& pArray = MyArrayGet(pArgs, MyArray*, kIndex++);
+                    Console::Write("(");
+                    for (size_t k = 0; k < pArray->Count; k++)
+                    {
+                        switch (Character)
+                        {
+                            case 'b':
+                                Console::Write("%s", MyArrayGet(pArray, uint64_t, k) ? "true" : "false");
+                                break;
+                            case 'd':
+                                Console::Write("%I64d", MyArrayGet(pArray, int64_t, k));
+                                break;
+                            case 'i':
+                                Console::Write("%I64d", MyArrayGet(pArray, int64_t, k));
+                                break;
+                            case 'u':
+                                Console::Write("%I64u", MyArrayGet(pArray, uint64_t, k));
+                                break;
+                            case 'f':
+                                Console::Write("%1.9f", MyArrayGet(pArray, double, k));
+                                break;
+                            case 'g':
+                                Console::Write("%1.9g", MyArrayGet(pArray, double, k));
+                                break;
+                            case 's':
+                            {
+                                MyString* const& pString = MyArrayGet(pArray, MyString*, k);
+                                Console::Write("'%s'", pString->Chars);
+                                break;
+                            }
+                            default:
+                                break;
+                        }
+                        Console::Write(k == pArray->Count - 1 ? "" : ", ");
+                    }
+                    Console::Write(")");
                     break;
+                }
                 case 'b':
+                {
                     Console::Write("%s", MyArrayGet(pArgs, uint64_t, kIndex++) ? "true" : "false");
                     break;
+                }
                 case 'd':
                 case 'i':
+                {
                     Console::Write("%I64d", MyArrayGet(pArgs, int64_t, kIndex++));
                     break;
+                }
                 case 'f':
                 case 'g':
+                {
                     Console::Write("%1.9g", MyArrayGet(pArgs, double, kIndex++));
                     break;
+                }
                 case 'u':
+                {
                     Console::Write("%I64u", MyArrayGet(pArgs, uint64_t, kIndex++));
                     break;
+                }
                 case 's':
                 {
                     MyString* const& pString = MyArrayGet(pArgs, MyString*, kIndex++);
@@ -594,6 +644,12 @@ void _My_Builtin_String_Compare(MyContext* pContext, MyVM* pVM) noexcept
     MyString* const& pRhs = pVM->Stack.PopString();
     MyString* const& pLhs = pVM->Stack.PopString();
     pVM->Stack.Push(pLhs == pRhs);
+}
+
+void _My_Builtin_String_Length(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pString = pVM->Stack.PopString();
+    pVM->Stack.Push(pString->Length);
 }
 
 void _My_Builtin_String_Find(MyContext* pContext, MyVM* pVM) noexcept
