@@ -10,18 +10,24 @@ function int Main(const string[] Argv)
 	Print(s_Message);
 	Print(ReadLine());	
 	
-	const uint     len = s_Message.Length();
-	const uint     pos = s_Message.Find("My");
-	const string   sub = s_Message.Substr(pos, 0);
-	const string[] spl = s_Message.Split(" ");
-	const bool     ssw = s_Message.StartsWith("He");
-	const bool     sew = s_Message.EndsWith("om");
-	const string   stu = s_Message.ToUpper();
-	const string   stl = s_Message.ToLower();
-	{
-		var object[] vArgs = { object(len), pos, sub, spl, ssw, sew, stu, stl };
-		WriteLine("Results{ $u, $u, $s, $*s, $b, $b, $s, $s }", vArgs);
-	}
+	const StringBuilder sb = new StringBuilder(Capacity: 32u);
+	sb.Init();
+	sb.WriteLine("Group(Scene)");
+	sb.Indent = sb.Indent + 1;
+		sb.WriteLine("Group(Entity)");
+		sb.Indent = sb.Indent + 1;
+			sb.WriteLine("Name = \"Floor\"");
+			sb.WriteLine("GUID = \"9E47ABB7-73CF-48F9-B5C7-F80471B4DBFD\"");
+			sb.WriteLine("Position = { 0.0, 0.0, 0.0 }");
+			sb.WriteLine("Rotation = { 0.0, 0.0, 0.0 }");
+			sb.WriteLine("Scaling  = { 1.0, 1.0, 1.0 }");
+		sb.Indent = sb.Indent - 1;
+		sb.WriteLine("EndGroup");
+	sb.Indent = sb.Indent - 1;
+	sb.WriteLine("EndGroup");
+	
+	const string str = sb.ToString();
+	Print(str);
 	
 	return 0;
 }

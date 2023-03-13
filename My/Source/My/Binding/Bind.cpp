@@ -2353,29 +2353,33 @@ private:
 			return pArrayType;
 		};
 
+		static MyType* const pObjectArray = ArrayType(md.ObjectType);
+		static MyType* const pStringArray = ArrayType(md.StringType);
+
 		// Complex
 		{
 			//
 		}
 
-		// String
-		{
-			MyType* const pStringArray = ArrayType(md.StringType);
+		/// String
+		SetupMethod(md.StringType, "Length",     md.UintType,    { });
+		SetupMethod(md.StringType, "Find",       md.UintType,    { { "sSubstr", md.StringType } });
+		SetupMethod(md.StringType, "Substr",     md.StringType,  { { "kOffset", md.UintType   }, { "kLength", md.UintType   } });
+		SetupMethod(md.StringType, "Split",      pStringArray,   { { "sSep",    md.StringType } });
+		SetupMethod(md.StringType, "StartsWith", md.BooleanType, { { "sPrefix", md.StringType } });
+		SetupMethod(md.StringType, "EndsWith",   md.BooleanType, { { "sSuffix", md.StringType } });
+		SetupMethod(md.StringType, "ToUpper",    md.StringType,  { });
+		SetupMethod(md.StringType, "ToLower",    md.StringType,  { });
 
-			SetupMethod(md.StringType, "Length",     md.UintType,    { });
-			SetupMethod(md.StringType, "Find",       md.UintType,    { { "sSubstr", md.StringType } });
-			SetupMethod(md.StringType, "Substr",     md.StringType,  { { "kOffset", md.UintType   }, { "kLength", md.UintType   } });
-			SetupMethod(md.StringType, "Split",      pStringArray,   { { "sSep",    md.StringType } });
-			SetupMethod(md.StringType, "StartsWith", md.BooleanType, { { "sPrefix", md.StringType } });
-			SetupMethod(md.StringType, "EndsWith",   md.BooleanType, { { "sSuffix", md.StringType } });
-			SetupMethod(md.StringType, "ToUpper",    md.StringType,  { });
-			SetupMethod(md.StringType, "ToLower",    md.StringType,  { });
-		}
-
-		// StringBuilder
-		{
-			//
-		}
+		/// StringBuilder
+		SetupMethod(md.StringBuilderType, "Init",       md.VoidType,   { });
+		SetupMethod(md.StringBuilderType, "Append",     md.VoidType,   { { "sString", md.StringType } });
+		SetupMethod(md.StringBuilderType, "AppendV",    md.VoidType,   { { "sFormat", md.StringType }, { "vArgs", pObjectArray } });
+		SetupMethod(md.StringBuilderType, "Write",      md.VoidType,   { { "sString", md.StringType } });
+		SetupMethod(md.StringBuilderType, "WriteV",     md.VoidType,   { { "sString", md.StringType }, { "vArgs", pObjectArray } });
+		SetupMethod(md.StringBuilderType, "WriteLine",  md.VoidType,   { { "sString", md.StringType } });
+		SetupMethod(md.StringBuilderType, "WriteLineV", md.VoidType,   { { "sString", md.StringType }, { "vArgs", pObjectArray } });
+		SetupMethod(md.StringBuilderType, "ToString",   md.StringType, { });
 
 		// Bytes
 		{

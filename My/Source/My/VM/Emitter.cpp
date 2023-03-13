@@ -1875,14 +1875,14 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("String__ToUpper",    _My_Builtin_String_ToUpper);
     RegisterBuiltin("String__ToLower",    _My_Builtin_String_ToLower);
     // StringBuilder
-    RegisterBuiltin("SbInit",       _My_Builtin_StringBuilder_Init);
-    RegisterBuiltin("SbAppend",     _My_Builtin_StringBuilder_Append);
-    RegisterBuiltin("SbAppendV",    _My_Builtin_StringBuilder_AppendV);
-    RegisterBuiltin("SbWrite",      _My_Builtin_StringBuilder_Write);
-    RegisterBuiltin("SbWriteV",     _My_Builtin_StringBuilder_WriteV);
-    RegisterBuiltin("SbWriteLine",  _My_Builtin_StringBuilder_WriteLine);
-    RegisterBuiltin("SbWriteLineV", _My_Builtin_StringBuilder_WriteLineV);
-    RegisterBuiltin("SbToString",   _My_Builtin_StringBuilder_ToString);
+    RegisterBuiltin("StringBuilder__Init",       _My_Builtin_StringBuilder_Init);
+    RegisterBuiltin("StringBuilder__Append",     _My_Builtin_StringBuilder_Append);
+    RegisterBuiltin("StringBuilder__AppendV",    _My_Builtin_StringBuilder_AppendV);
+    RegisterBuiltin("StringBuilder__Write",      _My_Builtin_StringBuilder_Write);
+    RegisterBuiltin("StringBuilder__WriteV",     _My_Builtin_StringBuilder_WriteV);
+    RegisterBuiltin("StringBuilder__WriteLine",  _My_Builtin_StringBuilder_WriteLine);
+    RegisterBuiltin("StringBuilder__WriteLineV", _My_Builtin_StringBuilder_WriteLineV);
+    RegisterBuiltin("StringBuilder__ToString",   _My_Builtin_StringBuilder_ToString);
     // Bytes
     RegisterBuiltin("BytesCreate",     _My_Builtin_Bytes_Create);
     RegisterBuiltin("BytesFree",       _My_Builtin_Bytes_Free);
