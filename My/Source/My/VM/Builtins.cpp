@@ -978,22 +978,22 @@ void _My_Builtin_Bytes_Free(MyContext* pContext, MyVM* pVM) noexcept
     pCBuffer = nullptr;
 }
 
-void _My_Builtin_Bytes_AddInt32(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_AddI32(MyContext* pContext, MyVM* pVM) noexcept
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_Bytes_AddInt64(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_AddI64(MyContext* pContext, MyVM* pVM) noexcept
 {
-    _My_Builtin_Bytes_AddUInt64(pContext, pVM);
+    _My_Builtin_Bytes_AddU64(pContext, pVM);
 }
 
-void _My_Builtin_Bytes_AddUInt32(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_AddU32(MyContext* pContext, MyVM* pVM) noexcept
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_Bytes_AddUInt64(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_AddU64(MyContext* pContext, MyVM* pVM) noexcept
 {
     constexpr uint64_t kSize = sizeof(uint64_t);
 
@@ -1008,14 +1008,14 @@ void _My_Builtin_Bytes_AddUInt64(MyContext* pContext, MyVM* pVM) noexcept
     kLength += kSize;
 }
 
-void _My_Builtin_Bytes_AddFloat32(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_AddF32(MyContext* pContext, MyVM* pVM) noexcept
 {
     MY_NOT_IMPLEMENTED();
 }
 
-void _My_Builtin_Bytes_AddFloat64(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_AddF64(MyContext* pContext, MyVM* pVM) noexcept
 {
-    _My_Builtin_Bytes_AddUInt64(pContext, pVM);
+    _My_Builtin_Bytes_AddU64(pContext, pVM);
 }
 
 void _My_Builtin_Bytes_AddString(MyContext* pContext, MyVM* pVM) noexcept
