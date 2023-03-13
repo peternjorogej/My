@@ -849,9 +849,10 @@ void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM)
     
     if (char* pBuffer = (char*)malloc(kInitialCapacity); pBuffer)
     {
-        MyObjectFieldSetValueAs<char*>(pStrBldr, MyObjectGetField(pStrBldr, "CString"), pBuffer);
-        MyObjectFieldSetValueAs<uint64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Length"), 0ull);
-        MyObjectFieldSetValueAs<int64_t>(pStrBldr, MyObjectGetField(pStrBldr, "Indent"), 0ll);
+        const uint64_t kZero = 0ull;
+        MyObjectFieldSetValue(pStrBldr, MyObjectGetField(pStrBldr, "CString"), &pBuffer, sizeof(char*));
+        MyObjectFieldSetValue(pStrBldr, MyObjectGetField(pStrBldr, "Length"), &kZero, sizeof(int64_t));
+        MyObjectFieldSetValue(pStrBldr, MyObjectGetField(pStrBldr, "Indent"), &kZero, sizeof(uint64_t));
     }
 }
 
