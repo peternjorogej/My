@@ -106,6 +106,20 @@ int main(int iArgc, char** ppArgv)
 			goto Error;
 		}
 	}
+	if (lpDecompFilepath)
+	{
+		MyAssembly* pAss = Compiler::Load(pContext, lpDecompFilepath);
+		if (pAss)
+		{
+			MyDecompile(pAss);
+			Console::WriteLine("(Successful decompilation)");
+		}
+		else
+		{
+			Console::WriteLine(Console::Color::Red, "Failed to load bytecode file '%s' for decompilation", lpDecompFilepath);
+			goto Error;
+		}
+	}
 	if (lpRunFilepath)
 	{
 		MyAssembly* pAss = Compiler::Load(pContext, lpRunFilepath);
@@ -141,20 +155,6 @@ int main(int iArgc, char** ppArgv)
 		else
 		{
 			Console::WriteLine(Console::Color::Red, "Build failed (could not compile %s)", lpRunSourceFilepath);
-			goto Error;
-		}
-	}
-	if (lpDecompFilepath)
-	{
-		MyAssembly* pAss = Compiler::Load(pContext, lpDecompFilepath);
-		if (pAss)
-		{
-			MyDecompile(pAss);
-			Console::WriteLine("(Successful decompilation)");
-		}
-		else
-		{
-			Console::WriteLine(Console::Color::Red, "Failed to load bytecode file '%s' for decompilation", lpDecompFilepath);
 			goto Error;
 		}
 	}
