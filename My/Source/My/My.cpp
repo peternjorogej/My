@@ -198,17 +198,17 @@ MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kAtt
 
 MyMethod* MyMethodCreate(
     MyStruct* pKlass,
-    char*     lpFullname,
-    MyType*   Type,
+    char*     lpName,
+    MyType*   pType,
     uint32_t  kFlags,
     uint32_t  kAddress,
     bool      bIsCtor
 ) noexcept
 {
     MyMethod* pMeth = Allocator::Create<MyMethod>(Allocator::Stage::Runtime);
-    pMeth->Fullname = lpFullname;
+    pMeth->Fullname = MyGetCachedStringV("%s__%s", pKlass->Name, lpName);
     pMeth->Klass    = pKlass;
-    pMeth->Type     = Type;
+    pMeth->Type     = pType;
     pMeth->Flags    = kFlags;
     pMeth->Address  = kAddress;
     pMeth->IsCtor   = bIsCtor;

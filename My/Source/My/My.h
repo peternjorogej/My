@@ -86,7 +86,7 @@ static_assert(sizeof(MyGuid) == 16ull, "Error: Invalid MyGuid size");
 
 struct MyFunctionSignature
 {
-	char*     Name   = nullptr;
+	char*    Name   = nullptr;
 	MyType*  Return = nullptr;
 	MyType** Params = nullptr;
 };
@@ -240,8 +240,8 @@ void        MyUninitialize(MyContext* pContext);
 MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kFlags, uint32_t kAddress = MY_INVALID_ADDR) noexcept;
 MyMethod*   MyMethodCreate(
 	MyStruct*                  pKlass,
-	char*                      Fullname,
-	MyType*                    Type,
+	char*                      lpName,
+	MyType*                    pType,
 	uint32_t                   kFlags,
 	uint32_t                   kAddress = MY_INVALID_ADDR,
 	bool                       bIsCtor = false
