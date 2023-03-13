@@ -599,12 +599,15 @@ public:
 			stbds_shput(s_UserDefinedTypes, md.BooleanStruct->Name,       md.BooleanType);
 			stbds_shput(s_UserDefinedTypes, md.IntStruct->Name,           md.IntType);
 			stbds_shput(s_UserDefinedTypes, md.UintStruct->Name,          md.UintType);
+			stbds_shput(s_UserDefinedTypes, md.IntPtrStruct->Name,        md.IntPtrType);
 			stbds_shput(s_UserDefinedTypes, md.FloatStruct->Name,         md.FloatType);
 			stbds_shput(s_UserDefinedTypes, md.StringStruct->Name,        md.StringType);
 			stbds_shput(s_UserDefinedTypes, md.StringBuilderStruct->Name, md.StringBuilderType);
 			stbds_shput(s_UserDefinedTypes, md.ComplexStruct->Name,       md.ComplexType);
 			stbds_shput(s_UserDefinedTypes, md.BytesStruct->Name,         md.BytesType);
 			stbds_shput(s_UserDefinedTypes, md.FileStruct->Name,          md.FileType);
+
+			InitBuiltinMethodSymbols(m_Scope);
 		}
 		if (!s_ForwardedTypes)
 		{
@@ -612,7 +615,7 @@ public:
 			stbds_shdefault(s_ForwardedTypes, nullptr);
 			stbds_shdefaults(s_ForwardedTypes, kvp);
 		}
-		{
+		/*{
 			FieldSymbol* pFields = nullptr;
 			const FieldSymbol fsValue = { MyGetCachedString("Value"), md.StringType, nullptr };
 			stbds_arrpush(pFields, fsValue);
@@ -633,7 +636,7 @@ public:
 			stbds_arrpush(pFields, fsHandle);
 			stbds_arrpush(pFields, fsFilepath);
 			m_Scope->DeclareStruct(MakeSymbol_Struct(md.FileStruct->Name, md.FileType, pFields));
-		}
+		}*/
 	}
 
 	InternalBinder(MyContext* pContext, const SyntaxTree* pTree)
@@ -1853,22 +1856,20 @@ private:
 			if (fs.InlineKeyword) { kMethodFlags |= MY_FUNC_ATTR_INLINE; }
 			if (fs.NoGCKeyword) { kMethodFlags |= MY_FUNC_ATTR_NOGC; }
 
-			char* const lpFullname = MyGetCachedStringV("%s__%s", pKlass->Name, fs.Name.Id);
 			MyType* pMethodType = MyTypeCreate(
 				MY_TYPE_KIND_FUNCTION,
 				new MyFunctionSignature{ fs.Name.Id, pReturn, ppParams },
 				kMethodFlags
 			);
 
-			MyMethod* pMethod = MyMethodCreate(pKlass, lpFullname, pMethodType, kMethodFlags, MY_INVALID_ADDR, bIsCtor);
+			MyMethod* pMethod = MyMethodCreate(pKlass, fs.Name.Id, pMethodType, kMethodFlags, MY_INVALID_ADDR, bIsCtor);
 			stbds_arrpush(pKlass->Methods, pMethod);
-
 			{
 				MySymbol* pSelfParam = MakeSymbol_Parameter(MyGetCachedString("this"), pType, false, true);
 				stbds_arrins(ppParamSyms, 0, pSelfParam);
 
 				MySymbol* pFunction = MakeSymbol_Function(
-					lpFullname,
+					pMethod->Fullname,
 					pMethodType,
 					ppParamSyms,
 					fs.StaticKeyword != nullptr,
@@ -1883,7 +1884,7 @@ private:
 					return;
 				}
 			}
-			Console::WriteLine("[DEBUG]: Bound method %s.%s -> %s", pKlass->Name, fs.Name.Id, lpFullname);
+			Console::WriteLine("[DEBUG]: Bound method %s.%s -> %s", pKlass->Name, fs.Name.Id, pMethod->Fullname);
 		}
 
 	Error:
@@ -2303,6 +2304,90 @@ private:
 	}
 
 private:
+	static void InitBuiltinMethodSymbols(BoundScope* pScope) noexcept
+	{
+		MyDefaults& md = My_Defaults;
+
+		static auto SetupMethod = [&pScope](MyType* pKlassType, const char* lpName, MyType* pReturn, List<Pair<const char*, MyType*>> Params) -> void
+		{
+			static char* const lpThisString = MyGetCachedString("this");
+
+			char* const lpMethodName = MyGetCachedString(lpName);
+
+			MyType** ppParamTypes = nullptr;
+			MySymbol** ppParamsSymbols = nullptr;
+			{
+				stbds_arrpush(ppParamTypes, pKlassType);
+				stbds_arrpush(ppParamsSymbols, MakeSymbol_Parameter(lpThisString, pKlassType, true, true));
+			}
+			for (const auto&[arg, type] : Params)
+			{
+				char* const lpArgName = MyGetCachedString(arg);
+				MySymbol* pSymbol = MakeSymbol_Parameter(lpArgName, type, true, true);
+
+				stbds_arrpush(ppParamTypes, type);
+				stbds_arrpush(ppParamsSymbols, pSymbol);
+			}
+
+			MyMethod* pMethod = MyMethodCreate(
+				pKlassType->Klass,
+				lpMethodName,
+				MyTypeCreate(
+					MY_TYPE_KIND_FUNCTION,
+					new MyFunctionSignature{ lpMethodName, pReturn, ppParamTypes }
+				),
+				MY_FUNC_ATTR_METHOD
+			);
+			stbds_arrpush(pKlassType->Klass->Methods, pMethod);
+
+			MySymbol* pMethodSymbol = MakeSymbol_Function(pMethod->Fullname, pMethod->Type, ppParamsSymbols);
+			pScope->DeclareFunction(pMethodSymbol);
+		};
+
+		static auto ArrayType = [](MyType* pBaseType) -> MyType*
+		{
+			uint32_t* pLengths = nullptr;
+			stbds_arrpush(pLengths, 0ul);
+
+			MyType* pArrayType = MyTypeCreate(MY_TYPE_KIND_ARRAY, new MyArrayType{ pBaseType->Klass, pLengths });
+			return pArrayType;
+		};
+
+		// Complex
+		{
+			//
+		}
+
+		// String
+		{
+			MyType* const pStringArray = ArrayType(md.StringType);
+
+			SetupMethod(md.StringType, "Length",     md.UintType,    { });
+			SetupMethod(md.StringType, "Find",       md.UintType,    { { "sSubstr", md.StringType } });
+			SetupMethod(md.StringType, "Substr",     md.StringType,  { { "kOffset", md.UintType   }, { "kLength", md.UintType   } });
+			SetupMethod(md.StringType, "Split",      pStringArray,   { { "sSep",    md.StringType } });
+			SetupMethod(md.StringType, "StartsWith", md.BooleanType, { { "sPrefix", md.StringType } });
+			SetupMethod(md.StringType, "EndsWith",   md.BooleanType, { { "sSuffix", md.StringType } });
+			SetupMethod(md.StringType, "ToUpper",    md.StringType,  { });
+			SetupMethod(md.StringType, "ToLower",    md.StringType,  { });
+		}
+
+		// StringBuilder
+		{
+			//
+		}
+
+		// Bytes
+		{
+			//
+		}
+
+		// File
+		{
+			//
+		}
+	}
+
 	static void InitModuleStd() noexcept
 	{
 		MY_NOT_IMPLEMENTED();
@@ -2464,18 +2549,18 @@ MySymbol* MakeSymbol_Variable(char* const lpName, MyType* pType, bool bIsReadonl
 	return pVariable;
 }
 
-MySymbol* MakeSymbol_Parameter(char* const lpName, MyType* pType, bool bIsConstexpr, bool bIsLocal)
+MySymbol* MakeSymbol_Parameter(char* const lpName, MyType* pType, bool bIsConst, bool bIsLocal)
 {
 	MySymbol* pParameter = Allocator::Create<MySymbol>(Allocator::Stage::Binder, SymbolKind::Parameter, lpName, pType);
 	pParameter->Name = lpName;
-	new(&pParameter->paramsym) ParameterSymbol{ pType, bIsConstexpr, bIsLocal };
+	new(&pParameter->paramsym) ParameterSymbol{ pType, bIsConst, bIsLocal };
 	return pParameter;
 }
 
 MySymbol* MakeSymbol_Function(
 	char* const  lpName,
-	MyType*     pType,
-	MySymbol**  ppParamTypes,
+	MyType*      pType,
+	MySymbol**   ppParamSymbols,
 	bool         bIsStatic,
 	bool         bIsInline,
 	bool         bIsNoGC,
@@ -2487,7 +2572,7 @@ MySymbol* MakeSymbol_Function(
 	new(&pFunction->funcsym) FunctionSymbol
 	{
 		pType,
-		ppParamTypes,
+		ppParamSymbols,
 		pDecl,
 		bIsInline,
 		bIsStatic,

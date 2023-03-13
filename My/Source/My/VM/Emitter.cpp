@@ -1864,15 +1864,16 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Sqrt",  _My_Builtin_Sqrt);
     RegisterBuiltin("Cbrt",  _My_Builtin_Cbrt);
     // String
-    RegisterBuiltin("__strcat",     _My_Builtin_String_Concat);
-    RegisterBuiltin("__strcmp",     _My_Builtin_String_Compare);
-    RegisterBuiltin("__strfind",    _My_Builtin_String_Find);
-    RegisterBuiltin("__strstr",     _My_Builtin_String_Substr);
-    RegisterBuiltin("__strsplit",   _My_Builtin_String_Split);
-    RegisterBuiltin("__strstartsw", _My_Builtin_String_StartsWith);
-    RegisterBuiltin("__strendsw",   _My_Builtin_String_EndsWith);
-    RegisterBuiltin("__strtoupper", _My_Builtin_String_ToUpper);
-    RegisterBuiltin("__strtolower", _My_Builtin_String_ToLower);
+    RegisterBuiltin("__strcat",           _My_Builtin_String_Concat);
+    RegisterBuiltin("__strcmp",           _My_Builtin_String_Compare);
+    RegisterBuiltin("String__Length",     _My_Builtin_String_Length);
+    RegisterBuiltin("String__Find",       _My_Builtin_String_Find);
+    RegisterBuiltin("String__Substr",     _My_Builtin_String_Substr);
+    RegisterBuiltin("String__Split",      _My_Builtin_String_Split);
+    RegisterBuiltin("String__StartsWith", _My_Builtin_String_StartsWith);
+    RegisterBuiltin("String__EndsWith",   _My_Builtin_String_EndsWith);
+    RegisterBuiltin("String__ToUpper",    _My_Builtin_String_ToUpper);
+    RegisterBuiltin("String__ToLower",    _My_Builtin_String_ToLower);
     // StringBuilder
     RegisterBuiltin("SbInit",       _My_Builtin_StringBuilder_Init);
     RegisterBuiltin("SbAppend",     _My_Builtin_StringBuilder_Append);

@@ -502,11 +502,11 @@ namespace std
 #pragma region Declarations_For_Creator_Function
 /// Create Symbols
 MySymbol* MakeSymbol_Variable(char* const lpName, MyType* pType, bool bIsReadonly, bool bIsLocal);
-MySymbol* MakeSymbol_Parameter(char* const lpName, MyType* pType, bool bIsConstexpr, bool bIsLocal);
+MySymbol* MakeSymbol_Parameter(char* const lpName, MyType* pType, bool bIsConst, bool bIsLocal);
 MySymbol* MakeSymbol_Function(
 	char* const  lpName,
 	MyType*      pType,
-	MySymbol**   ppParamTypes,
+	MySymbol**   ppParamSymbols,
 	bool         bIsStatic = false,
 	bool         bIsInline = false,
 	bool         bIsNoGC   = false,
