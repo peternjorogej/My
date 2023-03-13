@@ -29,8 +29,7 @@ var float fMyValue; // Defaults to zero
 const string Greeting = "Hello, World"; // Readonly
 // Struct types
 var MyType mt = new MyType();
-/* Array types (still incomplete, indexing higher dimensions
-does not work as intended */
+/* Array types */
 var float[] data = new float[5]();
 //   - 2D (representing a 3x3 matrix)
 var float[3, 3] m33 = new float[3, 3](); // Indexing: m33[i, j]
@@ -98,7 +97,6 @@ struct Person
     var string ID; 
     var string Name; 
 
-    // Structs can have methods (API not complete)
     function int GetYOB()
     {
         return this.YOB;
@@ -116,18 +114,18 @@ Basic usage:
 #include <My/VM/Compiler.h>
 #include <My/VM/VM.h>
 #include <My/Utils/Utils.h>
-#include <Stb/stb_ds.h>
+#include <stb/stb_ds.h>
 
 int main(int iArgc, char** ppArgv)
 {
 	MyContext* pCtx = MyInitialize();
 
     const char* lpPath = "your/path/to/script.my";
-    std::initializer_list<InternalFunction> internals = 
+    List<InternalFunction> Internals = 
     {
         // ...
     };
-	MyAssembly* pAss = Compiler::Build(pCtx, lpPath, internals);
+	MyAssembly* pAss = Compiler::Build(pCtx, lpPath, Internals);
 	if (pAss)
 	{
 		// MyDecompile(pAss); // To see what the emitted bytecode does
@@ -158,11 +156,7 @@ void CppFunction_Native(MyContext* pCtx, MyVM* pVM) noexcept
 int main()
 {
     // ...
-    std::initializer_list<InternalFunction> internals =
-    {
-        { "CppFunction", CppFunction_Native, -1 };
-    };
-    MyAssembly* pAss = Compiler::Build(pCtx, lpFilename, internals);
+    MyAssembly* pAss = Compiler::Build(pCtx, lpFilename, { { "CppFunction", CppFunction_Native } });
     // ...
 }
 ```
@@ -195,9 +189,10 @@ function int Main(string[] Args)
     - [ ] Default arguments and variadics
     - [ ] Overloading
     - [ ] Operator overloading
-    - [ ] Compile-time functions (*static_assert* etc)
+    - [ ] Compile-time functions (*sizeof*, *static_assert* etc)
 - [ ] OOP:
-	- [ ] Methods (Constructors included)
+	- [x] Methods
+	- [ ] Constructors
     - [ ] ToString(), Copy(), Write()
 	- [ ] Inheritance and Polymorphism
 	- [ ] Encapsulation (*visibility*)
