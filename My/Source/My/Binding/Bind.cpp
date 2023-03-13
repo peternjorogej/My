@@ -7,7 +7,7 @@
 
 static bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcept;
 
-#pragma region Type_Conversion
+#pragma region Type Conversion
 /// Type Conversion
 class TypeConversion
 {
@@ -85,78 +85,6 @@ TypeConversion TypeConversion::Implicit = TypeConversion(true, false, true);
 TypeConversion TypeConversion::Explicit = TypeConversion(true, false, false);
 #pragma endregion
 
-#if 0
-MyType::MyType()
-{
-	memset(this, 0, sizeof(MyType));
-	Kind = TypeKind::Invalid;
-}
-
-MyType::MyType(TypeKind Kind)
-	: MyType()
-{
-	this->Kind = Kind;
-}
-
-bool MyType::Equals(const MyType& Type) const noexcept
-{
-	if (Kind != Type.Kind)
-	{
-		return false;
-	}
-
-	switch (Kind)
-	{
-		case TypeKind::Name:
-		{
-			const NameType& lhs = nametype;
-			const NameType& rhs = Type.nametype;
-			return lhs.Name == rhs.Name;
-		}
-		case TypeKind::Array:
-		{
-			const ArrayType& lhs = arraytype;
-			const ArrayType& rhs = Type.arraytype;
-
-			return lhs.Type->Equals(*rhs.Type) && _My_ArrayTypesMatch(lhs, rhs);
-		}
-		case TypeKind::Function:
-		{
-			const FunctionType& lhs = functype;
-			const FunctionType& rhs = Type.functype;
-
-			if (!lhs.Type->Equals(*rhs.Type))
-			{
-				return false;
-			}
-			const size_t kLenLhs = stbds_arrlenu(lhs.ParamTypes);
-			const size_t kLenRhs = stbds_arrlenu(rhs.ParamTypes);
-			if (kLenLhs != kLenRhs)
-			{
-				return false;
-			}
-			for (size_t k = 0; k < kLenLhs; k++)
-			{
-				if (!lhs.ParamTypes[k]->Equals(*rhs.ParamTypes[k]))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-		case TypeKind::Struct:
-		{
-			const StructType& lhs = structtype;
-			const StructType& rhs = Type.structtype;
-			return lhs.Name == rhs.Name;
-		}
-		default:
-			MY_ASSERT(false, "Error: Invalid TypeKind(%u)", Kind);
-			return false;
-	}
-}
-#endif // 0
-
 /// Symbols
 MySymbol::MySymbol()
 {
@@ -173,7 +101,7 @@ MySymbol::MySymbol(SymbolKind Kind, char* const lpName, MyType* pType)
 }
 
 /// Expressions
-#pragma region Operator_Binding
+#pragma region Operator Binding
 BoundUnaryOperator::BoundUnaryOperator(TokenKind Kind, BoundUnaryOperatorKind OperatorKind, MyType* pRhsType, MyType* pResultType)
 	: Kind(Kind), OperatorKind(OperatorKind), RhsType(pRhsType), ResultType(pResultType)
 { }
@@ -231,7 +159,7 @@ BoundBinaryOperator::BoundBinaryOperator(TokenKind Kind, BoundBinaryOperatorKind
 	: BoundBinaryOperator(Kind, OperatorKind, pOperandType, pOperandType, pResultType)
 { }
 
-#pragma region Definitions_For_Operator_Binding
+#pragma region Definitions for Operator Binding
 #define _Define_My_BoundBinaryOperator_Bind_X64_X64(__x, __TpX) \
 	static BoundBinaryOperator* _My_BoundBinaryOperator_Bind_##__x##_##__x(TokenKind Kind, MyType* pLhsType, MyType* pRhsType) noexcept \
 	{                                                                                                                \
@@ -482,7 +410,7 @@ BoundStatement::BoundStatement(BoundStatementKind Kind)
 	this->Kind = Kind;
 }
 
-#pragma region Internal_Binding
+#pragma region Internal Binding
 /// Scope
 struct BoundScope
 {
@@ -1100,15 +1028,17 @@ private:
 			for (size_t k = 0; k < kActualFieldCount; k++)
 			{
 				const FieldInitializer& fi = opnew.Fields[k];
-				if (!MyStructGetField(pType->Klass, fi.Name.Id))
+				if (MyField* pField = MyStructGetField(pType->Klass, fi.Name.Id); pField)
+				{
+					BoundExpression* pValue = BindConversion(fi.Value, pField->Type);
+					const BONEFieldInitializer bfi = BONEFieldInitializer{ fi.Name.Id, pValue };
+					stbds_arrpush(pInitializers, bfi);
+				}
+				else
 				{
 					m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(fi.Name), fi.Name.Id, pType->Klass);
 					return MakeBoundExpression_Error();
 				}
-
-				BoundExpression* pValue = BindExpression(fi.Value);
-				const BONEFieldInitializer bfi = BONEFieldInitializer{ fi.Name.Id, pValue };
-				stbds_arrpush(pInitializers, bfi);
 			}
 
 			return MakeBoundExpression_OperatorNew(pType, pInitializers);
@@ -1189,21 +1119,41 @@ private:
 		else if (pCallable->Kind == BoundExpressionKind::Field)
 		{
 			BoundFieldExpression& field = pCallable->field;
-			DebugLog::Warn("[DEBUG] - %s.%s", field.Type->Klass->Name, field.Field);
-			m_Diagnostics.ReportFeatureNotImplemented(GetLocation(call.Callable), "Method call (function call on object)");
-			goto Error;
+
+			MyStruct* pKlass = GetStructFromType(field.Object->Type());
+			MyMethod* pMethod = MyStructGetMethod(pKlass, field.Field);
+
+			if (const auto[bFound, pFun] = m_Scope->LookupFunction(pMethod->Fullname); bFound)
+			{
+				const size_t kParamsLength = stbds_arrlenu(pFun->funcsym.Parameters);
+				const size_t kArgsLength = stbds_arrlenu(call.Arguments) + 1u;
+
+				if (kArgsLength != kParamsLength)
+				{
+					TextLocation Location = call.Arguments ? GetLocation(stbds_arrlast(call.Arguments)) : GetLocation(pCall);
+					m_Diagnostics.ReportInvalidArgumentCount(Location, pFun->Name, kParamsLength, kArgsLength);
+					goto Error;
+				}
+
+				pFunction = pFun;
+			}
+			else
+			{
+				goto Error;
+			}
 		}
 		else
 		{
-			m_Diagnostics.ReportUnknownError(GetLocation(call.Callable), "Invlid object kind for call expression");
+			m_Diagnostics.ReportUnknownError(GetLocation(call.Callable), "Invalid object kind for call expression");
 			goto Error;
 		}
 
 		const size_t kArgsLength = stbds_arrlenu(call.Arguments);
+		const size_t kArgsOffset = pCallable->Kind == BoundExpressionKind::Field ? 1 : 0;
 		for (size_t k = 0; k < kArgsLength; k++)
 		{
 			BoundExpression* pBoundArgument = BindExpression(call.Arguments[k]);
-			MySymbol* pParamSym = pFunction->funcsym.Parameters[k];
+			MySymbol* pParamSym = pFunction->funcsym.Parameters[k + kArgsOffset];
 
 			pBoundArgument = BindConversion(GetLocation(call.Arguments[k]), pBoundArgument, pParamSym->Type);
 			stbds_arrpush(ppArgs, pBoundArgument);
@@ -1284,16 +1234,20 @@ private:
 		if (pObjectType != My_Defaults.ErrorType)
 		{
 			MyField* pField = MyStructGetField(pObjectType->Klass, lpField);
-			if (!pField)
+			if (pField)
 			{
-				m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(field.Field), lpField, pObjectType->Klass);
-				goto Error;
+				return MakeBoundExpression_Field(pObject, pField->Type, lpField);
 			}
 
-			return MakeBoundExpression_Field(pObject, pField->Type, lpField);
+			MyMethod* pMethod = MyStructGetMethod(pObjectType->Klass, lpField);
+			if (pMethod)
+			{
+				return MakeBoundExpression_Field(pObject, pMethod->Type, lpField);
+			}
+
+			m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(field.Field), lpField, pObjectType->Klass);
 		}
 
-	Error:
 		return MakeBoundExpression_Error();
 	}
 
@@ -1689,83 +1643,7 @@ private:
 	/// Declarations
 	void BindFunctionSignature(const FunctionSignature& Signature, Declaration* pDecl)
 	{
-		if (const auto[bFound, pFun] = m_Scope->LookupFunction(Signature.Name.Id); bFound)
-		{
-			m_Diagnostics.ReportSymbolRedeclaredDifferently(GetLocation(Signature.Name), Signature.Name.Id);
-			return;
-		}
-
-		MyType**           ppParamTypes = nullptr;
-		MySymbol**         ppParamSyms  = nullptr;
-		Pair<char*, bool>* pSeenParams  = nullptr;
-		{
-			static constexpr Pair<char*, bool> sp = {};
-			stbds_hmdefault(pSeenParams, false);
-			stbds_hmdefaults(pSeenParams, sp);
-		}
-
-		MyType*   pReturnType = nullptr;
-		MySymbol* pFunction   = nullptr;
-
-		if (!(pReturnType = BindTypeSpec(Signature.Return)))
-		{
-			m_Diagnostics.ReportUnknownType(GetLocation(Signature.Return), GetTypeName(Signature.Return));
-			goto Error;
-		}
-
-		for (size_t k = 0; k < stbds_arrlenu(Signature.Params); k++)
-		{
-			const Parameter& param = Signature.Params[k];
-
-			MyType* pType = BindTypeSpec(param.Type);
-			if (!pType)
-			{
-				m_Diagnostics.ReportUnknownType(GetLocation(param.Type), GetTypeName(param.Type));
-				goto Error;
-			}
-
-			MySymbol* pParam = MakeSymbol_Parameter(param.Name.Id, pType, param.ConstKeyword != nullptr, true);
-
-			if (stbds_hmget(pSeenParams, param.Name.Id) == false)
-			{
-				stbds_hmput(pSeenParams, param.Name.Id, true);
-				stbds_arrpush(ppParamTypes, pType);
-				stbds_arrpush(ppParamSyms, pParam);
-			}
-			else
-			{
-				m_Diagnostics.ReportParameterRedeclaration(GetLocation(param.Name), param.Name.Id);
-				goto Error;
-			}
-		}
-
-		uint32_t kFlags = 0u;
-		if (Signature.InlineKeyword != nullptr) { kFlags |= MY_FUNC_ATTR_INLINE; }
-		if (Signature.StaticKeyword != nullptr) { kFlags |= MY_FUNC_ATTR_STATIC; }
-		if (Signature.NoGCKeyword   != nullptr) { kFlags |= MY_FUNC_ATTR_NOGC;   }
-
-		pFunction = MakeSymbol_Function(
-			Signature.Name.Id,
-			MyTypeCreate(
-				MY_TYPE_KIND_FUNCTION,
-				new MyFunctionSignature{ Signature.Name.Id, pReturnType, ppParamTypes },
-				kFlags
-			),
-			ppParamSyms,
-			Signature.InlineKeyword != nullptr,
-			Signature.StaticKeyword != nullptr,
-			Signature.NoGCKeyword != nullptr,
-			pDecl
-		);
-
-		if (!m_Scope->DeclareFunction(pFunction))
-		{
-			m_Diagnostics.ReportSymbolRedeclaration(GetLocation(Signature.Name), Signature.Name.Id);
-			goto Error;
-		}
-
-	Error:
-		return;
+		BindFunctionSignature(this, Signature, pDecl);
 	}
 
 	void BindImportDeclaration(Declaration* pImport)
@@ -1808,7 +1686,7 @@ private:
 	void BindExternDeclaration(Declaration* pExtern)
 	{
 		ExternDeclaration& externdecl = pExtern->externdecl;
-		BindFunctionSignature(externdecl.Signature, nullptr);
+		BindFunctionSignature(this, externdecl.Signature, nullptr);
 	}
 
 	void BindEnumDeclaration(Declaration* pEnum)
@@ -1831,7 +1709,7 @@ private:
 	void BindFunctionDeclaration(Declaration* pFunc)
 	{
 		FunctionDeclaration& funcdecl = pFunc->funcdecl;
-		BindFunctionSignature(funcdecl.Signature, pFunc);
+		BindFunctionSignature(this, funcdecl.Signature, pFunc);
 	}
 
 	void BindForwardDeclaration(Declaration* pForward)
@@ -1919,31 +1797,94 @@ private:
 			FieldSymbol fs = { vds.Identifier.Id, pMemberType, nullptr };
 			stbds_arrpush(pFields, fs);
 		}
-
-		for (size_t k = 0; k < stbds_arrlenu(structdecl.Methods); k++)
-		{
-			// TODO: Fill out
-			DebugLog::Warn("[DEBUG]: NotImplemented");
-		}
-
 		if (!pFields)
 		{
 			// Empty struct
 			char* const lpName = MyGetCachedString("__padding");
 			MyStructAddField(pKlass, lpName, My_Defaults.IntType, MY_FIELD_ATTR_CONST);
 		}
-		MySymbol* pSymbol = MakeSymbol_Struct(Name.Id, pType, pFields, pStruct);
 
-		if (!m_Scope->DeclareStruct(pSymbol))
+		// Create the struct symbol and declare it before binding the functions
 		{
-			m_Diagnostics.ReportSymbolRedeclaration(GetLocation(Name), Name.Id);
-			goto Error;
+			MySymbol* pSymbol = MakeSymbol_Struct(Name.Id, pType, pFields, pStruct);
+			if (!m_Scope->DeclareStruct(pSymbol))
+			{
+				m_Diagnostics.ReportSymbolRedeclaration(GetLocation(Name), Name.Id);
+				goto Error;
+			}
+
+			stbds_shput(s_UserDefinedTypes, Name.Id, pType);
 		}
+		
+		// Step 1: Bind the method signatures
+		for (size_t k = 0; k < stbds_arrlenu(structdecl.Methods); k++)
+		{
+			Declaration* pMethodDecl = structdecl.Methods[k];
+			FunctionSignature& fs = pMethodDecl->funcdecl.Signature;
 
-		// Register the type after binding it's declaration succeeds
-		stbds_shput(s_UserDefinedTypes, Name.Id, pType);
+			bool bIsCtor = fs.Name.Id == pKlass->Name;
 
-		return;
+			MyType* pReturn = BindTypeSpec(fs.Return);
+			if (!pReturn)
+			{
+				m_Diagnostics.ReportUnknownType(GetLocation(fs.Return), GetTypeName(fs.Return));
+				return;
+			}
+
+			MySymbol** ppParamSyms = nullptr;
+			MyType** ppParams = nullptr;
+			for (size_t k = 0; k < stbds_arrlenu(fs.Params); k++)
+			{
+				const Parameter& param = fs.Params[k];
+				MyType* pParam = BindTypeSpec(param.Type);
+				if (!pParam)
+				{
+					m_Diagnostics.ReportUnknownType(GetLocation(param.Type), GetTypeName(param.Type));
+					return;
+				}
+				stbds_arrpush(ppParams, pParam);
+
+				MySymbol* pParamSym = MakeSymbol_Parameter(param.Name.Id, pParam, param.ConstKeyword != nullptr, true);
+				stbds_arrpush(ppParamSyms, pParamSym);
+			}
+
+			uint32_t kMethodFlags = MY_FUNC_ATTR_METHOD;
+			if (bIsCtor) { kMethodFlags |= MY_FUNC_ATTR_CTOR; }
+			if (fs.InlineKeyword) { kMethodFlags |= MY_FUNC_ATTR_INLINE; }
+			if (fs.NoGCKeyword) { kMethodFlags |= MY_FUNC_ATTR_NOGC; }
+
+			char* const lpFullname = MyGetCachedStringV("%s__%s", pKlass->Name, fs.Name.Id);
+			MyType* pMethodType = MyTypeCreate(
+				MY_TYPE_KIND_FUNCTION,
+				new MyFunctionSignature{ fs.Name.Id, pReturn, ppParams },
+				kMethodFlags
+			);
+
+			MyMethod* pMethod = MyMethodCreate(pKlass, lpFullname, pMethodType, kMethodFlags, MY_INVALID_ADDR, bIsCtor);
+			stbds_arrpush(pKlass->Methods, pMethod);
+
+			{
+				MySymbol* pSelfParam = MakeSymbol_Parameter(MyGetCachedString("this"), pType, false, true);
+				stbds_arrins(ppParamSyms, 0, pSelfParam);
+
+				MySymbol* pFunction = MakeSymbol_Function(
+					lpFullname,
+					pMethodType,
+					ppParamSyms,
+					fs.StaticKeyword != nullptr,
+					fs.InlineKeyword != nullptr,
+					fs.NoGCKeyword != nullptr,
+					pMethodDecl
+				);
+
+				if (!m_Scope->DeclareFunction(pFunction))
+				{
+					m_Diagnostics.ReportSymbolRedeclaration(GetLocation(fs.Name), fs.Name.Id);
+					return;
+				}
+			}
+			Console::WriteLine("[DEBUG]: Bound method %s.%s -> %s", pKlass->Name, fs.Name.Id, lpFullname);
+		}
 
 	Error:
 		return;
@@ -2077,6 +2018,83 @@ private:
 	}
 
 private:
+	static void BindFunctionSignature(InternalBinder* const& pBinder, const FunctionSignature& Signature, Declaration* pDecl) noexcept
+	{
+		if (const auto [bFound, pFun] = pBinder->m_Scope->LookupFunction(Signature.Name.Id); bFound)
+		{
+			pBinder->m_Diagnostics.ReportSymbolRedeclaredDifferently(pBinder->GetLocation(Signature.Name), Signature.Name.Id);
+			return;
+		}
+
+		MyType** ppParamTypes = nullptr;
+		MySymbol** ppParamSyms = nullptr;
+		Pair<char*, bool>* pSeenParams = nullptr;
+		{
+			static constexpr Pair<char*, bool> sp = {};
+			stbds_hmdefault(pSeenParams, false);
+			stbds_hmdefaults(pSeenParams, sp);
+		}
+
+		MyType* pReturnType = nullptr;
+		MySymbol* pFunction = nullptr;
+
+		if (!(pReturnType = pBinder->BindTypeSpec(Signature.Return)))
+		{
+			pBinder->m_Diagnostics.ReportUnknownType(pBinder->GetLocation(Signature.Return), GetTypeName(Signature.Return));
+			return;
+		}
+
+		for (size_t k = 0; k < stbds_arrlenu(Signature.Params); k++)
+		{
+			const Parameter& param = Signature.Params[k];
+
+			MyType* pType = pBinder->BindTypeSpec(param.Type);
+			if (!pType)
+			{
+				pBinder->m_Diagnostics.ReportUnknownType(pBinder->GetLocation(param.Type), GetTypeName(param.Type));
+				return;
+			}
+
+			MySymbol* pParam = MakeSymbol_Parameter(param.Name.Id, pType, param.ConstKeyword != nullptr, true);
+
+			if (stbds_hmget(pSeenParams, param.Name.Id) == false)
+			{
+				stbds_hmput(pSeenParams, param.Name.Id, true);
+				stbds_arrpush(ppParamTypes, pType);
+				stbds_arrpush(ppParamSyms, pParam);
+			}
+			else
+			{
+				pBinder->m_Diagnostics.ReportParameterRedeclaration(pBinder->GetLocation(param.Name), param.Name.Id);
+				return;
+			}
+		}
+
+		uint32_t kFlags = 0u;
+		if (Signature.InlineKeyword != nullptr) { kFlags |= MY_FUNC_ATTR_INLINE; }
+		if (Signature.StaticKeyword != nullptr) { kFlags |= MY_FUNC_ATTR_STATIC; }
+		if (Signature.NoGCKeyword != nullptr) { kFlags |= MY_FUNC_ATTR_NOGC; }
+
+		pFunction = MakeSymbol_Function(
+			Signature.Name.Id,
+			MyTypeCreate(
+				MY_TYPE_KIND_FUNCTION,
+				new MyFunctionSignature{ Signature.Name.Id, pReturnType, ppParamTypes },
+				kFlags
+			),
+			ppParamSyms,
+			Signature.StaticKeyword != nullptr,
+			Signature.InlineKeyword != nullptr,
+			Signature.NoGCKeyword != nullptr,
+			pDecl
+		);
+
+		if (!pBinder->m_Scope->DeclareFunction(pFunction))
+		{
+			pBinder->m_Diagnostics.ReportSymbolRedeclaration(pBinder->GetLocation(Signature.Name), Signature.Name.Id);
+		}
+	}
+
 	static int32_t GetStart(const TypeSpec* const& pTypeSpec) noexcept
 	{
 		switch (pTypeSpec->Kind)
@@ -2397,43 +2415,6 @@ BoundProgram Binder::BindProgram(MyContext* pContext, BoundGlobalScope* pGlobalS
 			stbds_shput(pFunctionBodies, pFunction->Name, bf);
 		}
 	}
-#if 0
-	for (size_t k = 0; k < stbds_arrlenu(pGlobalScope->Structs); k++)
-	{
-		StructSymbol& ss = pGlobalScope->Structs[k]->structsym;
-
-		MySymbol** ppParamSyms = nullptr;
-		MySymbol* pArgSym = MakeSymbol_Parameter(MyGetCachedString("Self"), ss.Type, false, true);
-		stbds_arrpush(ppParamSyms, pArgSym);
-		MySymbol* pCtorSym = MakeSymbol_Function(ss.Type->Fullname, ss.Type, ppParamSyms, false, false, false, nullptr);
-
-		BoundExpression* pSelf = MakeBoundExpression_Name(pArgSym);
-
-		BoundStatement** ppStmts = nullptr;
-		for (size_t i = 0; i < stbds_arrlenu(ss.Fields); i++)
-		{
-			FieldSymbol& fs = ss.Fields[i];
-			BoundExpression* pField = MakeBoundExpression_Field(pSelf, fs.Type, fs.Name);
-			BoundExpression* pValue = fs.Default;
-			BoundExpression* pFieldAssign = MakeBoundExpression_Assignment(
-				pField,
-				MakeSymbol_Variable("#Index", fs.Type, false, true),
-				pValue
-			);
-
-			BoundStatement* pExprStmt = MakeBoundStatement_Expression(pFieldAssign);
-			stbds_arrpush(ppStmts, pExprStmt);
-		}
-		{
-			BoundStatement* pReturn = MakeBoundStatement_Return(pSelf);
-			stbds_arrpush(ppStmts, pReturn);
-		}
-
-		BoundStatement* pBody = MakeBoundStatement_Block(ppStmts);
-		const BoundProgram::BoundFunction ctor = { pCtorSym, pBody };
-		stbds_shput(pFunctionBodies, ss.Type->Fullname, ctor);
-	}
-#endif // 0
 
 	BoundProgram::BoundFunction& Main = stbds_shget(pFunctionBodies, "Main");
 	if (!Main.key || !Main.value)
@@ -2468,7 +2449,7 @@ BoundBinaryOperator* Binder::BindBinaryOperator(TokenKind OperatorKind, MyType* 
 	return BoundBinaryOperator::Bind(OperatorKind, pLhsType, pRhsType);
 }
 
-#pragma region Definitions_For_Creator_Functions
+#pragma region Definitions for Creator Functions
 /// Symbols
 MySymbol* MakeSymbol_Variable(char* const lpName, MyType* pType, bool bIsReadonly, bool bIsLocal)
 {

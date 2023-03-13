@@ -945,12 +945,6 @@ void Emitter::EmitCallExpression(MyBytecodeProcessor& bp, BoundExpression* pCall
 {
     BoundCallExpression& ce = pCall->call;
 
-    const size_t kArgc = stbds_arrlenu(ce.Arguments);
-    for (size_t k = 0; k < kArgc; k++)
-    {
-        EmitExpression(bp, ce.Arguments[k]);
-    }
-    
     // Emit object after arguments (will be on top of stack)
     if (ce.Callable->Kind == BoundExpressionKind::Field)
     {
@@ -958,6 +952,12 @@ void Emitter::EmitCallExpression(MyBytecodeProcessor& bp, BoundExpression* pCall
         EmitExpression(bp, fe.Object);
     }
 
+    const size_t kArgc = stbds_arrlenu(ce.Arguments);
+    for (size_t k = 0; k < kArgc; k++)
+    {
+        EmitExpression(bp, ce.Arguments[k]);
+    }
+    
     char* const& lpName = ce.Function->Name;
 
     if (bp.IsRegistered(lpName))
@@ -968,7 +968,7 @@ void Emitter::EmitCallExpression(MyBytecodeProcessor& bp, BoundExpression* pCall
     {
         // Inline the functions defined as inline
         FunctionSymbol& fs = ce.Function->funcsym;
-        if (fs.IsInline && kArgc == 0u)
+        if (fs.IsInline && kArgc == 0u && ce.Callable->Kind != BoundExpressionKind::Field)
         {
             const BoundProgram::BoundFunction& bf = stbds_shget(m_FunctionBodies, lpName);
             const auto&[_, pBody] = bf;
@@ -1549,6 +1549,8 @@ namespace PnBS
             In >> pKlass->Size;
             In >> kData[0];
             In >> kData[1];
+
+            pKlass->Name = MyGetCachedString(s);
             pKlass->Guid = MyGuidCreate(MyContextGet(), kData[0], kData[1]);
 
             uint32_t kCount = 0ul;

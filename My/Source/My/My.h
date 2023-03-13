@@ -100,12 +100,12 @@ struct MyFunction
 
 struct MyMethod
 {
-	MyFunctionSignature Signature = {};
-	char*      Fullname = nullptr; // Decorated (Fully Qualified) Name (ie. Person__GetName())
+	char*     Fullname = nullptr; // Decorated (Fully Qualified) Name (ie. Person__GetName())
 	MyStruct* Klass    = nullptr; // Parent struct
-	uint32_t   Flags    = 0ul;
-	uint32_t   Address  = 0ul;
-	bool       IsCtor   = false;
+	MyType*   Type     = nullptr; // Has the signature
+	uint32_t  Flags    = 0ul;
+	uint32_t  Address  = 0ul;
+	bool      IsCtor   = false;
 };
 
 struct MyField
@@ -239,9 +239,9 @@ void        MyUninitialize(MyContext* pContext);
 
 MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kFlags, uint32_t kAddress = MY_INVALID_ADDR) noexcept;
 MyMethod*   MyMethodCreate(
-	const MyFunctionSignature& Signature,
 	MyStruct*                  pKlass,
 	char*                      Fullname,
+	MyType*                    Type,
 	uint32_t                   kFlags,
 	uint32_t                   kAddress = MY_INVALID_ADDR,
 	bool                       bIsCtor = false
@@ -250,6 +250,7 @@ MyStruct*   MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAt
 bool        MyStructIsReference(MyStruct* pKlass) noexcept;
 void        MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, uint32_t kAttribs = MY_FIELD_ATTR_NONE) noexcept;
 MyField*    MyStructGetField(MyStruct* pKlass, const char* lpField);
+MyMethod*   MyStructGetMethod(MyStruct* pKlass, const char* lpMethod);
 size_t      MyStructFieldCount(const MyStruct* pKlass);
 MyType*     MyTypeCreate(uint8_t kKind, void* pData, uint32_t kFlags = 0ul) noexcept;
 bool        MyTypeIsReference(MyType* pType) noexcept;

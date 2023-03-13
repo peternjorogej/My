@@ -197,21 +197,21 @@ MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kAtt
 }
 
 MyMethod* MyMethodCreate(
-    const MyFunctionSignature& Signature,
-    MyStruct*                  pKlass,
-    char*                       lpFullname,
-    uint32_t                    kFlags,
-    uint32_t                    kAddress,
-    bool                        bIsCtor
+    MyStruct* pKlass,
+    char*     lpFullname,
+    MyType*   Type,
+    uint32_t  kFlags,
+    uint32_t  kAddress,
+    bool      bIsCtor
 ) noexcept
 {
     MyMethod* pMeth = Allocator::Create<MyMethod>(Allocator::Stage::Runtime);
-    pMeth->Signature = Signature;
-    pMeth->Fullname  = lpFullname;
-    pMeth->Klass     = pKlass;
-    pMeth->Flags     = kFlags;
-    pMeth->Address   = kAddress;
-    pMeth->IsCtor    = bIsCtor;
+    pMeth->Fullname = lpFullname;
+    pMeth->Klass    = pKlass;
+    pMeth->Type     = Type;
+    pMeth->Flags    = kFlags;
+    pMeth->Address  = kAddress;
+    pMeth->IsCtor   = bIsCtor;
 
     return pMeth;
 }
@@ -291,6 +291,23 @@ MyField* MyStructGetField(MyStruct* pKlass, const char* lpField)
         if (pField->Name == lpFieldName)
         {
             return pField;
+        }
+    }
+
+    return nullptr;
+}
+
+MyMethod* MyStructGetMethod(MyStruct* pKlass, const char* lpMethod)
+{
+    char* const lpMethodName = MyGetCachedString(lpMethod);
+
+    const size_t kCount = stbds_arrlenu(pKlass->Methods);
+    for (size_t k = 0; k < kCount; k++)
+    {
+        MyMethod* const& pMethod = pKlass->Methods[k];
+        if (pMethod->Type->Signature->Name == lpMethodName)
+        {
+            return pMethod;
         }
     }
 

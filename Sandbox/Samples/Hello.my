@@ -3,9 +3,50 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
+extern function float  Sqrt(float x);
+
 using Matrix4x4 = float[4, 4,];
 
-// Testing function inlining
+struct Student
+{
+	var string Name;
+	var string Registration;
+	var int    YOB;
+	var float  Score;
+	
+	function void SetName(string Name)
+	{
+		this.Name = Name;
+	}
+	
+	function void SetScore(float score, float max)
+	{
+		this.Score = score*(100.0/max);
+	}
+	
+	function void PrintStudent()
+	{
+		const object[] vArgs = { object(this.Name), this.Registration, this.YOB, this.Score };
+		WriteLine("Student($s, [$s, $d, $f/100])", vArgs);
+	}
+};
+
+struct pod Float2
+{
+	var float X;
+	var float Y;
+	
+	function float Dot(const Float2 u)
+	{
+		return this.X*u.X + this.Y*u.Y;
+	}
+	
+	function float Length()
+	{
+		return Sqrt(this.Dot(this));
+	}
+};
+
 function static inline int Go() nogc
 {
 	return 0;
@@ -14,7 +55,18 @@ function static inline int Go() nogc
 function int Main(const string[] Argv)
 {
 	Print("Hello, World from My");
-	Print(ReadLine());
+	Print(ReadLine());	
+	// Testing method call
+	{
+		const Student stud = new Student(Name: "Peter", Registration: "ABC-001", YOB: 2001, Score: 4.8);
+		stud.SetName("Peter Njoroge");
+		stud.SetScore(4.81, 5.0);
+		stud.PrintStudent();
+	}
+	{
+		const Float2 u = new Float2(X: 3.0, Y: 4.0);
+		WriteLine("Float2($f, $f; u.u=$f, |u|=$f)", { u.X, u.Y, u.Dot(u), u.Length() });
+	}
 	
 	return Go();
 }
