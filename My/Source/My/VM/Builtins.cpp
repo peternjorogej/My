@@ -76,7 +76,7 @@ void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept
 
     while (true)
     {
-        char* pIt = std::find(lpBegin, lpEnd, '%');
+        char* pIt = std::find(lpBegin, lpEnd, '$');
         if (pIt == lpEnd)
         {
             Console::Write(lpBegin);
@@ -84,15 +84,15 @@ void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept
         }
         else
         {
-            if (pIt[1] != '%')
+            if (pIt[1] != '$')
             {
                 Console::Write("%.*s", pIt - lpBegin, lpBegin);
             }
 
             switch (pIt[1])
             {
-                case '%':
-                    Console::Write("%%");
+                case '$':
+                    Console::Write("$");
                     break;
                 case 'b':
                     Console::Write("%s", MyArrayGet(pArgs, uint64_t, kIndex++) ? "true" : "false");
