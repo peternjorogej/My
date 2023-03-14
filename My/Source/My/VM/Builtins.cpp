@@ -944,9 +944,21 @@ static void Bytes_CheckAndResizeBuffer(MyObject* pBytes, uint64_t kSize) noexcep
     }
 }
 
-void _My_Builtin_Bytes_Create(MyContext* pContext, MyVM* pVM) noexcept
+void _My_Builtin_Bytes_Init(MyContext* pContext, MyVM* pVM) noexcept
 {
-    uint64_t kInitialCapacity = pVM->Stack.PopU64();
+    MyObject* pBytes = pVM->Stack.PopObject();
+
+    uint64_t& kInitialCapacity = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"));
+    if (Buffer buffer = Buffer::Create(kInitialCapacity); buffer)
+    {
+        kInitialCapacity = buffer.Capacity();
+
+        const uint64_t kZero = 0ull;
+        MyObjectFieldSetValue(pBytes, MyObjectGetField(pBytes, "CBuffer"), &buffer, sizeof(void*));
+        MyObjectFieldSetValue(pBytes, MyObjectGetField(pBytes, "Length"), &kZero, sizeof(uint64_t));
+    }
+
+    /*uint64_t kInitialCapacity = pVM->Stack.PopU64();
 
     if (kInitialCapacity == 0ull)
     {
@@ -963,19 +975,23 @@ void _My_Builtin_Bytes_Create(MyContext* pContext, MyVM* pVM) noexcept
     MyObjectFieldSetValueAs<char*>(pBytes, MyObjectGetField(pBytes, "CBuffer"), pCBuffer);
     MyObjectFieldSetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"), kInitialCapacity);
 
-    pVM->Stack.Push(pBytes);
+    pVM->Stack.Push(pBytes);*/
 }
 
 void _My_Builtin_Bytes_Free(MyContext* pContext, MyVM* pVM) noexcept
 {
     MyObject* pBytes = pVM->Stack.PopObject();
 
-    char*& pCBuffer = MyObjectFieldGetValueAs<char*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
+    uint8_t*& pCBuffer = MyObjectFieldGetValueAs<uint8_t*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
+    Buffer buffer = Buffer{ pCBuffer };
 
     // NOTE: Check memory of *pCBuffer* in Debug > Windows > Memory 1 (while debugger is running)
     // to confirm that Bytes API works
-    free(pCBuffer);
+    Buffer::Delete(buffer);
     pCBuffer = nullptr;
+
+    /*free(pCBuffer);
+    pCBuffer = nullptr;*/
 }
 
 void _My_Builtin_Bytes_AddI32(MyContext* pContext, MyVM* pVM) noexcept
@@ -995,17 +1011,24 @@ void _My_Builtin_Bytes_AddU32(MyContext* pContext, MyVM* pVM) noexcept
 
 void _My_Builtin_Bytes_AddU64(MyContext* pContext, MyVM* pVM) noexcept
 {
-    constexpr uint64_t kSize = sizeof(uint64_t);
+    static constexpr uint64_t kSizeOfU64 = sizeof(uint64_t);
 
     uint64_t kValue = pVM->Stack.PopU64();
     MyObject* const pBytes = pVM->Stack.PopObject();
 
-    char* const& pCBuffer = MyObjectFieldGetValueAs<char*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
-    uint64_t& kLength = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Length"));
+    uint8_t* const& pCBuffer = MyObjectFieldGetValueAs<uint8_t*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
+    Buffer buffer = Buffer{ pCBuffer };
 
-    Bytes_CheckAndResizeBuffer(pBytes, kSize);
+    buffer.Write(&kValue, kSizeOfU64);
+
+    uint64_t& kLength = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Length"));
+    kLength = buffer.Length();
+    uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"));
+    kCapacity = buffer.Capacity();
+
+    /*Bytes_CheckAndResizeBuffer(pBytes, kSize);
     memcpy(pCBuffer + kLength, &kValue, kSize);
-    kLength += kSize;
+    kLength += kSize;*/
 }
 
 void _My_Builtin_Bytes_AddF32(MyContext* pContext, MyVM* pVM) noexcept
@@ -1020,31 +1043,58 @@ void _My_Builtin_Bytes_AddF64(MyContext* pContext, MyVM* pVM) noexcept
 
 void _My_Builtin_Bytes_AddString(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MyString* const& pStr = pVM->Stack.PopString();
+    MyString* const& pString = pVM->Stack.PopString();
     MyObject* const& pBytes = pVM->Stack.PopObject();
 
-    char* const& pCBuffer = MyObjectFieldGetValueAs<char*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
-    uint64_t& kLength = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Length"));
+    uint8_t* const& pCBuffer = MyObjectFieldGetValueAs<uint8_t*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
+    Buffer buffer = Buffer{ pCBuffer };
 
-    Bytes_CheckAndResizeBuffer(pBytes, pStr->Length);
-    memcpy(pCBuffer + kLength, pStr->Chars, pStr->Length);
-    kLength += pStr->Length;
+    buffer.Write(pString->Chars, pString->Length);
+
+    uint64_t& kLength = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Length"));
+    kLength = buffer.Length();
+    uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"));
+    kCapacity = buffer.Capacity();
+
+    /*Bytes_CheckAndResizeBuffer(pBytes, pString->Length);
+    memcpy(pCBuffer + kLength, pString->Chars, pString->Length);
+    kLength += pString->Length;*/
 }
 
 void _My_Builtin_Bytes_Append(MyContext* pContext, MyVM* pVM) noexcept
 {
-    MyObject* const& pOtherBytes = pVM->Stack.PopObject();
+    MyObject* const& pThatBytes = pVM->Stack.PopObject();
     MyObject* const& pThisBytes = pVM->Stack.PopObject();
 
-    char* const& pThisCBuffer = MyObjectFieldGetValueAs<char*>(pThisBytes, MyObjectGetField(pThisBytes, "CBuffer"));
-    uint64_t& kThisLength = MyObjectFieldGetValueAs<uint64_t>(pThisBytes, MyObjectGetField(pThisBytes, "Length"));
+    uint8_t* const& pThisCBuffer = MyObjectFieldGetValueAs<uint8_t*>(pThisBytes, MyObjectGetField(pThisBytes, "CBuffer"));
+    Buffer this_buffer = Buffer{ pThisCBuffer };
     
-    const char* const pOtherCBuffer = MyObjectFieldGetValueAs<char*>(pOtherBytes, MyObjectGetField(pOtherBytes, "CBuffer"));
-    const uint64_t kOtherLength = MyObjectFieldGetValueAs<uint64_t>(pOtherBytes, MyObjectGetField(pOtherBytes, "Length"));
+    uint8_t* const pThatCBuffer = MyObjectFieldGetValueAs<uint8_t*>(pThatBytes, MyObjectGetField(pThatBytes, "CBuffer"));
+    const Buffer that_buffer = Buffer{ pThatCBuffer };
 
-    Bytes_CheckAndResizeBuffer(pThisBytes, kOtherLength);
-    memcpy(pThisCBuffer + kThisLength, pOtherCBuffer, kOtherLength);
-    kThisLength += kOtherLength;
+    this_buffer.Write((void*)that_buffer, that_buffer.Length());
+    uint64_t& kLength = MyObjectFieldGetValueAs<uint64_t>(pThisBytes, MyObjectGetField(pThisBytes, "Length"));
+    kLength = this_buffer.Length();
+    uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pThisBytes, MyObjectGetField(pThisBytes, "Capacity"));
+    kCapacity = this_buffer.Capacity();
+
+    /*const uint64_t kThatLength = MyObjectFieldGetValueAs<uint64_t>(pThatBytes, MyObjectGetField(pThatBytes, "Length"));
+    uint64_t& kThisLength = MyObjectFieldGetValueAs<uint64_t>(pThisBytes, MyObjectGetField(pThisBytes, "Length"));
+
+
+    Bytes_CheckAndResizeBuffer(pThisBytes, kThatLength);
+    memcpy(pThisCBuffer + kThisLength, pThatCBuffer, kThatLength);
+    kThisLength += kThatLength;*/
+}
+
+void _My_Builtin_Bytes_GetBufferPointer(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyObject* const& pBytes = pVM->Stack.PopObject();
+
+    uint8_t* const& pCBuffer = MyObjectFieldGetValueAs<uint8_t*>(pBytes, MyObjectGetField(pBytes, "CBuffer"));
+    const Buffer buffer = Buffer{ pCBuffer };
+
+    pVM->Stack.Push((uint64_t)(void*)buffer);
 }
 
 // File

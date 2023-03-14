@@ -259,6 +259,11 @@ inline Buffer::operator bool() const noexcept
 {
 	return (bool)m_Pointer;
 }
+
+uint8_t* const* Buffer::operator &() const noexcept
+{
+	return &m_Pointer;
+}
 #pragma endregion
 
 #pragma region Random Number Generation

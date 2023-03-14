@@ -90,7 +90,7 @@ void _My_Builtin_StringBuilder_ToString(MyContext* pContext, MyVM* pVM);
 
 // Bytes
 // NOTE: WriteX32, ReadX32 - Hoping for 32-bit types?
-void _My_Builtin_Bytes_Create(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_Init(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Bytes_Free(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Bytes_AddI32(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Bytes_AddI64(MyContext* pContext, MyVM* pVM) noexcept;
@@ -100,6 +100,7 @@ void _My_Builtin_Bytes_AddF32(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Bytes_AddF64(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Bytes_AddString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Bytes_Append(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Bytes_GetBufferPointer(MyContext* pContext, MyVM* pVM) noexcept;
 
 // File
 void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM);

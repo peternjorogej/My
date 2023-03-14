@@ -1884,16 +1884,17 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("StringBuilder__WriteLineV", _My_Builtin_StringBuilder_WriteLineV);
     RegisterBuiltin("StringBuilder__ToString",   _My_Builtin_StringBuilder_ToString);
     // Bytes
-    RegisterBuiltin("BytesCreate",      _My_Builtin_Bytes_Create);
-    RegisterBuiltin("Bytes__Free",      _My_Builtin_Bytes_Free);
-    RegisterBuiltin("Bytes__AddI32",    _My_Builtin_Bytes_AddI32);
-    RegisterBuiltin("Bytes__AddU32",    _My_Builtin_Bytes_AddU32);
-    RegisterBuiltin("Bytes__AddF32",    _My_Builtin_Bytes_AddF32);
-    RegisterBuiltin("Bytes__AddI64",    _My_Builtin_Bytes_AddI64);
-    RegisterBuiltin("Bytes__AddU64",    _My_Builtin_Bytes_AddU64);
-    RegisterBuiltin("Bytes__AddF64",    _My_Builtin_Bytes_AddF64);
-    RegisterBuiltin("Bytes__AddString", _My_Builtin_Bytes_AddString);
-    RegisterBuiltin("Bytes__Append",    _My_Builtin_Bytes_Append);
+    RegisterBuiltin("Bytes__Init",             _My_Builtin_Bytes_Init);
+    RegisterBuiltin("Bytes__Free",             _My_Builtin_Bytes_Free);
+    RegisterBuiltin("Bytes__AddI32",           _My_Builtin_Bytes_AddI32);
+    RegisterBuiltin("Bytes__AddU32",           _My_Builtin_Bytes_AddU32);
+    RegisterBuiltin("Bytes__AddF32",           _My_Builtin_Bytes_AddF32);
+    RegisterBuiltin("Bytes__AddI64",           _My_Builtin_Bytes_AddI64);
+    RegisterBuiltin("Bytes__AddU64",           _My_Builtin_Bytes_AddU64);
+    RegisterBuiltin("Bytes__AddF64",           _My_Builtin_Bytes_AddF64);
+    RegisterBuiltin("Bytes__AddString",        _My_Builtin_Bytes_AddString);
+    RegisterBuiltin("Bytes__Append",           _My_Builtin_Bytes_Append);
+    RegisterBuiltin("Bytes__GetBufferPointer", _My_Builtin_Bytes_GetBufferPointer);
     // File
     RegisterBuiltin("FileOpen",        _My_Builtin_File_Open);
     RegisterBuiltin("FileClose",       _My_Builtin_File_Close);

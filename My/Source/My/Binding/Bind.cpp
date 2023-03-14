@@ -2382,15 +2382,17 @@ private:
 		SetupMethod(md.StringBuilderType, "ToString",   md.StringType, { });
 
 		// Bytes
-		SetupMethod(md.BytesType, "Free",      md.VoidType, { });
-		SetupMethod(md.BytesType, "AddI32",    md.VoidType, { { "iValue", md.IntType    } });
-		SetupMethod(md.BytesType, "AddU32",    md.VoidType, { { "kValue", md.UintType   } });
-		SetupMethod(md.BytesType, "AddF32",    md.VoidType, { { "fValue", md.FloatType  } });
-		SetupMethod(md.BytesType, "AddI64",    md.VoidType, { { "iValue", md.IntType    } });
-		SetupMethod(md.BytesType, "AddU64",    md.VoidType, { { "kValue", md.UintType   } });
-		SetupMethod(md.BytesType, "AddF64",    md.VoidType, { { "dValue", md.FloatType  } });
-		SetupMethod(md.BytesType, "AddString", md.VoidType, { { "sValue", md.StringType } });
-		SetupMethod(md.BytesType, "Append",    md.VoidType, { { "pBytes", md.BytesType  } });
+		SetupMethod(md.BytesType, "Init",             md.VoidType,   { });
+		SetupMethod(md.BytesType, "Free",             md.VoidType,   { });
+		SetupMethod(md.BytesType, "AddI32",           md.VoidType,   { { "iValue", md.IntType    } });
+		SetupMethod(md.BytesType, "AddU32",           md.VoidType,   { { "kValue", md.UintType   } });
+		SetupMethod(md.BytesType, "AddF32",           md.VoidType,   { { "fValue", md.FloatType  } });
+		SetupMethod(md.BytesType, "AddI64",           md.VoidType,   { { "iValue", md.IntType    } });
+		SetupMethod(md.BytesType, "AddU64",           md.VoidType,   { { "kValue", md.UintType   } });
+		SetupMethod(md.BytesType, "AddF64",           md.VoidType,   { { "dValue", md.FloatType  } });
+		SetupMethod(md.BytesType, "AddString",        md.VoidType,   { { "sValue", md.StringType } });
+		SetupMethod(md.BytesType, "Append",           md.VoidType,   { { "pBytes", md.BytesType  } });
+		SetupMethod(md.BytesType, "GetBufferPointer", md.IntPtrType, { });
 
 		// File
 		{

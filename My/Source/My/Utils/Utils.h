@@ -44,6 +44,8 @@ public:
 
 	inline operator bool() const noexcept;
 
+	uint8_t* const* operator &() const noexcept;
+	
 	template<typename T>
 	inline operator T*() const noexcept
 	{

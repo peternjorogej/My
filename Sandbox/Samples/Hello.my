@@ -3,6 +3,11 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
+extern function File   FileOpen(string Filepath, string OpenMode);
+extern function void   FileClose(File f);
+extern function bool   FileIsOpen(File f);
+extern function void   FileWriteBytes(File f, intptr buffer);
+
 const string s_Message = "Hello, World from My";
 
 function int Main(const string[] Argv)
@@ -10,24 +15,26 @@ function int Main(const string[] Argv)
 	Print(s_Message);
 	Print(ReadLine());	
 	
-	const StringBuilder sb = new StringBuilder(Capacity: 32u);
-	sb.Init();
-	sb.WriteLine("Group(Scene)");
-	sb.Indent = sb.Indent + 1;
-		sb.WriteLine("Group(Entity)");
-		sb.Indent = sb.Indent + 1;
-			sb.WriteLine("Name = \"Floor\"");
-			sb.WriteLine("GUID = \"9E47ABB7-73CF-48F9-B5C7-F80471B4DBFD\"");
-			sb.WriteLine("Position = { 0.0, 0.0, 0.0 }");
-			sb.WriteLine("Rotation = { 0.0, 0.0, 0.0 }");
-			sb.WriteLine("Scaling  = { 1.0, 1.0, 1.0 }");
-		sb.Indent = sb.Indent - 1;
-		sb.WriteLine("EndGroup");
-	sb.Indent = sb.Indent - 1;
-	sb.WriteLine("EndGroup");
+	const Bytes bytes = new Bytes(Capacity: 32u);
+	bytes.Init();
+	bytes.AddI64(98765);
+	bytes.AddU64(43210u);
+	bytes.AddF64(2.718281828459045);
+	bytes.AddString("Hello, World");
+	bytes.Append(bytes);
+	{
+		// Check binary file to see is it worked
+		// (NOTE: Strings don't have their lengths serialized) 
+		const File fout = FileOpen("Samples/Out.bin", "wb");
+		if (FileIsOpen(fout))
+		{
+			FileWriteBytes(fout, bytes.GetBufferPointer());
+			FileClose(fout);
+		}
+	}
 	
-	const string str = sb.ToString();
-	Print(str);
+	// TODO: Automatically call Bytes.Free (memory allocated by 'Bytes' is *unmanaged*)
+	bytes.Free();
 	
 	return 0;
 }
