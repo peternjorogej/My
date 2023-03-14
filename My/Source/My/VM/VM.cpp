@@ -1170,11 +1170,11 @@ void MyDecompile(const MyAssembly* pAssembly) noexcept
             case MyOpCode::Ldobj:
                 Console::WriteLine("%sldobj, [%u]", Space.c_str(), (Inst.Arg0 & 0xFFFF));
                 break;
-            case MyOpCode::Dup:
-                Console::WriteLine("%sdup, [%u]", Space.c_str(), Inst.Arg0 + 1u);
-                break;
             case MyOpCode::Pop:
                 Console::WriteLine("%spop", Space.c_str());
+                break;
+            case MyOpCode::Dup:
+                Console::WriteLine("%sdup, [%u]", Space.c_str(), Inst.Arg0 + 1u);
                 break;
             case MyOpCode::Ldarg:
                 Console::WriteLine("%sldarg, [%u]", Space.c_str(), Inst.Arg0);

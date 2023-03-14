@@ -369,7 +369,14 @@ const char* MyTypeGetName(const MyType* pType) noexcept
             }
             case MY_TYPE_KIND_FUNCTION:
             {
-                return pType->Signature->Name;
+                const char* lpAllParamsString = "";
+                const size_t kCount = stbds_arrlenu(pType->Signature->Params);
+                for (size_t k = 0; k < kCount; k++)
+                {
+                    const char* lpParamString = MyGetCachedStringV("%s%s", MyTypeGetName(pType->Signature->Params[k]), k==kCount-1 ? "" : ", ");
+                    lpAllParamsString = MyGetCachedStringV("%s%s", lpAllParamsString, lpParamString);
+                }
+                return MyGetCachedStringV("%s(%s)", MyTypeGetName(pType->Signature->Return), lpAllParamsString);
             }
             default: break;
         }
