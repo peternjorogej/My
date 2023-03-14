@@ -149,12 +149,10 @@ struct ArrayTypeSpec
 struct FunctionTypeSpec
 {
 	Token      CallbackKeyword = {};
-	Token      LparenToken0    = {};
+	Token      LparenToken     = {};
 	TypeSpec*  Return          = nullptr;
-	Token      LparenToken1    = {};
 	TypeSpec** Parameters      = nullptr;
-	Token      RparenToken1    = {};
-	Token      RparenToken0    = {};
+	Token      RparenToken     = {};
 };
 
 struct TypeSpec
