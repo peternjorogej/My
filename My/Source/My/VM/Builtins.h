@@ -107,13 +107,9 @@ void _My_Builtin_File_Open(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_Close(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_IsOpen(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_ReadN(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_ReadBytes(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_ReadNBytes(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_WriteN(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_WriteBytes(MyContext* pContext, MyVM* pVM);
-void _My_Builtin_File_WriteNBytes(MyContext* pContext, MyVM* pVM);
 
 
 #if 0

@@ -3,10 +3,7 @@ extern function void   Print(string Text);
 extern function string ReadLine();
 extern function void   WriteLine(string Format, object[] Args,);
 
-extern function File   FileOpen(string Filepath, string OpenMode);
-extern function void   FileClose(File f);
-extern function bool   FileIsOpen(File f);
-extern function void   FileWriteBytes(File f, intptr buffer);
+extern function File   OpenFile(string Filepath, string OpenMode);
 
 const string s_Message = "Hello, World from My";
 
@@ -25,11 +22,11 @@ function int Main(const string[] Argv)
 	{
 		// Check binary file to see is it worked
 		// (NOTE: Strings don't have their lengths serialized) 
-		const File fout = FileOpen("Samples/Out.bin", "wb");
-		if (FileIsOpen(fout))
+		const File fout = OpenFile("Samples/Out.bin", "wb");
+		if (fout.IsOpen())
 		{
-			FileWriteBytes(fout, bytes.GetBufferPointer());
-			FileClose(fout);
+			fout.WriteBytes(bytes.GetBufferPointer(), 0u);
+			fout.Close();
 		}
 	}
 	

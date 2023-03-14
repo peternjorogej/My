@@ -1896,17 +1896,13 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Bytes__Append",           _My_Builtin_Bytes_Append);
     RegisterBuiltin("Bytes__GetBufferPointer", _My_Builtin_Bytes_GetBufferPointer);
     // File
-    RegisterBuiltin("FileOpen",        _My_Builtin_File_Open);
-    RegisterBuiltin("FileClose",       _My_Builtin_File_Close);
-    RegisterBuiltin("FileIsOpen",      _My_Builtin_File_IsOpen);
-    RegisterBuiltin("FileRead",        _My_Builtin_File_Read);
-    RegisterBuiltin("FileReadN",       _My_Builtin_File_ReadN);
-    RegisterBuiltin("FileReadBytes",   _My_Builtin_File_ReadBytes);
-    RegisterBuiltin("FileReadNBytes",  _My_Builtin_File_ReadNBytes);
-    RegisterBuiltin("FileWrite",       _My_Builtin_File_Write);
-    RegisterBuiltin("FileWriteN",      _My_Builtin_File_WriteN);
-    RegisterBuiltin("FileWriteBytes",  _My_Builtin_File_WriteBytes);
-    RegisterBuiltin("FileWriteNBytes", _My_Builtin_File_WriteNBytes);
+    RegisterBuiltin("OpenFile",         _My_Builtin_File_Open);
+    RegisterBuiltin("File__Close",      _My_Builtin_File_Close);
+    RegisterBuiltin("File__IsOpen",     _My_Builtin_File_IsOpen);
+    RegisterBuiltin("File__Read",       _My_Builtin_File_Read);
+    RegisterBuiltin("File__ReadBytes",  _My_Builtin_File_ReadBytes);
+    RegisterBuiltin("File__Write",      _My_Builtin_File_Write);
+    RegisterBuiltin("File__WriteBytes", _My_Builtin_File_WriteBytes);
 }
 #pragma endregion
 

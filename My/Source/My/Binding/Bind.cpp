@@ -2395,9 +2395,12 @@ private:
 		SetupMethod(md.BytesType, "GetBufferPointer", md.IntPtrType, { });
 
 		// File
-		{
-			//
-		}
+		SetupMethod(md.FileType, "Close",      md.VoidType,    { });
+		SetupMethod(md.FileType, "IsOpen",     md.BooleanType, { });
+		SetupMethod(md.FileType, "Read",       md.StringType,  { { "kLength", md.UintType   } });
+		SetupMethod(md.FileType, "ReadBytes",  md.IntPtrType,  { { "kLength", md.UintType   } });
+		SetupMethod(md.FileType, "Write",      md.VoidType,    { { "pBuffer", md.IntPtrType }, { "kLength", md.UintType } });
+		SetupMethod(md.FileType, "WriteBytes", md.VoidType,    { { "pBuffer", md.IntPtrType }, { "kLength", md.UintType } });
 	}
 
 	static void InitModuleStd() noexcept
