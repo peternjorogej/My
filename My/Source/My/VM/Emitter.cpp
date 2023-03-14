@@ -492,13 +492,6 @@ void Emitter::EmitFunction(MyBytecodeProcessor& bp, const MySymbol* pFunction, B
 
     EmitFunctionBody(bp, pBody->block.Statements);
 
-    /*iCount = stbds_arrlen(pBody->block.Statements);
-    for (int32_t k = 0; k < iCount; k++)
-    {
-        BoundStatement* const& pStmt = pBody->block.Statements[k];
-        EmitStatement(bp, pStmt);
-    }*/
-
     bp.EndFunction();
 }
 
@@ -700,8 +693,7 @@ void Emitter::EmitNameExpression(MyBytecodeProcessor& bp, BoundExpression* pName
 
     if (ne.Symbol->Kind == SymbolKind::Function)
     {
-        // bp.Emit(MyOpCode::Lda, ne.Symbol);
-        MY_ASSERT(false, "NotImplementedException [Emitting function name '%s']", ne.Symbol->Name);
+        MY_ASSERT(false, "[NotImplemented]: Callable expressions: '%s'", ne.Symbol->Name);
     }
     else
     {

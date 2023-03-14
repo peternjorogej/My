@@ -9,9 +9,8 @@ enum class MyOpCode : uint16_t
 	Invalid = 0,
 	// Stack Ops
 	Ldc = 1, Ldcf, Ldstr, Ldarr, Ldobj, Ldarg,
-	Ldloc, Stloc, Ldglo, Stglo,
-	Newarray, Newobj,
-	Pop, Dup, Ldelem, Stelem, Ldfld, Stfld,
+	Ldloc, Stloc, Ldglo, Stglo, Pop, Dup,
+	Newarray, Newobj, Ldelem, Stelem, Ldfld, Stfld,
 	Inc, Incf,
 	// Math Ops
 	Add, Addf, Sub, Subf, Mul, Mulf, Div, Divf, Pow, Powf,
