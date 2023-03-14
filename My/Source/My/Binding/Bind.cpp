@@ -6,6 +6,7 @@
 
 
 static bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcept;
+static bool _My_FunctionTypesMatch(const MyFunctionSignature& From, const MyFunctionSignature& To) noexcept;
 
 #pragma region Type Conversion
 /// Type Conversion
@@ -18,7 +19,7 @@ public:
 	static TypeConversion Explicit;
 
 public:
-	TypeConversion(bool Exists, bool IsIdentity, bool IsImplicit)
+	constexpr TypeConversion(bool Exists, bool IsIdentity, bool IsImplicit)
 		: Exists(Exists), IsIdentity(IsIdentity), IsImplicit(IsImplicit)
 	{ }
 
@@ -65,6 +66,14 @@ public:
 		if (From->Kind == MY_TYPE_KIND_ARRAY && To->Kind == MY_TYPE_KIND_ARRAY)
 		{
 			if (_My_ArrayTypesMatch(*From->Array, *To->Array))
+			{
+				return TypeConversion::Implicit;
+			}
+		}
+		
+		if (From->Kind == MY_TYPE_KIND_FUNCTION && To->Kind == MY_TYPE_KIND_FUNCTION)
+		{
+			if (_My_FunctionTypesMatch(*From->Signature, *To->Signature))
 			{
 				return TypeConversion::Implicit;
 			}
@@ -666,7 +675,14 @@ public:
 		FunctionSymbol& fs = m_Function->funcsym;
 		for (size_t k = 0; k < stbds_arrlenu(fs.Parameters); k++)
 		{
-			m_Scope->DeclareVariable(fs.Parameters[k]);
+			if (fs.Parameters[k]->Type->Kind == MY_TYPE_KIND_FUNCTION)
+			{
+				m_Scope->DeclareFunction(fs.Parameters[k]);
+			}
+			else
+			{
+				m_Scope->DeclareVariable(fs.Parameters[k]);
+			}
 		}
 	}
 	
@@ -1094,19 +1110,11 @@ private:
 			}
 			if (const auto[bFound, pFun] = m_Scope->LookupFunction(lpName); bFound)
 			{
-				const size_t kParamsLength = stbds_arrlenu(pFun->funcsym.Parameters);
+				const size_t kParamsLength = stbds_arrlenu(pFun->Type->Signature->Params);
 				const size_t kArgsLength = stbds_arrlenu(call.Arguments);
 
 				if (kArgsLength != kParamsLength)
 				{
-					/*TextLocation Location = GetLocation(pCall);
-					if (kArgsLength > 0)
-					{
-						uint32_t kStart = GetStart(stbds_arrlast(call.Arguments));
-						uint32_t kEnd   = GetEnd(pCall);
-						uint32_t kLine  = m_Tree->GetText().GetLineIndex(kStart);
-						Location = TextLocation(kStart, kEnd - kStart, kLine, m_Tree->GetText().Filename);
-					}*/
 					TextLocation Location = kArgsLength ? GetLocation(stbds_arrlast(call.Arguments)) : GetLocation(pCall);
 					m_Diagnostics.ReportInvalidArgumentCount(Location, pFun->Name, kParamsLength, kArgsLength);
 					goto Error;
@@ -1156,9 +1164,9 @@ private:
 		for (size_t k = 0; k < kArgsLength; k++)
 		{
 			BoundExpression* pBoundArgument = BindExpression(call.Arguments[k]);
-			MySymbol* pParamSym = pFunction->funcsym.Parameters[k + kArgsOffset];
+			MyType* pParamType = pFunction->Type->Signature->Params[k + kArgsOffset];
 
-			pBoundArgument = BindConversion(GetLocation(call.Arguments[k]), pBoundArgument, pParamSym->Type);
+			pBoundArgument = BindConversion(GetLocation(call.Arguments[k]), pBoundArgument, pParamType);
 			stbds_arrpush(ppArgs, pBoundArgument);
 		}
 
@@ -1951,8 +1959,27 @@ private:
 
 	MyType* BindFunctionTypeSpecifier(TypeSpec* pTypeSpec)
 	{
-		MY_NOT_IMPLEMENTED();
-		return My_Defaults.ErrorType;
+		//MY_NOT_IMPLEMENTED();
+		FunctionTypeSpec& fts = pTypeSpec->func;
+
+		MyType* pReturn = BindTypeSpec(fts.Return);
+		if (!pReturn || pReturn == My_Defaults.ErrorType)
+		{
+			return My_Defaults.ErrorType;
+		}
+
+		MyType** ppParameters = nullptr;
+		for (size_t k = 0; k < stbds_arrlenu(fts.Parameters); k++)
+		{
+			MyType* pParameter = BindTypeSpec(fts.Parameters[k]);
+			if (!pParameter || pParameter == My_Defaults.ErrorType)
+			{
+				return My_Defaults.ErrorType;
+			}
+			stbds_arrpush(ppParameters, pParameter);
+		}
+
+		return MyTypeCreate(MY_TYPE_KIND_FUNCTION, new MyFunctionSignature{ nullptr, pReturn, ppParameters });
 	}
 
 	MyType* LookupType(char* const& lpName)
@@ -2159,7 +2186,7 @@ private:
 			case TypeSpecKind::Array:
 				return pTypeSpec->array.RbracketToken.End;
 			case TypeSpecKind::Function:
-				return pTypeSpec->func.RparenToken0.End;
+				return pTypeSpec->func.RparenToken.End;
 			default: break;
 		}
 
@@ -2229,8 +2256,14 @@ private:
 			}
 			case TypeSpecKind::Function:
 			{
-				MY_NOT_IMPLEMENTED();
-				return nullptr;
+				const char* lpAllParamsString = "";
+				const size_t kCount = stbds_arrlenu(pTypeSpec->func.Parameters);
+				for (size_t k = 0; k < kCount; k++)
+				{
+					const char* lpParamString = MyGetCachedStringV("%s%s", GetTypeName(pTypeSpec->func.Parameters[k]), k == kCount - 1 ? "" : ", ");
+					lpAllParamsString = MyGetCachedStringV("%s%s", lpAllParamsString, lpParamString);
+				}
+				return MyGetCachedStringV("%s(%s)", GetTypeName(pTypeSpec->func.Return), lpAllParamsString);
 			}
 			default: break;
 		}
@@ -2902,6 +2935,31 @@ bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcep
 		const uint64_t& fc = From.Lengths[k];
 		const uint64_t& tc = To.Lengths[k];
 		if (fc != tc && tc != 0ull)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool _My_FunctionTypesMatch(const MyFunctionSignature& From, const MyFunctionSignature& To) noexcept
+{
+	if (From.Return != To.Return)
+	{
+		return false;
+	}
+
+	const size_t kLhsArgc = stbds_arrlenu(From.Params);
+	const size_t kRhsArgc = stbds_arrlenu(To.Params);
+	if (kLhsArgc != kRhsArgc)
+	{
+		return false;
+	}
+
+	for (size_t k = 0; k < kLhsArgc; k++)
+	{
+		if (From.Params[k] != To.Params[k])
 		{
 			return false;
 		}
