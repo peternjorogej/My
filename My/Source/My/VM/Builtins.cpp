@@ -957,25 +957,6 @@ void _My_Builtin_Bytes_Init(MyContext* pContext, MyVM* pVM) noexcept
         MyObjectFieldSetValue(pBytes, MyObjectGetField(pBytes, "CBuffer"), &buffer, sizeof(void*));
         MyObjectFieldSetValue(pBytes, MyObjectGetField(pBytes, "Length"), &kZero, sizeof(uint64_t));
     }
-
-    /*uint64_t kInitialCapacity = pVM->Stack.PopU64();
-
-    if (kInitialCapacity == 0ull)
-    {
-        kInitialCapacity = 64ull;
-    }
-
-    MyObject* pBytes = MyObjectNew(pContext, My_Defaults.BytesStruct);
-
-    char* const pCBuffer = (char*)malloc(kInitialCapacity);
-    MY_ASSERT(pCBuffer != nullptr, "Failed to allocate memory");
-
-    memset(pCBuffer, 0, kInitialCapacity);
-
-    MyObjectFieldSetValueAs<char*>(pBytes, MyObjectGetField(pBytes, "CBuffer"), pCBuffer);
-    MyObjectFieldSetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"), kInitialCapacity);
-
-    pVM->Stack.Push(pBytes);*/
 }
 
 void _My_Builtin_Bytes_Free(MyContext* pContext, MyVM* pVM) noexcept
@@ -989,9 +970,6 @@ void _My_Builtin_Bytes_Free(MyContext* pContext, MyVM* pVM) noexcept
     // to confirm that Bytes API works
     Buffer::Delete(buffer);
     pCBuffer = nullptr;
-
-    /*free(pCBuffer);
-    pCBuffer = nullptr;*/
 }
 
 void _My_Builtin_Bytes_AddI32(MyContext* pContext, MyVM* pVM) noexcept
@@ -1025,10 +1003,6 @@ void _My_Builtin_Bytes_AddU64(MyContext* pContext, MyVM* pVM) noexcept
     kLength = buffer.Length();
     uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"));
     kCapacity = buffer.Capacity();
-
-    /*Bytes_CheckAndResizeBuffer(pBytes, kSize);
-    memcpy(pCBuffer + kLength, &kValue, kSize);
-    kLength += kSize;*/
 }
 
 void _My_Builtin_Bytes_AddF32(MyContext* pContext, MyVM* pVM) noexcept
@@ -1055,10 +1029,6 @@ void _My_Builtin_Bytes_AddString(MyContext* pContext, MyVM* pVM) noexcept
     kLength = buffer.Length();
     uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pBytes, MyObjectGetField(pBytes, "Capacity"));
     kCapacity = buffer.Capacity();
-
-    /*Bytes_CheckAndResizeBuffer(pBytes, pString->Length);
-    memcpy(pCBuffer + kLength, pString->Chars, pString->Length);
-    kLength += pString->Length;*/
 }
 
 void _My_Builtin_Bytes_Append(MyContext* pContext, MyVM* pVM) noexcept
@@ -1077,14 +1047,6 @@ void _My_Builtin_Bytes_Append(MyContext* pContext, MyVM* pVM) noexcept
     kLength = this_buffer.Length();
     uint64_t& kCapacity = MyObjectFieldGetValueAs<uint64_t>(pThisBytes, MyObjectGetField(pThisBytes, "Capacity"));
     kCapacity = this_buffer.Capacity();
-
-    /*const uint64_t kThatLength = MyObjectFieldGetValueAs<uint64_t>(pThatBytes, MyObjectGetField(pThatBytes, "Length"));
-    uint64_t& kThisLength = MyObjectFieldGetValueAs<uint64_t>(pThisBytes, MyObjectGetField(pThisBytes, "Length"));
-
-
-    Bytes_CheckAndResizeBuffer(pThisBytes, kThatLength);
-    memcpy(pThisCBuffer + kThisLength, pThatCBuffer, kThatLength);
-    kThisLength += kThatLength;*/
 }
 
 void _My_Builtin_Bytes_GetBufferPointer(MyContext* pContext, MyVM* pVM) noexcept
