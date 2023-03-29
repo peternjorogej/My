@@ -565,7 +565,9 @@ private:
 		}
 
 		if (pNewParent == pOldParent && stbds_arrlenu(pNewList) == 0ul)
+		{
 			return _RewriteResult{ false, pOldParent, pOldList };
+		}
 
 		return _RewriteResult{ true, pNewParent, pNewList };
 	}
@@ -770,7 +772,6 @@ protected:
 		///
 
 		MY_NOT_IMPLEMENTED();
-		return pForeach;
 
 		/*BoundForeachStatement& fes = pForeach->foreach;
 
@@ -885,6 +886,7 @@ protected:
 			)
 		});
 		return RewriteStatement(pBlock);*/
+		return pForeach;
 	}
 
 	virtual BoundStatement* RewriteWhileStatement(BoundStatement* pWhile) noexcept override

@@ -12,26 +12,9 @@ function int Main(const string[] Argv)
 	Print(s_Message);
 	Print(ReadLine());	
 	
-	const Bytes bytes = new Bytes(Capacity: 32u);
-	bytes.Init();
-	bytes.AddI64(98765);
-	bytes.AddU64(43210u);
-	bytes.AddF64(2.718281828459045);
-	bytes.AddString("Hello, World");
-	bytes.Append(bytes);
-	{
-		// Check binary file to see is it worked
-		// (NOTE: Strings don't have their lengths serialized) 
-		const File fout = OpenFile("Samples/Out.bin", "wb");
-		if (fout.IsOpen())
-		{
-			fout.WriteBytes(bytes.GetBufferPointer(), 0u);
-			fout.Close();
-		}
-	}
-	
-	// TODO: Automatically call Bytes.Free (memory allocated by 'Bytes' is *unmanaged*)
-	bytes.Free();
+	const float x = (float)"25.52"; // Weird, but we'll change it.
+	const int y = (int)x;
+	WriteLine("x=$f, y=$d", { (object)x, y });
 	
 	return 0;
 }

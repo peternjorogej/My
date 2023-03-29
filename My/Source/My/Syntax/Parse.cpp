@@ -808,53 +808,6 @@ private:
 			return nullptr;
 		}
 
-		/*TypeSpec*  pType   = nullptr;
-		TypeSpec** ppTypes = nullptr;
-
-		const Token& CallbackKeyword = NextToken();
-		const Token& LparenToken0 = NextToken();
-		if (!CheckAndMatchToken(TokenKind::LParen))
-		{
-			return nullptr;
-		}
-		if (!(pType = ParseTypeSpec()))
-		{
-			return nullptr;
-		}
-		const Token& LparenToken1 = Current();
-		if (!CheckAndMatchToken(TokenKind::LParen))
-		{
-			return nullptr;
-		}
-		while (Current().Kind != TokenKind::RParen && Current().Kind != TokenKind::Eof)
-		{
-			TypeSpec* pArgType = ParseTypeSpec();
-			if (!pArgType)
-			{
-				return nullptr;
-			}
-			stbds_arrpush(ppTypes, pArgType);
-
-			if (Current().Kind != TokenKind::RParen)
-			{
-				if (!CheckAndMatchToken(TokenKind::Comma))
-				{
-					return nullptr;
-				}
-			}
-		}
-		const Token& RparenToken1 = Current();
-		if (!CheckAndMatchToken(TokenKind::RParen))
-		{
-			return nullptr;
-		}
-		const Token& RparenToken0 = Current();
-		if (!CheckAndMatchToken(TokenKind::RParen))
-		{
-			return nullptr;
-		}
-		
-		return MakeTypeSpec_Function(CallbackKeyword, LparenToken0, pType, LparenToken1, ppTypes, RparenToken1, RparenToken0);*/
 		return MakeTypeSpec_Function(CallbackKeyword, LparenToken, pType, ppTypes, RparenToken);
 	}
 

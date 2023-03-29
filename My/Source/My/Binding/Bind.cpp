@@ -624,28 +624,6 @@ public:
 			stbds_shdefault(s_ForwardedTypes, nullptr);
 			stbds_shdefaults(s_ForwardedTypes, kvp);
 		}
-		/*{
-			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsValue = { MyGetCachedString("Value"), md.StringType, nullptr };
-			stbds_arrpush(pFields, fsValue);
-			m_Scope->DeclareStruct(MakeSymbol_Struct(md.StringBuilderStruct->Name, md.StringBuilderType, pFields));
-		}
-		{
-			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsReal = { MyGetCachedString("Real"), md.FloatType, nullptr };
-			const FieldSymbol fsImag = { MyGetCachedString("Imag"), md.FloatType, nullptr };
-			stbds_arrpush(pFields, fsReal);
-			stbds_arrpush(pFields, fsImag);
-			m_Scope->DeclareStruct(MakeSymbol_Struct(md.ComplexStruct->Name, md.ComplexType, pFields));
-		}
-		{
-			FieldSymbol* pFields = nullptr;
-			const FieldSymbol fsHandle   = { MyGetCachedString("Handle"),   md.UintType, nullptr };
-			const FieldSymbol fsFilepath = { MyGetCachedString("Filepath"), md.StringType, nullptr };
-			stbds_arrpush(pFields, fsHandle);
-			stbds_arrpush(pFields, fsFilepath);
-			m_Scope->DeclareStruct(MakeSymbol_Struct(md.FileStruct->Name, md.FileType, pFields));
-		}*/
 	}
 
 	InternalBinder(MyContext* pContext, const SyntaxTree* pTree)
@@ -1304,6 +1282,12 @@ private:
 		if (!pExpr || pExpr->Type() == My_Defaults.ErrorType)
 		{
 			return MakeBoundExpression_Error();
+		}
+
+		MyDefaults& md = My_Defaults;
+		if (pType == md.BooleanType || pType == md.IntType || pType == md.UintType || pType == md.FloatType)
+		{
+			return BindConversion(GetLocation(cast.Expr), pExpr, pType, true); // <-- bAllowExplicit
 		}
 
 		return MakeBoundExpression_Cast(pType, pExpr);
