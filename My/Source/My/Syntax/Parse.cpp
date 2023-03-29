@@ -768,7 +768,6 @@ private:
 
 	TypeSpec* ParseFunctionTypeSpec() noexcept
 	{
-		//MY_NOT_IMPLEMENTED();
 		// The syntax is weird but it will work for now
 		TypeSpec*  pType   = nullptr;
 		TypeSpec** ppTypes = nullptr;
