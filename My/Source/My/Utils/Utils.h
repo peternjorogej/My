@@ -158,6 +158,7 @@ public:
 	void ReportInvalidCountForDecomposition(const TextLocation& Location, size_t kExpectedCount, size_t kCount) noexcept;
 	void ReportForeachIterableNotArrayLike(const TextLocation& Location, MyType* pType) noexcept;
 	void ReportInvalidCast(const TextLocation& Location, MyType* pTypeFrom, MyType* pTypeTo) noexcept;
+	void ReportInvalidTypeConversion(const TextLocation& Location, MyType* pTypeFrom, MyType* pTypeTo) noexcept;
 	void ReportIllegalTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept;
 	void ReportIllegalImplicitTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept;
 	void ReportIllegalAssignment(const TextLocation& Location, char* const& lpName) noexcept;

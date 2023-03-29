@@ -532,6 +532,14 @@ void DiagnosticBag::ReportInvalidCast(const TextLocation& Location, MyType* pTyp
 	Report(Location, Message);
 }
 
+void DiagnosticBag::ReportInvalidTypeConversion(const TextLocation& Location, MyType* pTypeFrom, MyType* pTypeTo) noexcept
+{
+	const std::string Message = Console::Format(
+		"Invalid type conversion from type '%s' to '%s'", MyTypeGetName(pTypeFrom), MyTypeGetName(pTypeTo)
+	);
+	Report(Location, Message);
+}
+
 void DiagnosticBag::ReportIllegalTypeConversion(const TextLocation& Location, MyType* pType, MyType* pExpectedType) noexcept
 {
 	const std::string Message = Console::Format(
