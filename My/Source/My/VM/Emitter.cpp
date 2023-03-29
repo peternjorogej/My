@@ -1839,22 +1839,6 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("BufferReadF64",     _My_Builtin_Buffer_ReadF64);
     RegisterBuiltin("BufferReadString",  _My_Builtin_Buffer_ReadString);
     RegisterBuiltin("BufferGet",         _My_Builtin_Buffer_Get);
-    // Math
-    RegisterBuiltin("Sin",   _My_Builtin_Sin);
-    RegisterBuiltin("Cos",   _My_Builtin_Cos);
-    RegisterBuiltin("Tan",   _My_Builtin_Tan);
-    RegisterBuiltin("Asin",  _My_Builtin_Asin);
-    RegisterBuiltin("Acos",  _My_Builtin_Acos);
-    RegisterBuiltin("Atan",  _My_Builtin_Atan);
-    RegisterBuiltin("Atan2", _My_Builtin_Atan2);
-    RegisterBuiltin("Log",   _My_Builtin_Log);
-    RegisterBuiltin("Log10", _My_Builtin_Log10);
-    RegisterBuiltin("Logb",  _My_Builtin_Logb);
-    RegisterBuiltin("Exp",   _My_Builtin_Exp);
-    RegisterBuiltin("Floor", _My_Builtin_Floor);
-    RegisterBuiltin("Ceil",  _My_Builtin_Ceil);
-    RegisterBuiltin("Sqrt",  _My_Builtin_Sqrt);
-    RegisterBuiltin("Cbrt",  _My_Builtin_Cbrt);
     // String
     RegisterBuiltin("__strcat",           _My_Builtin_String_Concat);
     RegisterBuiltin("__strcmp",           _My_Builtin_String_Compare);
@@ -1898,6 +1882,27 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("File__ReadBytes",  _My_Builtin_File_ReadBytes);
     RegisterBuiltin("File__Write",      _My_Builtin_File_Write);
     RegisterBuiltin("File__WriteBytes", _My_Builtin_File_WriteBytes);
+
+    // (static) Math
+    RegisterBuiltin("Math__Abs",   _My_Builtin_Math_Abs);
+    RegisterBuiltin("Math__Sin",   _My_Builtin_Math_Sin);
+    RegisterBuiltin("Math__Cos",   _My_Builtin_Math_Cos);
+    RegisterBuiltin("Math__Tan",   _My_Builtin_Math_Tan);
+    RegisterBuiltin("Math__Asin",  _My_Builtin_Math_Asin);
+    RegisterBuiltin("Math__Acos",  _My_Builtin_Math_Acos);
+    RegisterBuiltin("Math__Atan",  _My_Builtin_Math_Atan);
+    RegisterBuiltin("Math__Atan2", _My_Builtin_Math_Atan2);
+    RegisterBuiltin("Math__Exp",   _My_Builtin_Math_Exp);
+    RegisterBuiltin("Math__Log",   _My_Builtin_Math_Log);
+    RegisterBuiltin("Math__Log10", _My_Builtin_Math_Log10);
+    RegisterBuiltin("Math__Logb",  _My_Builtin_Math_Logb);
+    RegisterBuiltin("Math__Floor", _My_Builtin_Math_Floor);
+    RegisterBuiltin("Math__Ceil",  _My_Builtin_Math_Ceil);
+    RegisterBuiltin("Math__Sqrt",  _My_Builtin_Math_Sqrt);
+    RegisterBuiltin("Math__Cbrt",  _My_Builtin_Math_Cbrt);
+    RegisterBuiltin("Math__Nthrt", _My_Builtin_Math_Nthrt);
+    RegisterBuiltin("Math__Pow",   _My_Builtin_Math_Pow);
+
 }
 #pragma endregion
 

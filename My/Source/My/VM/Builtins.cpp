@@ -534,99 +534,6 @@ void _My_Builtin_Buffer_Get(MyContext* pContext, MyVM* pVM) noexcept
     MY_NOT_IMPLEMENTED();
 }
 
-// Math
-void _My_Builtin_Sin(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(sin(x));
-}
-
-void _My_Builtin_Cos(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(cos(x));
-}
-
-void _My_Builtin_Tan(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(tan(x));
-}
-
-void _My_Builtin_Asin(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(asin(x));
-}
-
-void _My_Builtin_Acos(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(acos(x));
-}
-
-void _My_Builtin_Atan(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(atan(x));
-}
-
-void _My_Builtin_Atan2(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double y = pVM->Stack.PopF64();
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(atan2(x, y));
-}
-
-void _My_Builtin_Log(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(log(x));
-}
-
-void _My_Builtin_Log10(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(log10(x));
-}
-
-void _My_Builtin_Logb(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double y = pVM->Stack.PopF64();
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(log(x) / log(y));
-}
-
-void _My_Builtin_Exp(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(exp(x));
-}
-
-void _My_Builtin_Floor(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(floor(x));
-}
-
-void _My_Builtin_Ceil(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(ceil(x));
-}
-
-void _My_Builtin_Sqrt(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(sqrt(x));
-}
-
-void _My_Builtin_Cbrt(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const double x = pVM->Stack.PopF64();
-    pVM->Stack.Push(cbrt(x));
-}
-
 // String
 void _My_Builtin_String_Concat(MyContext* pContext, MyVM* pVM) noexcept
 {
@@ -1280,8 +1187,117 @@ void _My_Builtin_File_WriteBytes(MyContext* pContext, MyVM* pVM)
     }
 }
 
-int64_t my_pow(int64_t base, int64_t exponent) noexcept
+
+// (static) Math
+void _My_Builtin_Math_Abs(MyContext* pContext, MyVM* pVM) noexcept
 {
-    // Maybe a better implementation *?
-    return int64_t(pow(double(base), double(exponent)));
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(abs(x));
 }
+
+void _My_Builtin_Math_Sin(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(sin(x));
+}
+
+void _My_Builtin_Math_Cos(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(cos(x));
+}
+
+void _My_Builtin_Math_Tan(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(tan(x));
+}
+
+void _My_Builtin_Math_Asin(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(asin(x));
+}
+
+void _My_Builtin_Math_Acos(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(acos(x));
+}
+
+void _My_Builtin_Math_Atan(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(atan(x));
+}
+
+void _My_Builtin_Math_Atan2(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    const double y = pVM->Stack.PopF64();
+    pVM->Stack.Push(atan2(y, x));
+}
+
+void _My_Builtin_Math_Log(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(log(x));
+}
+
+void _My_Builtin_Math_Log10(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(log10(x));
+}
+
+void _My_Builtin_Math_Logb(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double b = pVM->Stack.PopF64();
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(log(x) / log(b));
+}
+
+void _My_Builtin_Math_Exp(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(exp(x));
+}
+
+void _My_Builtin_Math_Floor(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(floor(x));
+}
+
+void _My_Builtin_Math_Ceil(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(ceil(x));
+}
+
+void _My_Builtin_Math_Sqrt(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(sqrt(x));
+}
+
+void _My_Builtin_Math_Cbrt(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(cbrt(x));
+}
+
+void _My_Builtin_Math_Nthrt(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double b = pVM->Stack.PopF64();
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(pow(x, 1.0 / b));
+}
+
+void _My_Builtin_Math_Pow(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const double y = pVM->Stack.PopF64();
+    const double x = pVM->Stack.PopF64();
+    pVM->Stack.Push(pow(x, y));
+}
+

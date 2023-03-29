@@ -49,23 +49,6 @@ void _My_Builtin_Buffer_ReadF64(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Buffer_ReadString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Buffer_Get(MyContext* pContext, MyVM* pVM) noexcept;
 
-// Math
-void _My_Builtin_Sin(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Cos(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Tan(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Asin(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Acos(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Atan(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Atan2(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Log(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Log10(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Logb(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Exp(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Floor(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Ceil(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Sqrt(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Cbrt(MyContext* pContext, MyVM* pVM) noexcept;
-
 // String
 void _My_Builtin_String_Concat(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_Compare(MyContext* pContext, MyVM* pVM) noexcept;
@@ -114,46 +97,23 @@ void _My_Builtin_File_ReadBytes(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_WriteBytes(MyContext* pContext, MyVM* pVM);
 
+// (static) Math
+void _My_Builtin_Math_Abs(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Sin(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Cos(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Tan(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Asin(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Acos(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Atan(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Atan2(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Log(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Log10(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Logb(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Exp(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Floor(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Ceil(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Sqrt(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Cbrt(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Nthrt(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Math_Pow(MyContext* pContext, MyVM* pVM) noexcept;
 
-#if 0
-void _My_Builtin_Strcat(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Strcmp(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Equals(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_CvToBool(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_CvToInt(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_CvToUint(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_CvToFloat(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_CvToString(InternalCallbackContext* pCallbackContext) noexcept;
-
-void _My_Builtin_Write(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_WriteLine(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Read(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_ReadLine(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_ReadInt(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_ReadUint(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_ReadFloat(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_RandomInt(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_RandomUint(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_RandomFloat(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Print(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Length(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Clock(InternalCallbackContext* pCallbackContext) noexcept;
-
-void _My_Builtin_Sin(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Cos(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Tan(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Asin(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Acos(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Atan(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Atan2(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Log(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Log10(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Logb(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Exp(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Floor(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Ceil(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Sqrt(InternalCallbackContext* pCallbackContext) noexcept;
-void _My_Builtin_Cbrt(InternalCallbackContext* pCallbackContext) noexcept;
-#endif // 0
-
-int64_t my_pow(int64_t base, int64_t exponent) noexcept;
