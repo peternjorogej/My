@@ -171,6 +171,8 @@ public:
 	void ReportTypeCannotBeIndexed(const TextLocation& Location, MyType* pType) noexcept;
 	void ReportMismatchedIndexCount(const TextLocation& Location, uint32_t kExpectedCount, uint32_t kCount) noexcept;
 	void ReportTypeCannotBeUsedAsIndex(const TextLocation& Location, MyType* pObjectType, MyType* pIndexType, MyType* pType) noexcept;
+	void ReportNotAStaticMember(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept;
+	void ReportNotAStaticMethod(const TextLocation& Location, char* const& lpMethod, MyStruct* pKlass) noexcept;
 	void ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept;
 	void ReportTooManyInitializers(const TextLocation& Location, MyStruct* pKlass, size_t kExpectedCount, size_t kCount);
 	void ReportTypeDoesNotHaveAttributes(const TextLocation& Location, MyType* pType) noexcept;

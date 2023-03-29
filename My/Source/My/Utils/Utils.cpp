@@ -614,6 +614,18 @@ void DiagnosticBag::ReportTypeCannotBeUsedAsIndex(const TextLocation& Location, 
 	Report(Location, Message);
 }
 
+void DiagnosticBag::ReportNotAStaticMember(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept
+{
+	const std::string Message = Console::Format("Field '%s' is not a static member of '%s'", lpField, pKlass->Name);
+	Report(Location, Message);
+}
+
+void DiagnosticBag::ReportNotAStaticMethod(const TextLocation& Location, char* const& lpMethod, MyStruct* pKlass) noexcept
+{
+	const std::string Message = Console::Format("Method '%s' is not a static function of '%s'", lpMethod, pKlass->Name);
+	Report(Location, Message);
+}
+
 void DiagnosticBag::ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept
 {
 	const std::string Message = Console::Format("Object of type '%s' has no key/attribute '%s'", pKlass->Name, lpField);
