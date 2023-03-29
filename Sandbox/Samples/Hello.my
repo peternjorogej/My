@@ -7,15 +7,29 @@ extern function File   OpenFile(string Filepath, string OpenMode);
 
 const string s_Message = "Hello, World from My";
 
+struct Empty
+{
+	var float x;
+	function void Test()
+	{
+		WriteLine("Empty($f)).Test", { this.x });
+	}
+};
+
 function int Main(const string[] Argv)
 {
 	Print(s_Message);
 	Print(ReadLine());	
 	
-	const float x = (float)"25.52"; // Weird, but we'll change it.
+	// const float x = float("25.52"); // Error: Invalid type convertion
+	const float x = (float)(object)"25.52".ParseFloat(); // This weirdness should work
 	const int y = (int)x;
-	WriteLine("x=$f, y=$d", { (object)x, y });
+	const string z = string(x+x);
+	WriteLine("x=$f, y=$d, z=$s", { (object)x, y, z });
 	
+	// const File f = (File)x; // Error: invalid cast (float to File)
+	// const File f = (File)z; // Error: invalid cast (string to File)
+
 	return 0;
 }
 

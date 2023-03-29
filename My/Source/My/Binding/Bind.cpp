@@ -30,37 +30,43 @@ public:
 
 	static const TypeConversion& Classify(MyType* From, MyType* To) noexcept
 	{
+		const MyDefaults& md = My_Defaults;
+
 		if (From == To)
 			return TypeConversion::Identity;
 
-		if (From != My_Defaults.VoidType && To == My_Defaults.ObjectType)
+		if (From != md.VoidType && To == md.ObjectType)
 			return TypeConversion::Implicit;
 
-		/*if (From == My_Defaults.ObjectType && To != My_Defaults.VoidType)
+		/*if (From == md.ObjectType && To != md.VoidType)
 			return TypeConversion::Implicit;*/
-
-		if (From == My_Defaults.BooleanType || From == My_Defaults.IntType || From == My_Defaults.UintType || From == My_Defaults.FloatType)
-			if (To == My_Defaults.StringType)
+		
+		if (From == md.ObjectType)
+			if (To == md.BooleanType || To == md.IntType || To == md.UintType || To == md.FloatType)
 				return TypeConversion::Explicit;
 
-		if (From == My_Defaults.StringType)
-			if (To == My_Defaults.BooleanType || To == My_Defaults.IntType || To == My_Defaults.UintType || To == My_Defaults.FloatType)
+		if (From == md.BooleanType || From == md.IntType || From == md.UintType || From == md.FloatType)
+			if (To == md.StringType)
 				return TypeConversion::Explicit;
 
-		if (From == My_Defaults.BooleanType)
-			if (To == My_Defaults.IntType || To == My_Defaults.UintType || To == My_Defaults.FloatType)
+		/*if (From == md.StringType)
+			if (To == md.BooleanType || To == md.IntType || To == md.UintType || To == md.FloatType)
+				return TypeConversion::Explicit;*/
+
+		if (From == md.BooleanType)
+			if (To == md.IntType || To == md.UintType || To == md.FloatType)
 				return TypeConversion::Implicit;
 
-		if (From == My_Defaults.IntType)
-			if (To == My_Defaults.BooleanType || To == My_Defaults.UintType || To == My_Defaults.FloatType)
+		if (From == md.IntType)
+			if (To == md.BooleanType || To == md.UintType || To == md.FloatType)
 				return TypeConversion::Implicit;
 		
-		if (From == My_Defaults.UintType)
-			if (To == My_Defaults.BooleanType || To == My_Defaults.IntType || To == My_Defaults.FloatType)
+		if (From == md.UintType)
+			if (To == md.BooleanType || To == md.IntType || To == md.FloatType)
 				return TypeConversion::Implicit;
 		
-		if (From == My_Defaults.FloatType)
-			if (To == My_Defaults.BooleanType || To == My_Defaults.IntType || To == My_Defaults.UintType)
+		if (From == md.FloatType)
+			if (To == md.BooleanType || To == md.IntType || To == md.UintType)
 				return TypeConversion::Implicit;
 
 		if (From->Kind == MY_TYPE_KIND_ARRAY && To->Kind == MY_TYPE_KIND_ARRAY)
@@ -1056,7 +1062,18 @@ private:
 			char* const& lpName = call.Callable->name.Identifier.Id;
 			if (MyType* pType = LookupType(lpName); pType && stbds_arrlenu(call.Arguments) == 1ul)
 			{
-				return BindConversion(call.Arguments[0], pType, true); // <-- bAllowExplicit
+				BoundExpression* pExpr = BindExpression(call.Arguments[0]);
+				MyType* pExprType = pExpr->Type();
+				TextLocation Location = GetLocation(pCall);
+
+				if (!MyTypeIsReference(pType) && MyTypeIsReference(pExprType))
+				{
+					// Disallow casting from reference to primitive types
+					m_Diagnostics.ReportInvalidTypeConversion(Location, pExprType, pType);
+					return MakeBoundExpression_Error();
+				}
+
+				return BindConversion(Location, pExpr, pType, true); // <-- bAllowExplicit
 			}
 		}
 
@@ -1202,8 +1219,8 @@ private:
 		// Error
 		else
 		{
-			m_Diagnostics.ReportTypeCannotBeIndexed(GetLocation(index.Sequence), pSequenceType);
-			goto Error;
+		m_Diagnostics.ReportTypeCannotBeIndexed(GetLocation(index.Sequence), pSequenceType);
+		goto Error;
 		}
 
 		return MakeBoundExpression_Index(pSequence, pValueType, ppIndices);
@@ -1271,6 +1288,8 @@ private:
 	{
 		CastExpression& cast = pCast->cast;
 
+		MyDefaults& md = My_Defaults;
+
 		MyType* pType = BindTypeSpec(cast.Type);
 		if (!pType)
 		{
@@ -1279,18 +1298,47 @@ private:
 		}
 
 		BoundExpression* pExpr = BindExpression(cast.Expr);
-		if (!pExpr || pExpr->Type() == My_Defaults.ErrorType)
+		MyType* pExprType = pExpr->Type();
+
+		if (!pExpr || pExprType == md.ErrorType)
 		{
 			return MakeBoundExpression_Error();
 		}
 
-		MyDefaults& md = My_Defaults;
-		if (pType == md.BooleanType || pType == md.IntType || pType == md.UintType || pType == md.FloatType)
+		// Cast expressions are valid only when:
+		//     1. The expression being cast is of a reference type and the type we are casting to is also
+		//        a reference type.
+		//     2. Both types are primitive (in which case, we use a type conversion instead).
+		//     3. We are casting between primitives and the generic *object* type.
+		bool bTypeFromIsRef = MyTypeIsReference(pExprType);
+		bool bTypeToIsRef = MyTypeIsReference(pType);
+		
+		if (bTypeFromIsRef == bTypeToIsRef)
 		{
-			return BindConversion(GetLocation(cast.Expr), pExpr, pType, true); // <-- bAllowExplicit
+			// Case 1 & 2:
+			if (bTypeFromIsRef)
+			{
+				// Restrict conversions between different reference types
+				if (pExprType == md.ObjectType)
+				{
+					return MakeBoundExpression_Cast(pType, pExpr);
+				}
+			}
+			else
+			{
+				return BindConversion(GetLocation(cast.Expr), pExpr, pType, true); // <-- bAllowExplicit;
+			}
 		}
 
-		return MakeBoundExpression_Cast(pType, pExpr);
+		if ((!bTypeFromIsRef && pType == md.ObjectType) || // primitive type to *object* type
+			(!bTypeToIsRef && pExprType == md.ObjectType)) // *object* type to primitive type
+		{
+			// Case 3:
+			return BindConversion(GetLocation(cast.Expr), pExpr, pType, true); // <-- bAllowExplicit;
+		}
+
+		m_Diagnostics.ReportInvalidCast(GetLocation(pCast), pExprType, pType);
+		return MakeBoundExpression_Error();
 	}
 
 	BoundExpression* BindConversion(Expression* pExpression, MyType* pType, bool bAllowExplicit = false)
@@ -2387,6 +2435,9 @@ private:
 		SetupMethod(md.StringType, "EndsWith",   md.BooleanType, { { "sSuffix", md.StringType } });
 		SetupMethod(md.StringType, "ToUpper",    md.StringType,  { });
 		SetupMethod(md.StringType, "ToLower",    md.StringType,  { });
+		SetupMethod(md.StringType, "ParseInt",   md.IntType,     { });
+		SetupMethod(md.StringType, "ParseUint",  md.UintType,    { });
+		SetupMethod(md.StringType, "ParseFloat", md.FloatType,   { });
 
 		/// StringBuilder
 		SetupMethod(md.StringBuilderType, "Init",       md.VoidType,   { });

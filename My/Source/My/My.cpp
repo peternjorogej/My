@@ -232,27 +232,27 @@ MyStruct* MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAttr
 
 bool MyStructIsReference(MyStruct* pKlass) noexcept
 {
-    MyDefaults& ud = My_Defaults;
-    if (pKlass)
-    {
-        if (pKlass == ud.BooleanStruct ||
-            pKlass == ud.IntStruct     ||
-            pKlass == ud.UintStruct    ||
-            pKlass == ud.FloatStruct)
-        {
-            return false;
-        }
-        if (pKlass->Attributes & MY_STRUCT_ATTR_POD)
-        {
-            return false;
-        }
-
-        return true;
-    }
-    else
+    MyDefaults& md = My_Defaults;
+    if (!pKlass)
     {
         return false;
     }
+
+    if (pKlass == md.BooleanStruct ||
+        pKlass == md.IntStruct     ||
+        pKlass == md.UintStruct    ||
+        pKlass == md.IntPtrStruct  ||
+        pKlass == md.FloatStruct)
+    {
+        return false;
+    }
+
+    if (pKlass->Attributes & MY_STRUCT_ATTR_POD)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, uint32_t kAttribs) noexcept
