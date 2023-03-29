@@ -77,6 +77,9 @@ void _My_Builtin_String_StartsWith(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_EndsWith(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_ToUpper(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_String_ToLower(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_ParseInt(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_ParseUint(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_String_ParseFloat(MyContext* pContext, MyVM* pVM) noexcept;
 
 // StringBuilder
 void _My_Builtin_StringBuilder_Init(MyContext* pContext, MyVM* pVM);

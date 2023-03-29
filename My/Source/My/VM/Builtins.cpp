@@ -786,6 +786,30 @@ void _My_Builtin_String_ToLower(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(pLower);
 }
 
+void _My_Builtin_String_ParseInt(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pString = pVM->Stack.PopString();
+    // TODO: Do the actual parsing
+    const int64_t iValue = strtoll(pString->Chars, nullptr, 10);
+    pVM->Stack.Push(iValue);
+}
+
+void _My_Builtin_String_ParseUint(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pString = pVM->Stack.PopString();
+    // TODO: Do the actual parsing
+    const uint64_t kValue = strtoull(pString->Chars, nullptr, 10);
+    pVM->Stack.Push(kValue);
+}
+
+void _My_Builtin_String_ParseFloat(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyString* const& pString = pVM->Stack.PopString();
+    // TODO: Do the actual parsing
+    const double dValue = strtod(pString->Chars, nullptr);
+    pVM->Stack.Push(dValue);
+}
+
 // StringBuilder
 static void StrBldr_CheckAndResizeBuffer(MyObject* pStrBldr, uint64_t kSize) noexcept
 {

@@ -1866,6 +1866,9 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("String__EndsWith",   _My_Builtin_String_EndsWith);
     RegisterBuiltin("String__ToUpper",    _My_Builtin_String_ToUpper);
     RegisterBuiltin("String__ToLower",    _My_Builtin_String_ToLower);
+    RegisterBuiltin("String__ParseInt",   _My_Builtin_String_ParseInt);
+    RegisterBuiltin("String__ParseUint",  _My_Builtin_String_ParseUint);
+    RegisterBuiltin("String__ParseFloat", _My_Builtin_String_ParseFloat);
     // StringBuilder
     RegisterBuiltin("StringBuilder__Init",       _My_Builtin_StringBuilder_Init);
     RegisterBuiltin("StringBuilder__Append",     _My_Builtin_StringBuilder_Append);
