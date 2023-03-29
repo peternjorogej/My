@@ -524,10 +524,12 @@ const char* MyReturnCodeString(int64_t iReturnCode) noexcept
         case MY_RC_INVALID_OPCODE:     return "RC_INVALID_OPCODE";
         case MY_RC_INVALID_ADDRESS:    return "RC_INVALID_ADDRESS";
 
+        case MY_RC_NULL_REFERENCE:           return "RC_NULL_REFERENCE";
         case MY_RC_DIVISION_BY_ZERO:         return "RC_DIVISION_BY_ZERO";
         case MY_RC_INDEX_OUT_OF_BOUNDS:      return "RC_INDEX_OUT_OF_BOUNDS";
         case MY_RC_INVALID_CAST:             return "RC_INVALID_CAST";
         case MY_RC_INVALID_OPERATION:        return "RC_INVALID_OPERATION";
+
         case MY_RC_UNDEFINED_BUILTIN:        return "RC_UNDEFINED_BUILTIN";
         case MY_RC_UNDEFINED_INTERNAL:       return "RC_UNDEFINED_INTERNAL";
         case MY_RC_RECURSION_LIMIT_EXCEEDED: return "RC_RECURSION_LIMIT_EXCEEDED";

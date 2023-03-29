@@ -733,6 +733,10 @@ int64_t MyVM::Execute(bool& bRunning)
         {
             // TODO: Will come back to this later (improvement)
             MyObject* const& pObject = Stack.PopObject();
+            if (!pObject)
+            {
+                return MY_RC_NULL_REFERENCE;
+            }
             MyField* pField = MyObjectGetField(pObject, Assembly->Fields[IP->Arg0].key);
             Stack.Push(MyObjectFieldGetValueAs<uint64_t>(pObject, pField));
             IP++;
@@ -742,6 +746,10 @@ int64_t MyVM::Execute(bool& bRunning)
         {
             // TODO: Will come back to this later (improvement)
             MyObject* pObject = Stack.PopObject();
+            if (!pObject)
+            {
+                return MY_RC_NULL_REFERENCE;
+            }
             MyField* pField = MyObjectGetField(pObject, Assembly->Fields[IP->Arg0].key);
             uint64_t kValue = Stack.PopU64();
             MyObjectFieldSetValue(pObject, pField, &kValue, sizeof(uint64_t));
