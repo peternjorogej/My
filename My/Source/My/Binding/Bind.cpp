@@ -609,17 +609,34 @@ public:
 			stbds_shdefault(s_UserDefinedTypes, nullptr);
 			stbds_shdefaults(s_UserDefinedTypes, kvp);
 
-			stbds_shput(s_UserDefinedTypes, md.ObjectStruct->Name,        md.ObjectType);
-			stbds_shput(s_UserDefinedTypes, md.BooleanStruct->Name,       md.BooleanType);
-			stbds_shput(s_UserDefinedTypes, md.IntStruct->Name,           md.IntType);
-			stbds_shput(s_UserDefinedTypes, md.UintStruct->Name,          md.UintType);
-			stbds_shput(s_UserDefinedTypes, md.IntPtrStruct->Name,        md.IntPtrType);
-			stbds_shput(s_UserDefinedTypes, md.FloatStruct->Name,         md.FloatType);
-			stbds_shput(s_UserDefinedTypes, md.StringStruct->Name,        md.StringType);
-			stbds_shput(s_UserDefinedTypes, md.StringBuilderStruct->Name, md.StringBuilderType);
-			stbds_shput(s_UserDefinedTypes, md.ComplexStruct->Name,       md.ComplexType);
-			stbds_shput(s_UserDefinedTypes, md.BytesStruct->Name,         md.BytesType);
-			stbds_shput(s_UserDefinedTypes, md.FileStruct->Name,          md.FileType);
+			static const auto SetupStruct = [this](MyType* pKlassType) noexcept -> void
+			{
+				stbds_shput(s_UserDefinedTypes, pKlassType->Klass->Name, pKlassType);
+
+				FieldSymbol* pFieldSymbols = nullptr;
+				for (size_t k = 0; k < stbds_arrlenu(pKlassType->Klass->Fields); k++)
+				{
+					const MyField* const pField = pKlassType->Klass->Fields + k;
+					
+					FieldSymbol fs = FieldSymbol{ pField->Name, pField->Type, nullptr };
+					stbds_arrpush(pFieldSymbols, fs);
+				}
+
+				m_Scope->DeclareStruct(MakeSymbol_Struct(pKlassType->Klass->Name, pKlassType, pFieldSymbols, nullptr));
+			};
+
+			SetupStruct(md.ObjectType);
+			SetupStruct(md.BooleanType);
+			SetupStruct(md.IntType);
+			SetupStruct(md.UintType);
+			SetupStruct(md.IntPtrType);
+			SetupStruct(md.FloatType);
+			SetupStruct(md.StringType);
+			SetupStruct(md.StringBuilderType);
+			SetupStruct(md.ComplexType);
+			SetupStruct(md.BytesType);
+			SetupStruct(md.FileType);
+			SetupStruct(md.MathType);
 
 			InitBuiltinMethodSymbols(m_Scope);
 		}
@@ -921,9 +938,10 @@ private:
 			return MakeBoundExpression_Name(pFun);
 		}
 
-		if (const auto [bFound, pStr] = m_Scope->LookupStruct(lpName); bFound)
+		if (const auto[bFound, pStr] = m_Scope->LookupStruct(lpName); bFound)
 		{
-			m_Diagnostics.ReportNotAVariable(GetLocation(name.Identifier), lpName);
+			// For static member access
+			return MakeBoundExpression_Name(pStr);
 		}
 		else
 		{
@@ -1076,9 +1094,11 @@ private:
 			}
 		}
 
-		BoundExpression*  pCallable = nullptr;
-		BoundExpression** ppArgs    = nullptr;
-		MySymbol*        pFunction = nullptr;
+		BoundExpression*  pCallable   = nullptr;
+		BoundExpression** ppArgs      = nullptr;
+		MySymbol*         pFunction   = nullptr;
+
+		bool bIsStaticMethod = false;
 
 		pCallable = BindExpression(call.Callable);
 		if (pCallable->Type() == My_Defaults.ErrorType)
@@ -1128,10 +1148,15 @@ private:
 			MyStruct* pKlass = GetStructFromType(field.Object->Type());
 			MyMethod* pMethod = MyStructGetMethod(pKlass, field.Field);
 
+			if (pMethod->Flags & MY_FUNC_ATTR_STATIC)
+			{
+				bIsStaticMethod = true;
+			}
+
 			if (const auto[bFound, pFun] = m_Scope->LookupFunction(pMethod->Fullname); bFound)
 			{
 				const size_t kParamsLength = stbds_arrlenu(pFun->funcsym.Parameters);
-				const size_t kArgsLength = stbds_arrlenu(call.Arguments) + 1u;
+				const size_t kArgsLength = stbds_arrlenu(call.Arguments) + (bIsStaticMethod ? 0u : 1u);
 
 				if (kArgsLength != kParamsLength)
 				{
@@ -1154,14 +1179,18 @@ private:
 		}
 
 		const size_t kArgsLength = stbds_arrlenu(call.Arguments);
-		const size_t kArgsOffset = pCallable->Kind == BoundExpressionKind::Field ? 1 : 0;
 		for (size_t k = 0; k < kArgsLength; k++)
 		{
 			BoundExpression* pBoundArgument = BindExpression(call.Arguments[k]);
-			MyType* pParamType = pFunction->Type->Signature->Params[k + kArgsOffset];
+			MyType* pParamType = pFunction->Type->Signature->Params[k];
 
 			pBoundArgument = BindConversion(GetLocation(call.Arguments[k]), pBoundArgument, pParamType);
 			stbds_arrpush(ppArgs, pBoundArgument);
+		}
+
+		if (bIsStaticMethod)
+		{
+			pCallable = MakeBoundExpression_Name(pFunction);
 		}
 
 		return MakeBoundExpression_Call(pCallable, pFunction, ppArgs);
@@ -1236,23 +1265,36 @@ private:
 		char* const& lpField = field.Field.Id;
 
 		MyType* pObjectType = pObject->Type();
-		if (pObjectType != My_Defaults.ErrorType)
+		if (pObjectType == My_Defaults.ErrorType)
 		{
-			MyField* pField = MyStructGetField(pObjectType->Klass, lpField);
-			if (pField)
-			{
-				return MakeBoundExpression_Field(pObject, pField->Type, lpField);
-			}
-
-			MyMethod* pMethod = MyStructGetMethod(pObjectType->Klass, lpField);
-			if (pMethod)
-			{
-				return MakeBoundExpression_Field(pObject, pMethod->Type, lpField);
-			}
-
-			m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(field.Field), lpField, pObjectType->Klass);
+			return MakeBoundExpression_Error();
 		}
 
+		bool bIsStaticMemberAccess = pObject->Kind == BoundExpressionKind::Name && pObject->name.Symbol->Name == pObjectType->Klass->Name;
+
+		MyField* pStructField = MyStructGetField(pObjectType->Klass, lpField);
+		if (pStructField)
+		{
+			if (bIsStaticMemberAccess && !(pStructField->Attributes & MY_FIELD_ATTR_STATIC))
+			{
+				m_Diagnostics.ReportNotAStaticMember(GetLocation(field.Field), lpField, pObjectType->Klass);
+				return MakeBoundExpression_Error();
+			}
+			return MakeBoundExpression_Field(pObject, pStructField->Type, lpField);
+		}
+
+		MyMethod* pMethod = MyStructGetMethod(pObjectType->Klass, lpField);
+		if (pMethod)
+		{
+			if (bIsStaticMemberAccess && !(pMethod->Flags & MY_FUNC_ATTR_STATIC))
+			{
+				m_Diagnostics.ReportNotAStaticMethod(GetLocation(field.Field), lpField, pObjectType->Klass);
+				return MakeBoundExpression_Error();
+			}
+			return MakeBoundExpression_Field(pObject, pMethod->Type, lpField);
+		}
+
+		m_Diagnostics.ReportInvalidKeyOrAttribute(GetLocation(field.Field), lpField, pObjectType->Klass);
 		return MakeBoundExpression_Error();
 	}
 
@@ -1892,6 +1934,7 @@ private:
 
 			uint32_t kMethodFlags = MY_FUNC_ATTR_METHOD;
 			if (bIsCtor) { kMethodFlags |= MY_FUNC_ATTR_CTOR; }
+			if (fs.StaticKeyword) { kMethodFlags |= MY_FUNC_ATTR_STATIC; }
 			if (fs.InlineKeyword) { kMethodFlags |= MY_FUNC_ATTR_INLINE; }
 			if (fs.NoGCKeyword) { kMethodFlags |= MY_FUNC_ATTR_NOGC; }
 
@@ -1901,11 +1944,13 @@ private:
 				kMethodFlags
 			);
 
-			MyMethod* pMethod = MyMethodCreate(pKlass, fs.Name.Id, pMethodType, kMethodFlags, MY_INVALID_ADDR, bIsCtor);
-			stbds_arrpush(pKlass->Methods, pMethod);
+			MyMethod* pMethod = MyMethodCreate(pKlass, fs.Name.Id, pMethodType, kMethodFlags, MY_INVALID_ADDR, bIsCtor); // Adds the method to 'pKlass->Methods'
 			{
-				MySymbol* pSelfParam = MakeSymbol_Parameter(MyGetCachedString("this"), pType, false, true);
-				stbds_arrins(ppParamSyms, 0, pSelfParam);
+				if (fs.StaticKeyword == nullptr)
+				{
+					MySymbol* pSelfParam = MakeSymbol_Parameter(MyGetCachedString("this"), pType, false, true);
+					stbds_arrins(ppParamSyms, 0, pSelfParam);
+				}
 
 				MySymbol* pFunction = MakeSymbol_Function(
 					pMethod->Fullname,
@@ -1923,7 +1968,6 @@ private:
 					return;
 				}
 			}
-			Console::WriteLine("[DEBUG]: Bound method %s.%s -> %s", pKlass->Name, fs.Name.Id, pMethod->Fullname);
 		}
 
 	Error:
@@ -2305,41 +2349,51 @@ private:
 
 	static MyType* GetTypeFromStruct(MyStruct* const& pKlass) noexcept
 	{
-		if (pKlass == My_Defaults.ObjectStruct)
+		MyDefaults& md = My_Defaults;
+
+		if (pKlass == md.ObjectStruct)
 		{
-			return My_Defaults.ObjectType;
+			return md.ObjectType;
 		}
-		if (pKlass == My_Defaults.BooleanStruct)
+		if (pKlass == md.BooleanStruct)
 		{
-			return My_Defaults.BooleanType;
+			return md.BooleanType;
 		}
-		if (pKlass == My_Defaults.IntStruct)
+		if (pKlass == md.IntStruct)
 		{
-			return My_Defaults.IntType;
+			return md.IntType;
 		}
-		if (pKlass == My_Defaults.UintStruct)
+		if (pKlass == md.UintStruct)
 		{
-			return My_Defaults.UintType;
+			return md.UintType;
 		}
-		if (pKlass == My_Defaults.FloatStruct)
+		if (pKlass == md.IntPtrStruct)
 		{
-			return My_Defaults.FloatType;
+			return md.IntPtrType;
 		}
-		if (pKlass == My_Defaults.ComplexStruct)
+		if (pKlass == md.FloatStruct)
 		{
-			return My_Defaults.ComplexType;
+			return md.FloatType;
 		}
-		if (pKlass == My_Defaults.StringStruct)
+		if (pKlass == md.ComplexStruct)
 		{
-			return My_Defaults.StringType;
+			return md.ComplexType;
 		}
-		if (pKlass == My_Defaults.StringBuilderStruct)
+		if (pKlass == md.StringStruct)
 		{
-			return My_Defaults.StringBuilderType;
+			return md.StringType;
 		}
-		if (pKlass == My_Defaults.FileStruct)
+		if (pKlass == md.StringBuilderStruct)
 		{
-			return My_Defaults.FileType;
+			return md.StringBuilderType;
+		}
+		if (pKlass == md.FileStruct)
+		{
+			return md.FileType;
+		}
+		if (pKlass == md.MathStruct)
+		{
+			return md.MathType;
 		}
 
 		for (size_t k = 0; k < stbds_hmlenu(s_UserDefinedTypes); k++)
@@ -2372,7 +2426,7 @@ private:
 	{
 		MyDefaults& md = My_Defaults;
 
-		static auto SetupMethod = [&pScope](MyType* pKlassType, const char* lpName, MyType* pReturn, List<Pair<const char*, MyType*>> Params) -> void
+		static auto SetupMethod = [&pScope](MyType* pKlassType, const char* lpName, MyType* pReturn, List<Pair<const char*, MyType*>> Params, bool bIsStatic = false) -> void
 		{
 			static char* const lpThisString = MyGetCachedString("this");
 
@@ -2380,6 +2434,7 @@ private:
 
 			MyType** ppParamTypes = nullptr;
 			MySymbol** ppParamsSymbols = nullptr;
+			if (!bIsStatic)
 			{
 				stbds_arrpush(ppParamTypes, pKlassType);
 				stbds_arrpush(ppParamsSymbols, MakeSymbol_Parameter(lpThisString, pKlassType, true, true));
@@ -2393,6 +2448,12 @@ private:
 				stbds_arrpush(ppParamsSymbols, pSymbol);
 			}
 
+			uint32_t kMethodFlags = MY_FUNC_ATTR_METHOD;
+			if (bIsStatic)
+			{
+				kMethodFlags |= MY_FUNC_ATTR_STATIC;
+			}
+
 			MyMethod* pMethod = MyMethodCreate(
 				pKlassType->Klass,
 				lpMethodName,
@@ -2400,9 +2461,9 @@ private:
 					MY_TYPE_KIND_FUNCTION,
 					new MyFunctionSignature{ lpMethodName, pReturn, ppParamTypes }
 				),
-				MY_FUNC_ATTR_METHOD
-			);
-			stbds_arrpush(pKlassType->Klass->Methods, pMethod);
+				kMethodFlags
+			); // Adds the method to 'pKlassType->Klass->Methods'
+			
 
 			MySymbol* pMethodSymbol = MakeSymbol_Function(pMethod->Fullname, pMethod->Type, ppParamsSymbols);
 			pScope->DeclareFunction(pMethodSymbol);
@@ -2468,6 +2529,26 @@ private:
 		SetupMethod(md.FileType, "ReadBytes",  md.IntPtrType,  { { "kLength", md.UintType   } });
 		SetupMethod(md.FileType, "Write",      md.VoidType,    { { "pBuffer", md.IntPtrType }, { "kLength", md.UintType } });
 		SetupMethod(md.FileType, "WriteBytes", md.VoidType,    { { "pBuffer", md.IntPtrType }, { "kLength", md.UintType } });
+
+		// (static) Math
+		SetupMethod(md.MathType, "Abs",   md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Sin",   md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Cos",   md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Tan",   md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Asin",  md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Acos",  md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Atan",  md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Atan2", md.FloatType, { { "y", md.FloatType }, { "x",    md.FloatType } }, true);
+		SetupMethod(md.MathType, "Exp",   md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Log",   md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Log10", md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Logb",  md.FloatType, { { "x", md.FloatType }, { "base", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Floor", md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Ceil",  md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Sqrt",  md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Cbrt",  md.FloatType, { { "x", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Nthrt", md.FloatType, { { "x", md.FloatType }, { "base", md.FloatType } }, true);
+		SetupMethod(md.MathType, "Pow",   md.FloatType, { { "x", md.FloatType }, { "y",    md.FloatType } }, true);
 	}
 
 	static void InitModuleStd() noexcept

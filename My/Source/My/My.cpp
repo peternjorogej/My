@@ -151,6 +151,11 @@ void MyInitializeStructs(MyContext* pContext)
         MyStructAddField(ud.FileStruct, "OpenMode", ud.StringType, MY_FIELD_ATTR_CONST);
         MyStructAddField(ud.FileStruct, "FileSize", ud.IntType, MY_FIELD_ATTR_CONST);
     }
+
+    // (static) Math
+    ud.MathStruct = MyStructCreate(pContext, "Math", MY_STRUCT_ATTR_STATIC);
+    ud.MathType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.MathStruct);
+    ud.MathStruct->Size = 0ul;
 }
 
 void MyUninitializeStructs()
@@ -170,6 +175,7 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.StringBuilderType);
     MY_SAFEDELETE(ud.BytesType);
     MY_SAFEDELETE(ud.FileType);
+    MY_SAFEDELETE(ud.MathType);
 
     MY_SAFEDELETE(ud.ErrorStruct);
     MY_SAFEDELETE(ud.VoidStruct);
@@ -184,6 +190,7 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.StringBuilderStruct);
     MY_SAFEDELETE(ud.BytesStruct);
     MY_SAFEDELETE(ud.FileStruct);
+    MY_SAFEDELETE(ud.MathStruct);
 }
 
 MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kAttribs, uint32_t kAddress) noexcept
@@ -196,6 +203,7 @@ MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kAtt
     return pFunc;
 }
 
+// Also adds the method to the struct's method list
 MyMethod* MyMethodCreate(
     MyStruct* pKlass,
     char*     lpName,
@@ -213,6 +221,12 @@ MyMethod* MyMethodCreate(
     pMeth->Address  = kAddress;
     pMeth->IsCtor   = bIsCtor;
 
+    if (pKlass->Attributes & MY_STRUCT_ATTR_STATIC)
+    {
+        pMeth->Flags |= MY_FUNC_ATTR_STATIC;
+    }
+
+    stbds_arrpush(pKlass->Methods, pMeth);
     return pMeth;
 }
 
@@ -263,6 +277,11 @@ void MyStructAddField(MyStruct* pKlass, const char* lpName, MyType* pType, uint3
     field.Klass      = pKlass;
     field.Offset     = pKlass->Size;
     field.Attributes = kAttribs;
+
+    if (pKlass->Attributes & MY_STRUCT_ATTR_STATIC)
+    {
+        field.Attributes |= MY_FIELD_ATTR_STATIC;
+    }
 
     MyStruct* pFieldKlass = field.Type->Klass;
 

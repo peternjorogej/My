@@ -19,8 +19,9 @@ enum tagMyTypeKind
 
 enum tagMyFieldAttributes
 {
-	MY_FIELD_ATTR_NONE  = 0,
-	MY_FIELD_ATTR_CONST = 1 << 0,
+	MY_FIELD_ATTR_NONE   = 0,
+	MY_FIELD_ATTR_CONST  = 1 << 0,
+	MY_FIELD_ATTR_STATIC = 1 << 1,
 };
 
 enum tagMyFunctionAttributes
@@ -35,8 +36,9 @@ enum tagMyFunctionAttributes
 
 enum tagMyStructAttributes
 {
-	MY_STRUCT_ATTR_NONE = 0,
-	MY_STRUCT_ATTR_POD  = 1 << 0,
+	MY_STRUCT_ATTR_NONE   = 0,
+	MY_STRUCT_ATTR_POD    = 1 << 0,
+	MY_STRUCT_ATTR_STATIC = 1 << 1,
 };
 
 enum tagMyReturnCode
@@ -209,13 +211,14 @@ struct MyDefaults
 	MyType* BooleanType = nullptr;
 	MyType* IntType     = nullptr;
 	MyType* UintType    = nullptr;
-	MyType* IntPtrType    = nullptr;
+	MyType* IntPtrType  = nullptr;
 	MyType* FloatType   = nullptr;
 	MyType* ComplexType = nullptr;
 	MyType* StringType  = nullptr;
 	MyType* StringBuilderType = nullptr;
 	MyType* BytesType   = nullptr;
 	MyType* FileType    = nullptr;
+	MyType* MathType    = nullptr;
 
 	MyStruct* ErrorStruct   = nullptr;
 	MyStruct* VoidStruct    = nullptr;
@@ -223,13 +226,14 @@ struct MyDefaults
 	MyStruct* BooleanStruct = nullptr;
 	MyStruct* IntStruct     = nullptr;
 	MyStruct* UintStruct    = nullptr;
-	MyStruct* IntPtrStruct    = nullptr;
+	MyStruct* IntPtrStruct  = nullptr;
 	MyStruct* FloatStruct   = nullptr;
 	MyStruct* ComplexStruct = nullptr;
 	MyStruct* StringStruct  = nullptr;
 	MyStruct* StringBuilderStruct = nullptr;
 	MyStruct* BytesStruct   = nullptr;
 	MyStruct* FileStruct    = nullptr;
+	MyStruct* MathStruct    = nullptr;
 };
 
 extern MyDefaults My_Defaults;
