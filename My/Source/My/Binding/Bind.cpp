@@ -38,12 +38,11 @@ public:
 		if (From != md.VoidType && To == md.ObjectType)
 			return TypeConversion::Implicit;
 
-		/*if (From == md.ObjectType && To != md.VoidType)
-			return TypeConversion::Implicit;*/
-		
 		if (From == md.ObjectType)
 			if (To == md.BooleanType || To == md.IntType || To == md.UintType || To == md.FloatType)
 				return TypeConversion::Explicit;
+			else
+				return TypeConversion::Implicit;
 
 		if (From == md.BooleanType || From == md.IntType || From == md.UintType || From == md.FloatType)
 			if (To == md.StringType)

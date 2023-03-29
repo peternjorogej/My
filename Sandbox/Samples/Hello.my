@@ -23,7 +23,7 @@ function int Main(const string[] Argv)
 	Print(s_Message);
 	Print(ReadLine());	
 	
-	const Empty e = (Empty)null;
+	const Empty e = null;
 	e.Test();
 	
 	return 0;
