@@ -1,8 +1,4 @@
 
-// extern function void   Print(string Text);
-// extern function string ReadLine();
-// extern function void   WriteLine(string Format, object[] Args,);
-
 const string s_Message = "Hello, World from My";
 
 function int Main(const string[] Argv)
@@ -10,16 +6,13 @@ function int Main(const string[] Argv)
 	Console.Print(s_Message);
 	Console.Print(Console.ReadLine());
 	
-	const string s0 = Console.ReadLine();
-	const string s1 = Console.ReadLine();
-	const int i = Console.ReadInt();
-	const uint u = Console.ReadUint();
-	const float f = Console.ReadFloat();
+	const int ri = Random.Int(1000);
+	const uint ru = Random.Uint(1000u);
+	const float rf = Random.Float();
+	const string rs0 = Random.String(20u, false); // Uses all printable characters (*)
+	const string rs1 = Random.String(20u, true); // Uses characters generally used for identifiers ([a-zA-Z0-9_])
 	
-	Console.Write("[Console.Write]: $s, $s\n", { s0, s1 }); // Doesn't add a new line
-	Console.WriteLine("[Console.WriteLine]: $s, $s", { s0, s1 });
-	
-	Console.WriteLine("[Numbers]: $d, $u, $f", { (object)i, u, f });
+	Console.WriteLine("[Numbers]: $d, $u, $f, $s, $s", { (object)ri, ru, rf, rs0, rs1 });
 	
 	return 0;
 }

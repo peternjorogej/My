@@ -58,23 +58,6 @@ void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept
 }
 
 // Std
-void _My_Builtin_RandomInt(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const int64_t iMax = pVM->Stack.PopI64();
-    pVM->Stack.Push(Random::Int(iMax));
-}
-
-void _My_Builtin_RandomUint(MyContext* pContext, MyVM* pVM) noexcept
-{
-    const uint64_t kMax = pVM->Stack.PopU64();
-    pVM->Stack.Push(Random::Uint(kMax));
-}
-
-void _My_Builtin_RandomFloat(MyContext* pContext, MyVM* pVM) noexcept
-{
-    pVM->Stack.Push(Random::Float());
-}
-
 void _My_Builtin_Length(MyContext* pContext, MyVM* pVM) noexcept
 {
     MyArray* const& pArray = pVM->Stack.PopArray();
@@ -1294,4 +1277,62 @@ void _My_Builtin_Math_Pow(MyContext* pContext, MyVM* pVM) noexcept
     const double x = pVM->Stack.PopF64();
     pVM->Stack.Push(pow(x, y));
 }
+
+// (static) Random
+void _My_Builtin_Random_Int(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const int64_t iMax = pVM->Stack.PopI64();
+    pVM->Stack.Push(Random::Int(iMax));
+}
+
+void _My_Builtin_Random_Uint(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const uint64_t kMax = pVM->Stack.PopU64();
+    pVM->Stack.Push(Random::Uint(kMax));
+}
+
+void _My_Builtin_Random_Float(MyContext* pContext, MyVM* pVM) noexcept
+{
+    pVM->Stack.Push(Random::Float());
+}
+
+void _My_Builtin_Random_String(MyContext* pContext, MyVM* pVM) noexcept
+{
+    static constexpr size_t s_MaxRandomStringSize = 2ull * 1024ull * 1024ull; // 2MB
+
+    static constexpr const char* const s_PrintableCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ~!@#$%^&*()_+{}|:\"<>?`-=[]\\;',./";
+    static constexpr const char* const s_IdentifierCharacters = "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    const bool bIsIdentifier = (bool)pVM->Stack.PopU64();
+    uint64_t kMax = pVM->Stack.PopU64();
+
+    if (kMax < 1ull)
+    {
+        kMax = 1ull;
+    }
+    if (kMax > s_MaxRandomStringSize)
+    {
+        // Maybe this is an error? Return an empty string?
+        kMax = s_MaxRandomStringSize;
+    }
+
+    const char* const lpSourceCharacters = bIsIdentifier ? s_IdentifierCharacters : s_PrintableCharacters;
+    size_t kSourceCharactersLength = strnlen(lpSourceCharacters, 128ull);
+
+    std::string Result(kMax, '-');
+    for (char& Character : Result)
+    {
+        Character = lpSourceCharacters[Random::Uint(kSourceCharactersLength)];
+    }
+
+    if (bIsIdentifier)
+    {
+        // Make sure that the first character is not a digit (duh?)
+        Result[0] = lpSourceCharacters[Random::Uint(kSourceCharactersLength - 9u)];
+    }
+
+    MyString* pResult = MyStringNew(pContext, Result);
+    pVM->Stack.Push(pResult);
+}
+
 

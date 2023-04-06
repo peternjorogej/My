@@ -160,6 +160,10 @@ void MyInitializeStructs(MyContext* pContext)
     ud.MathStruct = MyStructCreate(pContext, "Math", MY_STRUCT_ATTR_STATIC);
     ud.MathType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.MathStruct);
     ud.MathStruct->Size = 0ul;
+    // (static) Random
+    ud.RandomStruct = MyStructCreate(pContext, "Random", MY_STRUCT_ATTR_STATIC);
+    ud.RandomType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.RandomStruct);
+    ud.RandomStruct->Size = 0ul;
 }
 
 void MyUninitializeStructs()

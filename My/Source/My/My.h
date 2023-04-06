@@ -220,6 +220,7 @@ struct MyDefaults
 	MyType* FileType    = nullptr;
 	MyType* ConsoleType = nullptr;
 	MyType* MathType    = nullptr;
+	MyType* RandomType  = nullptr;
 
 	MyStruct* ErrorStruct   = nullptr;
 	MyStruct* VoidStruct    = nullptr;
@@ -236,6 +237,7 @@ struct MyDefaults
 	MyStruct* FileStruct    = nullptr;
 	MyStruct* ConsoleStruct = nullptr;
 	MyStruct* MathStruct    = nullptr;
+	MyStruct* RandomStruct  = nullptr;
 };
 
 extern MyDefaults My_Defaults;

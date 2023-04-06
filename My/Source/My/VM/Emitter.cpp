@@ -1803,9 +1803,6 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString);
     RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString);
     // Std
-    RegisterBuiltin("RandomInt",   _My_Builtin_RandomInt);
-    RegisterBuiltin("RandomUint",  _My_Builtin_RandomUint);
-    RegisterBuiltin("RandomFloat", _My_Builtin_RandomFloat);
     RegisterBuiltin("Length",      _My_Builtin_Length);
     RegisterBuiltin("Clock",       _My_Builtin_Clock);
 
@@ -1902,6 +1899,11 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Math__Cbrt",  _My_Builtin_Math_Cbrt);
     RegisterBuiltin("Math__Nthrt", _My_Builtin_Math_Nthrt);
     RegisterBuiltin("Math__Pow",   _My_Builtin_Math_Pow);
+    // (static) Random
+    RegisterBuiltin("Random__Int",    _My_Builtin_Random_Int);
+    RegisterBuiltin("Random__Uint",   _My_Builtin_Random_Uint);
+    RegisterBuiltin("Random__Float",  _My_Builtin_Random_Float);
+    RegisterBuiltin("Random__String", _My_Builtin_Random_String);
 }
 #pragma endregion
 

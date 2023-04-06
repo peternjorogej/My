@@ -638,6 +638,7 @@ public:
 			SetupStruct(md.FileType);
 			SetupStruct(md.ConsoleType);
 			SetupStruct(md.MathType);
+			SetupStruct(md.RandomType);
 
 			InitBuiltinMethodSymbols(m_Scope);
 		}
@@ -2559,6 +2560,12 @@ private:
 		SetupMethod(md.MathType, "Cbrt",  md.FloatType, { { "x", md.FloatType } }, true);
 		SetupMethod(md.MathType, "Nthrt", md.FloatType, { { "x", md.FloatType }, { "base", md.FloatType } }, true);
 		SetupMethod(md.MathType, "Pow",   md.FloatType, { { "x", md.FloatType }, { "y",    md.FloatType } }, true);
+
+		// (static) Random
+		SetupMethod(md.RandomType, "Int",    md.IntType,    { { "iMax", md.IntType  } }, true);
+		SetupMethod(md.RandomType, "Uint",   md.UintType,   { { "kMax", md.UintType } }, true);
+		SetupMethod(md.RandomType, "Float",  md.FloatType,  { }, true);
+		SetupMethod(md.RandomType, "String", md.StringType, { {"kLength", md.UintType }, {"bIsIdentifier", md.BooleanType } }, true);
 	}
 
 	static void InitModuleStd() noexcept

@@ -12,9 +12,6 @@ void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept;
 
 // Std Operations
-void _My_Builtin_RandomInt(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_RandomUint(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_RandomFloat(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Length(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Clock(MyContext* pContext, MyVM* pVM) noexcept;
 
@@ -117,4 +114,10 @@ void _My_Builtin_Math_Sqrt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Math_Cbrt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Math_Nthrt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Math_Pow(MyContext* pContext, MyVM* pVM) noexcept;
+
+// (static) Random
+void _My_Builtin_Random_Int(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Random_Uint(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Random_Float(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Random_String(MyContext* pContext, MyVM* pVM) noexcept;
 
