@@ -24,6 +24,15 @@ int main()
 	MyDecompile(pAss);
 	Console::WriteLine(Console::Color::Green, "Build successful");
 
+	MyStruct* pMySexyStruct = MyContextGetStruct(pContext, "MySexyStruct");
+	if (!pMySexyStruct)
+	{
+		goto Error;
+	}
+
+	MyObject* pObject = MyObjectNew(pContext, pMySexyStruct);
+	MyVM::Invoke(pContext, pObject, "SexyMethod", { });
+
 	MyVM::Invoke(pContext, "MyFunction", { });
 	Console::ReadKey();
 

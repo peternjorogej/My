@@ -1026,7 +1026,7 @@ bool MyVM::Decompile()
     return Assembly ? MyDecompile(Assembly), true : false;
 }
 
-int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyValue>& Argv)
+int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const MyValue* pArgv, size_t kArgc)
 {
     char* const& lpName = MyGetCachedString(lpFunction);
 
@@ -1050,9 +1050,9 @@ int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyV
 #endif // MY_DEBUG
     stbds_arrpush(pContext->VM->CallStack, fci);
 
-    for (const MyValue& oArg : Argv)
+    for (size_t k = 0; k < kArgc; k++)
     {
-        pContext->VM->Stack.Push(oArg);
+        pContext->VM->Stack.Push(pArgv[k]);
     }
 
     int64_t iResult  = 0ll;
@@ -1079,6 +1079,24 @@ int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyV
     }
 
     return iResult;
+}
+
+int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyValue>& Argv)
+{
+    return Invoke(pContext, lpFunction, Argv.begin(), Argv.size());
+}
+
+int64_t MyVM::Invoke(MyContext* pContext, MyObject* pObject, const char* lpMethod, const List<MyValue>& Argv)
+{
+    if (!pObject)
+    {
+        DebugLog::Error("Invalid object");
+        return -1LL;
+    }
+
+    char* const lpFullMethodName = MyGetCachedStringV("%s__%s", pObject->Klass->Name, lpMethod);
+    pContext->VM->Stack.Push(pObject);
+    return Invoke(pContext, lpFullMethodName, Argv);
 }
 #pragma endregion
 

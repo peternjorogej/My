@@ -267,6 +267,8 @@ bool        MyTypeIsReference(MyType* pType) noexcept;
 const char* MyTypeGetName(const MyType* pType) noexcept;
 
 MyContext*  MyContextGet() noexcept;
+MyStruct*   MyContextGetStruct(MyContext* pContext, const char* lpName) noexcept;
+
 MyGuid      MyGuidCreate(MyContext* pContext) noexcept;
 MyGuid      MyGuidCreate(MyContext* pContext, uint64_t kValue0, uint64_t kValue1) noexcept;
 char*       MyGuidCreateStringRepr(MyContext* pContext, const MyGuid& Guid) noexcept;

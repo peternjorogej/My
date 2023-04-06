@@ -138,5 +138,7 @@ struct MyVM
 
     bool Decompile();
 
-    static int64_t Invoke(MyContext* pContext, const char* lpFunction, const List<MyValue>& Argv);
+    static int64_t Invoke(MyContext* pContext, const char* lpFunction, const MyValue* pArgv = nullptr, size_t kArgc = 0ul);
+    static int64_t Invoke(MyContext* pContext, const char* lpFunction, const List<MyValue>& Argv = {});
+    static int64_t Invoke(MyContext* pContext, MyObject* pObject, const char* lpMethod, const List<MyValue>& Argv = {});
 };

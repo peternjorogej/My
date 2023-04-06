@@ -417,6 +417,28 @@ MyContext* MyContextGet() noexcept
 {
     return s_CurrentContext;
 }
+
+MyStruct* MyContextGetStruct(MyContext* pContext, const char* lpName) noexcept
+{
+    if (!pContext || !lpName)
+    {
+        return nullptr;
+    }
+
+    char* const lpCachedName = MyGetCachedString(lpName);
+
+    MyStruct* const* const pKlasses = pContext->Assembly->Klasses;
+    for (size_t k = 0; k < stbds_arrlenu(pKlasses); k++)
+    {
+        if (pKlasses[k]->Name == lpCachedName)
+        {
+            return pKlasses[k];
+        }
+    }
+
+    return nullptr;
+}
+
 #if 0
 MyGuid MyContextGetTypeID(MyContext* pContext, char* const& lpTypename) noexcept
 {

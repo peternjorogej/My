@@ -9,6 +9,16 @@ function static void MyFunction()
 	CppFunction("Hello, World", 69);
 }
 
+struct MySexyStruct
+{
+	var float Value;
+
+	function void SexyMethod()
+	{
+		Console.Print("[My]: Calling bound method: 'MySexyStruct.SexyMethod'");
+	}
+};
+
 function int Main(const string[] Argv)
 {
 	return 0;
