@@ -29,7 +29,9 @@ public:
 	};
 
 public:
-	constexpr Buffer(uint8_t* pBuffer = nullptr);
+	constexpr Buffer(uint8_t* pBuffer = nullptr)
+		: m_Pointer(pBuffer)
+	{ }
 
 	static Buffer Create(size_t kSize) noexcept;
 	static void   Delete(Buffer buffer) noexcept;
@@ -42,7 +44,7 @@ public:
 	uint32_t Length() const noexcept;
 	uint32_t Capacity() const noexcept;
 
-	inline operator bool() const noexcept;
+	operator bool() const noexcept;
 
 	uint8_t* const* operator &() const noexcept;
 	

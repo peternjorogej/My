@@ -118,10 +118,6 @@ void* Allocator::AllocateInternal(size_t kSize, Stage stage) noexcept
 #pragma endregion
 
 #pragma region Heap Memory Management
-constexpr Buffer::Buffer(uint8_t* pBuffer)
-	: m_Pointer(pBuffer)
-{ }
-
 Buffer Buffer::Create(size_t kSize) noexcept
 {
 	kSize = std::clamp(kSize, MinimumAllocSize, MaximumAllocSize);
@@ -255,7 +251,7 @@ uint32_t Buffer::Capacity() const noexcept
 	return m_Pointer ? ((SizeInfo*)(m_Pointer - sizeof(SizeInfo)))->Capacity : 0ul;
 }
 
-inline Buffer::operator bool() const noexcept
+Buffer::operator bool() const noexcept
 {
 	return (bool)m_Pointer;
 }
