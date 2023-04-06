@@ -120,4 +120,5 @@ void _My_Builtin_Random_Int(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Random_Uint(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Random_Float(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Random_String(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Random_Choice(MyContext* pContext, MyVM* pVM) noexcept;
 

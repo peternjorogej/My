@@ -2565,7 +2565,8 @@ private:
 		SetupMethod(md.RandomType, "Int",    md.IntType,    { { "iMax", md.IntType  } }, true);
 		SetupMethod(md.RandomType, "Uint",   md.UintType,   { { "kMax", md.UintType } }, true);
 		SetupMethod(md.RandomType, "Float",  md.FloatType,  { }, true);
-		SetupMethod(md.RandomType, "String", md.StringType, { {"kLength", md.UintType }, {"bIsIdentifier", md.BooleanType } }, true);
+		SetupMethod(md.RandomType, "String", md.StringType, { {"kLength", md.UintType  }, {"bIsIdentifier", md.BooleanType } }, true);
+		SetupMethod(md.RandomType, "Choice", md.ObjectType, { {"vItems",  pObjectArray } }, true);
 	}
 
 	static void InitModuleStd() noexcept

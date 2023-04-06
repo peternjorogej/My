@@ -1335,4 +1335,19 @@ void _My_Builtin_Random_String(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(pResult);
 }
 
+void _My_Builtin_Random_Choice(MyContext* pContext, MyVM* pVM) noexcept
+{
+    MyArray* const pArray = pVM->Stack.PopArray();
+    if (!pArray)
+    {
+        pVM->Stack.Push(0ull);
+        return;
+    }
+
+    const size_t kIndex = Random::Uint(pArray->Count);
+    uint64_t kItemAddress = MyArrayGet(pArray, uint64_t, kIndex);
+
+    pVM->Stack.Push(kItemAddress);
+}
+
 

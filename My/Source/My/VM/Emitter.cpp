@@ -1904,6 +1904,7 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Random__Uint",   _My_Builtin_Random_Uint);
     RegisterBuiltin("Random__Float",  _My_Builtin_Random_Float);
     RegisterBuiltin("Random__String", _My_Builtin_Random_String);
+    RegisterBuiltin("Random__Choice", _My_Builtin_Random_Choice);
 }
 #pragma endregion
 
