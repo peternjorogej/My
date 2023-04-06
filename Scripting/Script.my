@@ -1,0 +1,15 @@
+
+// Defined in C++
+extern function static void CppFunction(string Text, int iValue);
+
+// Invoked within C++
+function static void MyFunction()
+{
+	Console.Print("[My]: Calling 'MyFunction'");
+	CppFunction("Hello, World", 69);
+}
+
+function int Main(const string[] Argv)
+{
+	return 0;
+}

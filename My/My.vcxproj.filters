@@ -4,23 +4,23 @@
     <Filter Include="Source">
       <UniqueIdentifier>{56EB95D1-428D-C0A7-2B48-D4FB178947F8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Uni">
-      <UniqueIdentifier>{51E4C236-3D9C-0484-A6A3-DDDF927A9F74}</UniqueIdentifier>
+    <Filter Include="Source\My">
+      <UniqueIdentifier>{EB058266-5770-36DD-A0AE-E7820C581432}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Uni\Base">
-      <UniqueIdentifier>{7B9B9B58-E726-091D-F037-8C115C42651D}</UniqueIdentifier>
+    <Filter Include="Source\My\Base">
+      <UniqueIdentifier>{55CD3199-419B-259F-2A2F-96C5169C0104}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Uni\Binding">
-      <UniqueIdentifier>{FB384DBE-E71C-0E14-507D-08673C80F895}</UniqueIdentifier>
+    <Filter Include="Source\My\Binding">
+      <UniqueIdentifier>{9554795A-016B-77F0-4AE2-0212B6374878}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Uni\Syntax">
-      <UniqueIdentifier>{E7F34717-530A-46AD-9C81-D1CE08D71635}</UniqueIdentifier>
+    <Filter Include="Source\My\Syntax">
+      <UniqueIdentifier>{410432D6-2DFD-5028-562F-36AD42873034}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Uni\Utils">
-      <UniqueIdentifier>{711E716D-5D17-90BF-8649-754472A16FCB}</UniqueIdentifier>
+    <Filter Include="Source\My\Utils">
+      <UniqueIdentifier>{8B8BCDC0-F716-3B85-0028-BE796C329785}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\Uni\VM">
-      <UniqueIdentifier>{03A2B554-6F62-318B-389D-7A08A41C7667}</UniqueIdentifier>
+    <Filter Include="Source\My\VM">
+      <UniqueIdentifier>{5D9581F2-49F8-1097-F27D-494DDEBFDC19}</UniqueIdentifier>
     </Filter>
     <Filter Include="Vendor">
       <UniqueIdentifier>{935FDCD7-7F01-07AE-68BC-1A0254FD8DFE}</UniqueIdentifier>
@@ -28,108 +28,120 @@
     <Filter Include="Vendor\Serializer">
       <UniqueIdentifier>{BCA26294-28B9-602A-7130-EC4BDD8531B2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Vendor\Stb">
-      <UniqueIdentifier>{4B277327-37DF-B474-A0E6-8DD08CBD4F65}</UniqueIdentifier>
+    <Filter Include="Vendor\argparse">
+      <UniqueIdentifier>{7741E7D4-E3CC-5499-ECDD-D78D58E8B099}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Vendor\Tools">
-      <UniqueIdentifier>{53C6E9D0-3F29-7975-E8AE-B12BD4F044F8}</UniqueIdentifier>
+    <Filter Include="Vendor\stb">
+      <UniqueIdentifier>{6BAF7327-5767-B574-C06E-8ED0AC455065}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\My\Base\Config.h">
-      <Filter>Source\Uni\Base</Filter>
+      <Filter>Source\My\Base</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Base\Core.h">
-      <Filter>Source\Uni\Base</Filter>
+      <Filter>Source\My\Base</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Base\IO.h">
-      <Filter>Source\Uni\Base</Filter>
+      <Filter>Source\My\Base</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Binding\BoundTree.h">
-      <Filter>Source\Uni\Binding</Filter>
+      <Filter>Source\My\Binding</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Binding\ControlFlowGraph.h">
-      <Filter>Source\Uni\Binding</Filter>
+      <Filter>Source\My\Binding</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Binding\Lowerer.h">
-      <Filter>Source\Uni\Binding</Filter>
+      <Filter>Source\My\Binding</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\My\My.h">
+      <Filter>Source\My</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Object.h">
-      <Filter>Source\Uni</Filter>
+      <Filter>Source\My</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Syntax\Text.h">
-      <Filter>Source\Uni\Syntax</Filter>
+      <Filter>Source\My\Syntax</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Syntax\Tree.h">
-      <Filter>Source\Uni\Syntax</Filter>
+      <Filter>Source\My\Syntax</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\Utils\Utils.h">
-      <Filter>Source\Uni\Utils</Filter>
+      <Filter>Source\My\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\VM\Builtins.h">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\VM\Compiler.h">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\VM\Emitter.h">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClInclude>
     <ClInclude Include="Source\My\VM\VM.h">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClInclude>
     <ClInclude Include="Vendor\Serializer\PnBinarySerializer.hpp">
       <Filter>Vendor\Serializer</Filter>
     </ClInclude>
-    <ClInclude Include="Vendor\stb\stb_ds.h" />
-    <ClInclude Include="Source\My\My.h" />
-    <ClInclude Include="Vendor\argparse\argparse.h" />
+    <ClInclude Include="Vendor\argparse\argparse.h">
+      <Filter>Vendor\argparse</Filter>
+    </ClInclude>
+    <ClInclude Include="Vendor\stb\stb_ds.h">
+      <Filter>Vendor\stb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\My\Base\Core.cpp">
-      <Filter>Source\Uni\Base</Filter>
+      <Filter>Source\My\Base</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Base\IO.cpp">
-      <Filter>Source\Uni\Base</Filter>
+      <Filter>Source\My\Base</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Binding\Bind.cpp">
-      <Filter>Source\Uni\Binding</Filter>
+      <Filter>Source\My\Binding</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Binding\ControlFlowGraph.cpp">
-      <Filter>Source\Uni\Binding</Filter>
+      <Filter>Source\My\Binding</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Binding\Lowerer.cpp">
-      <Filter>Source\Uni\Binding</Filter>
+      <Filter>Source\My\Binding</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\My\My.cpp">
+      <Filter>Source\My</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Object.cpp">
-      <Filter>Source\Uni</Filter>
+      <Filter>Source\My</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Syntax\Parse.cpp">
-      <Filter>Source\Uni\Syntax</Filter>
+      <Filter>Source\My\Syntax</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Syntax\Text.cpp">
-      <Filter>Source\Uni\Syntax</Filter>
+      <Filter>Source\My\Syntax</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\Utils\Utils.cpp">
-      <Filter>Source\Uni\Utils</Filter>
+      <Filter>Source\My\Utils</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\VM\Builtins.cpp">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\VM\Compiler.cpp">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\VM\Emitter.cpp">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClCompile>
     <ClCompile Include="Source\My\VM\VM.cpp">
-      <Filter>Source\Uni\VM</Filter>
+      <Filter>Source\My\VM</Filter>
     </ClCompile>
     <ClCompile Include="Vendor\Serializer\PnBinarySerializer.cpp">
       <Filter>Vendor\Serializer</Filter>
     </ClCompile>
-    <ClCompile Include="Vendor\stb\stb_ds.cpp" />
-    <ClCompile Include="Source\My\My.cpp" />
-    <ClCompile Include="Vendor\argparse\argparse.c" />
+    <ClCompile Include="Vendor\argparse\argparse.c">
+      <Filter>Vendor\argparse</Filter>
+    </ClCompile>
+    <ClCompile Include="Vendor\stb\stb_ds.cpp">
+      <Filter>Vendor\stb</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

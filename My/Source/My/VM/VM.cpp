@@ -1028,8 +1028,6 @@ bool MyVM::Decompile()
 
 int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyValue>& Argv)
 {
-    MY_NOT_IMPLEMENTED();
-
     char* const& lpName = MyGetCachedString(lpFunction);
 
     uint32_t kAddress = stbds_shget(pContext->Assembly->Functions, lpName);
@@ -1041,7 +1039,7 @@ int64_t MyVM::Invoke(MyContext* pContext, const char* lpFunction, const List<MyV
 
     // Set up VM
     pContext->VM->Assembly = pContext->Assembly;
-    // pContext->VM->IP       = pContext->Assembly->Code + kAddress;
+    pContext->VM->IP       = pContext->Assembly->Code + kAddress;
     pContext->VM->Mode     = MyVM::ExecutionMode::SingleFunction;
     
     const FunctionCallInfo fci =
