@@ -102,16 +102,11 @@ double Console::ReadFloat64() noexcept
 	return In() >> dValue, dValue;
 }
 
-std::string Console::Read() noexcept
-{
-	std::string Input;
-	return In() >> Input, Input;
-}
-
 std::string Console::ReadLine() noexcept
 {
 	std::string Input;
-	return std::getline(In(), Input), Input;
+	std::getline(In(), Input);
+	return Input;
 }
 
 char Console::ReadKey() noexcept

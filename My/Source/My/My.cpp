@@ -152,6 +152,10 @@ void MyInitializeStructs(MyContext* pContext)
         MyStructAddField(ud.FileStruct, "FileSize", ud.IntType, MY_FIELD_ATTR_CONST);
     }
 
+    // (static) Console
+    ud.ConsoleStruct = MyStructCreate(pContext, "Console", MY_STRUCT_ATTR_STATIC);
+    ud.ConsoleType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.ConsoleStruct);
+    ud.ConsoleStruct->Size = 0ul;
     // (static) Math
     ud.MathStruct = MyStructCreate(pContext, "Math", MY_STRUCT_ATTR_STATIC);
     ud.MathType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.MathStruct);

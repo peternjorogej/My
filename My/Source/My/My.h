@@ -218,6 +218,7 @@ struct MyDefaults
 	MyType* StringBuilderType = nullptr;
 	MyType* BytesType   = nullptr;
 	MyType* FileType    = nullptr;
+	MyType* ConsoleType = nullptr;
 	MyType* MathType    = nullptr;
 
 	MyStruct* ErrorStruct   = nullptr;
@@ -233,6 +234,7 @@ struct MyDefaults
 	MyStruct* StringBuilderStruct = nullptr;
 	MyStruct* BytesStruct   = nullptr;
 	MyStruct* FileStruct    = nullptr;
+	MyStruct* ConsoleStruct = nullptr;
 	MyStruct* MathStruct    = nullptr;
 };
 

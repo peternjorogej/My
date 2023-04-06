@@ -636,6 +636,7 @@ public:
 			SetupStruct(md.ComplexType);
 			SetupStruct(md.BytesType);
 			SetupStruct(md.FileType);
+			SetupStruct(md.ConsoleType);
 			SetupStruct(md.MathType);
 
 			InitBuiltinMethodSymbols(m_Scope);
@@ -2529,6 +2530,15 @@ private:
 		SetupMethod(md.FileType, "ReadBytes",  md.IntPtrType,  { { "kLength", md.UintType   } });
 		SetupMethod(md.FileType, "Write",      md.VoidType,    { { "pBuffer", md.IntPtrType }, { "kLength", md.UintType } });
 		SetupMethod(md.FileType, "WriteBytes", md.VoidType,    { { "pBuffer", md.IntPtrType }, { "kLength", md.UintType } });
+
+		// (static) Console
+		SetupMethod(md.ConsoleType, "Print",     md.VoidType,   { { "sText",   md.StringType } }, true);
+		SetupMethod(md.ConsoleType, "Write",     md.VoidType,   { { "sFormat", md.StringType }, { "vArgs", pObjectArray } }, true);
+		SetupMethod(md.ConsoleType, "WriteLine", md.VoidType,   { { "sFormat", md.StringType }, { "vArgs", pObjectArray } }, true);
+		SetupMethod(md.ConsoleType, "ReadLine",  md.StringType, { }, true);
+		SetupMethod(md.ConsoleType, "ReadInt",   md.IntType,    { }, true);
+		SetupMethod(md.ConsoleType, "ReadUint",  md.UintType,   { }, true);
+		SetupMethod(md.ConsoleType, "ReadFloat", md.FloatType,  { }, true);
 
 		// (static) Math
 		SetupMethod(md.MathType, "Abs",   md.FloatType, { { "x", md.FloatType } }, true);

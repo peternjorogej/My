@@ -1803,17 +1803,9 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString);
     RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString);
     // Std
-    RegisterBuiltin("Write",       _My_Builtin_Write);
-    RegisterBuiltin("WriteLine",   _My_Builtin_WriteLine);
-    RegisterBuiltin("Read",        _My_Builtin_Read);
-    RegisterBuiltin("ReadLine",    _My_Builtin_ReadLine);
-    RegisterBuiltin("ReadInt",     _My_Builtin_ReadInt);
-    RegisterBuiltin("ReadUint",    _My_Builtin_ReadUint);
-    RegisterBuiltin("ReadFloat",   _My_Builtin_ReadFloat);
     RegisterBuiltin("RandomInt",   _My_Builtin_RandomInt);
     RegisterBuiltin("RandomUint",  _My_Builtin_RandomUint);
     RegisterBuiltin("RandomFloat", _My_Builtin_RandomFloat);
-    RegisterBuiltin("Print",       _My_Builtin_Print);
     RegisterBuiltin("Length",      _My_Builtin_Length);
     RegisterBuiltin("Clock",       _My_Builtin_Clock);
 
@@ -1883,6 +1875,14 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("File__Write",      _My_Builtin_File_Write);
     RegisterBuiltin("File__WriteBytes", _My_Builtin_File_WriteBytes);
 
+    // (static) Console
+    RegisterBuiltin("Console__Print",     _My_Builtin_Console_Print);
+    RegisterBuiltin("Console__Write",     _My_Builtin_Console_Write);
+    RegisterBuiltin("Console__WriteLine", _My_Builtin_Console_WriteLine);
+    RegisterBuiltin("Console__ReadLine",  _My_Builtin_Console_ReadLine);
+    RegisterBuiltin("Console__ReadInt",   _My_Builtin_Console_ReadInt);
+    RegisterBuiltin("Console__ReadUint",  _My_Builtin_Console_ReadUint);
+    RegisterBuiltin("Console__ReadFloat", _My_Builtin_Console_ReadFloat);
     // (static) Math
     RegisterBuiltin("Math__Abs",   _My_Builtin_Math_Abs);
     RegisterBuiltin("Math__Sin",   _My_Builtin_Math_Sin);
@@ -1902,7 +1902,6 @@ void _My_Initialize_BuiltinsMap() noexcept
     RegisterBuiltin("Math__Cbrt",  _My_Builtin_Math_Cbrt);
     RegisterBuiltin("Math__Nthrt", _My_Builtin_Math_Nthrt);
     RegisterBuiltin("Math__Pow",   _My_Builtin_Math_Pow);
-
 }
 #pragma endregion
 

@@ -36,7 +36,6 @@ public:
 	static int64_t       ReadInt64() noexcept;
 	static uint64_t      ReadUint64() noexcept;
 	static double        ReadFloat64() noexcept;
-	static std::string   Read() noexcept;
 	static std::string   ReadLine() noexcept;
 	static char          ReadKey() noexcept;
 	static void          Clear() noexcept;

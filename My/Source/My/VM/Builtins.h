@@ -12,17 +12,9 @@ void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept;
 
 // Std Operations
-void _My_Builtin_Write(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_WriteLine(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Read(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_ReadLine(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_ReadInt(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_ReadUint(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_ReadFloat(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_RandomInt(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_RandomUint(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_RandomFloat(MyContext* pContext, MyVM* pVM) noexcept;
-void _My_Builtin_Print(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Length(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_Clock(MyContext* pContext, MyVM* pVM) noexcept;
 
@@ -96,6 +88,15 @@ void _My_Builtin_File_Read(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_ReadBytes(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_Write(MyContext* pContext, MyVM* pVM);
 void _My_Builtin_File_WriteBytes(MyContext* pContext, MyVM* pVM);
+
+// (static) Console
+void _My_Builtin_Console_Print(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Console_Write(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Console_WriteLine(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Console_ReadLine(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Console_ReadInt(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Console_ReadUint(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_Console_ReadFloat(MyContext* pContext, MyVM* pVM) noexcept;
 
 // (static) Math
 void _My_Builtin_Math_Abs(MyContext* pContext, MyVM* pVM) noexcept;

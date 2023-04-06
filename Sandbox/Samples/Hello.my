@@ -1,68 +1,25 @@
 
-extern function void   Print(string Text);
-extern function string ReadLine();
-extern function void   WriteLine(string Format, object[] Args,);
+// extern function void   Print(string Text);
+// extern function string ReadLine();
+// extern function void   WriteLine(string Format, object[] Args,);
 
 const string s_Message = "Hello, World from My";
 
-struct Empty
-{
-	function void BoundMethod()
-	{
-		WriteLine("Empty($p).BoundMethod", { this });
-		// Print("Empty.BoundMethod");
-	}
-	
-	function static void StaticMethod()
-	{
-		// WriteLine("Empty($p).StaticMethod", { this }); // Error: Undefined symbol this.
-		Print("Empty.StaticMethod");
-	}
-};
-
 function int Main(const string[] Argv)
 {
-	Print(s_Message);
-	Print(ReadLine());
+	Console.Print(s_Message);
+	Console.Print(Console.ReadLine());
 	
-	{
-		const Empty empty = new Empty();
-		
-		Empty.StaticMethod();
-		// Empty.BoundMethod(); // Error: Not a static method
-		
-		empty.StaticMethod();
-		empty.BoundMethod();
-	}
-	{
-		// Static functions defined in the 'Math' struct
-		const float pi = 3.14159265358;
-		const float y0 = Math.Sin(pi / 4.0); // 0.7071...
-		const float y1 = Math.Cos(pi / 4.0); // 0.7071...
-		const float y2 = Math.Tan(pi / 4.0); // 1.0
-		const float y3 = Math.Exp(1.0);      // 2.71828...
-		const float y4 = Math.Log(y3);       // 1.0
-		const float y5 = Math.Asin(y0);
-		const float y6 = Math.Acos(y1);
-		const float y7 = Math.Atan(y2);
-		const float y8 = Math.Atan2(y0, y1);
-		const float y9 = Math.Log10(1000.0);
-		const float y10 = Math.Logb(125.0, 5.0);
-		const float y11 = Math.Floor(25.52);
-		const float y12 = Math.Ceil(25.52);
-		const float y13 = Math.Sqrt(7225.0);
-		const float y14 = Math.Cbrt(125.0);
-		const float y15 = Math.Nthrt(243.0, 5.0);
-		const float y16 = Math.Pow(2.0, 10.0);
-		const float y17 = Math.Abs(-3.0);
-		
-		WriteLine("Math.X(x)={\n\tSin(pi/4)=$f,\n\tCos(pi/4)=$f, \n\tTan(pi/4)=$f, \n\tExp(1)=$f, \n\tLog(e)=$f \n}",
-		{ y0, y1, y2, y3, y4 });
-		WriteLine("Math.X(x)={\n\tAsin($f)=$f,\n\tAcos($f)=$f, \n\tAtan($f)=$f, \n\tAtan2($f, $f)=$f, \n\tLog10(1000)=$f, \n\tLogb(125, 5)=$f \n}",
-		{ y0, y5, y1, y6, y2, y7, y0, y1, y8, y9, y10 });
-		WriteLine("Math.X(x)={\n\tFloor(25.52)=$f,\n\tCeil(25.52)=$f, \n\tSqrt(7225)=$f, \n\tCbrt(125)=$f, \n\tNthrt(243, 5)=$f, \n\tPow(2, 10)=$f, \n\tAbs(-3)=$f \n}",
-		{ y11, y12, y13, y14, y15, y16, y17 });
-	}
+	const string s0 = Console.ReadLine();
+	const string s1 = Console.ReadLine();
+	const int i = Console.ReadInt();
+	const uint u = Console.ReadUint();
+	const float f = Console.ReadFloat();
+	
+	Console.Write("[Console.Write]: $s, $s\n", { s0, s1 }); // Doesn't add a new line
+	Console.WriteLine("[Console.WriteLine]: $s, $s", { s0, s1 });
+	
+	Console.WriteLine("[Numbers]: $d, $u, $f", { (object)i, u, f });
 	
 	return 0;
 }
