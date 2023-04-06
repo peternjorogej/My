@@ -628,7 +628,7 @@ void DiagnosticBag::ReportNotAStaticMethod(const TextLocation& Location, char* c
 
 void DiagnosticBag::ReportInvalidKeyOrAttribute(const TextLocation& Location, char* const& lpField, MyStruct* pKlass) noexcept
 {
-	const std::string Message = Console::Format("Object of type '%s' has no key/attribute '%s'", pKlass->Name, lpField);
+	const std::string Message = Console::Format("Object of type '%s' has no member '%s'", pKlass->Name, lpField);
 	Report(Location, Message);
 }
 
