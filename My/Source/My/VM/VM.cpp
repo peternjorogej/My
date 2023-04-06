@@ -99,11 +99,11 @@ void MyGC::Mark(uint64_t& kAddress) noexcept
             for (size_t k = 0; k < stbds_arrlenu(pObject->Klass->Fields); k++)
             {
                 MyField* const& pField = pObject->Klass->Fields + k;
-                if (MyStructIsReference(pField->Type->Klass))
-                {
+                /*if (MyStructIsReference(pField->Type->Klass))
+                {*/
                     uint64_t& kData = MyObjectFieldGetValueAs<uint64_t>(pObject, pField);
                     Mark(kData);
-                }
+                /*}*/
             }
             break;
         }
@@ -503,7 +503,7 @@ static inline void Pow(MyVM* pVM) noexcept
 }
 #pragma endregion
 
-static uint32_t s_CollectorThreshold = 50ul;
+static uint32_t s_CollectorThreshold = 500ul;
 static uint32_t s_RecursionDepth     = 0ul;
 static uint32_t s_MaxCallStackSize   = 1'000ul;
 static uint32_t s_MaxRecursionLimit  = 1'000ul;
