@@ -130,13 +130,19 @@ bool        MyArrayIsEqual(const MyArray* pLhsStr, const MyArray* pRhsStr);
 
 MyObject*   MyObjectNew(MyContext* pContext, MyStruct* pKlass);
 MyObject*   MyObjectCopy(MyContext* pContext, const MyObject* pObject);
-MyField*    MyObjectGetField(MyObject* pObject, char* const& lpField);
+MyField*    MyObjectGetField(MyObject* pObject, const char* lpField);
 Byte*       MyObjectFieldGetValue(MyObject* pObject, MyField* pField);
 void        MyObjectFieldSetValue(MyObject* pObject, MyField* pField, const void* pData, size_t kSize = 0ull);
+Byte*       MyObjectFieldGetValue(MyObject* pObject, const char* lpField);
+void        MyObjectFieldSetValue(MyObject* pObject, const char* lpField, const void* pData, size_t kSize = 0ull);
 template<typename Tp>
 Tp&         MyObjectFieldGetValueAs(MyObject* pObject, MyField* pField);
 template<typename Tp>
 void        MyObjectFieldSetValueAs(MyObject* pObject, MyField* pField, const Tp& Data);
+template<typename Tp>
+Tp&         MyObjectFieldGetValueAs(MyObject* pObject, const char* lpField);
+template<typename Tp>
+void        MyObjectFieldSetValueAs(MyObject* pObject, const char* lpField, const Tp& Data);
 
 const char* ValueKindString(MyValueKind Kind) noexcept;
 
@@ -176,4 +182,26 @@ inline void MyObjectFieldSetValueAs(MyObject* pObject, MyField* pField, const Tp
 	}
 
 	MyObjectFieldSetValue(pObject, pField, &Data, kKlassSize);
+}
+
+template<typename Tp>
+inline Tp& MyObjectFieldGetValueAs(MyObject* pObject, const char* lpField)
+{
+	static_assert(std::is_standard_layout<Tp>::value);
+	return *reinterpret_cast<Tp*>(MyObjectFieldGetValue(pObject, lpField));
+}
+
+template<typename Tp>
+inline void MyObjectFieldSetValueAs(MyObject* pObject, const char* lpField, const Tp& Data)
+{
+	static_assert(std::is_standard_layout<Tp>::value);
+
+	const MyStruct* pFieldKlass = pField->Type->Klass;
+	const uint32_t kKlassSize = pFieldKlass->Attributes & MY_STRUCT_ATTR_POD ? pFieldKlass->Size : sizeof(MyObject*);
+	if (sizeof(Tp) != kKlassSize)
+	{
+		DebugLog::Error("[DEBUG]: Struct sizes mismatched (expected %I64u, got %u)", sizeof(Tp), kKlassSize);
+	}
+
+	MyObjectFieldSetValue(pObject, lpField, &Data, kKlassSize);
 }

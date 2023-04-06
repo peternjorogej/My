@@ -413,7 +413,7 @@ MyObject* MyObjectCopy(MyContext* pContext, const MyObject* pObject)
     return pCopy;
 }
 
-MyField* MyObjectGetField(MyObject* pObject, char* const& lpField)
+MyField* MyObjectGetField(MyObject* pObject, const char* lpField)
 {
     return MyStructGetField(pObject->Klass, lpField);
 }
@@ -426,6 +426,18 @@ Byte* MyObjectFieldGetValue(MyObject* pObject, MyField* pField)
 void MyObjectFieldSetValue(MyObject* pObject, MyField* pField, const void* pData, size_t kSize)
 {
     memcpy(pObject->Data + pField->Offset, pData, kSize);
+}
+
+Byte* MyObjectFieldGetValue(MyObject* pObject, const char* lpField)
+{
+    MyField* const pField = MyObjectGetField(pObject, lpField);
+    return MyObjectFieldGetValue(pObject, pField);
+}
+
+void MyObjectFieldSetValue(MyObject* pObject, const char* lpField, const void* pData, size_t kSize)
+{
+    MyField* const pField = MyObjectGetField(pObject, lpField);
+    MyObjectFieldSetValue(pObject, pField, pData, kSize);
 }
 
 

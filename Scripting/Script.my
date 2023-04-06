@@ -1,24 +1,34 @@
 
 // Defined in C++
-extern function static void CppFunction(string Text, int iValue);
+extern function static bool RegisterEntityType(string TypeName);
 
-// Invoked within C++
-function static void MyFunction()
+// Called within C++
+function static void BeginScripting()
 {
-	Console.Print("[My]: Calling 'MyFunction'");
-	CppFunction("Hello, World", 69);
+	Console.Print("[My ]: BeginScripting");
+	RegisterEntityType("Entity");
 }
 
-struct MySexyStruct
+struct Entity
 {
 	var float Value;
 
-	function void SexyMethod()
+	// Called within C++
+	function bool OnCreate()
 	{
-		Console.Print("[My]: Calling bound method: 'MySexyStruct.SexyMethod'");
+		Console.Print("[My ]: Entity.OnCreate");
+		return true;
+	}
+
+	// Called within C++
+	function void OnUpdate(float dt)
+	{
+		this.Value = this.Value + dt;
+		Console.Print("[My ]: Entity.OnUpdate(float dt)");
 	}
 };
 
+// FIXME: Not used since the script is not being executed as a program
 function int Main(const string[] Argv)
 {
 	return 0;

@@ -8,8 +8,8 @@
 #include <unordered_set>
 
 #ifdef MY_DEBUG
-  #define _My_VM_CheckOverflow(__stk)       if (__stk.SP == MY_STACK_MAX) { return MY_ASSERT(false), MY_RC_STACK_OVERFLOW; }
-  #define _My_VM_CheckUnderflow(__stk, __n) if (__stk.SP < __n) { return MY_ASSERT(false), MY_RC_STACK_UNDERFLOW; }
+  #define _My_VM_CheckOverflow(__stk)       if (__stk.SP == MY_STACK_MAX) { return /*MY_ASSERT(false),*/ MY_RC_STACK_OVERFLOW; }
+  #define _My_VM_CheckUnderflow(__stk, __n) if (__stk.SP < __n) { return /*MY_ASSERT(false),*/ MY_RC_STACK_UNDERFLOW; }
 #else
   #define _My_VM_CheckOverflow(__stk)       if (__stk.SP == MY_STACK_MAX) { return MY_RC_STACK_OVERFLOW; }
   #define _My_VM_CheckUnderflow(__stk, __n) if (__stk.SP < __n) { return MY_RC_STACK_UNDERFLOW; }
@@ -329,10 +329,10 @@ void MyStack::Push(const MyValue& Value)
         case MyValueKind::String:  Push(Value.Str); break;
         case MyValueKind::Array:   Push(Value.Arr); break;
         case MyValueKind::Object:  Push(Value.Obj); break;
-        default: break;
+        default:
+            MY_ASSERT(false, "Invalid value kind (%u) '%s'", Value.Kind, ValueKindString(Value.Kind));
+            break;
     }
-
-    MY_ASSERT(false, "Invalid value kind (%u) '%s'", Value.Kind, ValueKindString(Value.Kind));
 }
 
 template<typename Tp>

@@ -7,13 +7,20 @@
 #include <My/VM/Compiler.h>
 #include <My/VM/VM.h>
 
-static void CppFunction_Native(MyContext* pContext, MyVM* pVM) noexcept;
+#include "stb/stb_ds.h"
+
+static void RegisterEntityType_Native(MyContext* pContext, MyVM* pVM) noexcept;
+
+static Pair<char*, MyStruct*>* s_RegisteredEntityTypes = nullptr;
 
 int main()
 {
 	MyContext* pContext = MyInitialize();
 
-	List<InternalFunction> Internals = { { "CppFunction", CppFunction_Native }, };
+	List<InternalFunction> Internals =
+	{
+		{ "RegisterEntityType", RegisterEntityType_Native },
+	};
 	List<MyStruct*> UserStructs = {};
 
 	MyAssembly* pAss = Compiler::Build(pContext, "Script.my", Internals, UserStructs);
@@ -24,27 +31,53 @@ int main()
 	MyDecompile(pAss);
 	Console::WriteLine(Console::Color::Green, "Build successful");
 
-	MyStruct* pMySexyStruct = MyContextGetStruct(pContext, "MySexyStruct");
-	if (!pMySexyStruct)
+	MyVM::Invoke(pContext, "BeginScripting", { });
+
+	MyStruct* pEntity = MyContextGetStruct(pContext, "Entity");
+	if (!pEntity)
 	{
 		goto Error;
 	}
 
-	MyObject* pObject = MyObjectNew(pContext, pMySexyStruct);
-	MyVM::Invoke(pContext, pObject, "SexyMethod", { });
+	MyObject* pObject = MyObjectNew(pContext, pEntity);
+	MyVM::Invoke(pContext, pObject, "OnCreate", { });
+	if (!pContext->VM->Stack.PopU64())
+	{
+		goto Error;
+	}
 
-	MyVM::Invoke(pContext, "MyFunction", { });
+	double t = 0.0;
+	while (true)
+	{
+		MyVM::Invoke(pContext, pObject, "OnUpdate", { MakeValue_Float64(1.0 / 30.0) });
+
+		if ((t = MyObjectFieldGetValueAs<double>(pObject, "Value")) > 1.0)
+		{
+			break;
+		}
+	}
+	for (size_t k = 0; k < stbds_shlenu(s_RegisteredEntityTypes); k++)
+	{
+		printf("\n[DEBUG]: Registered Entity Type: %s", s_RegisteredEntityTypes[k].key);
+	}
+	Console::WriteLine("\n[DEBUG]: DONE!");
+
 	Console::ReadKey();
 
 Error:
 	MyUninitialize(pContext);
 }
 
-void CppFunction_Native(MyContext* pContext, MyVM* pVM) noexcept
+void RegisterEntityType_Native(MyContext* pContext, MyVM* pVM) noexcept
 {
-	int64_t iValue = pVM->Stack.PopI64();
-	MyString* Text = pVM->Stack.PopString();
+	MyString* pEntityTypeName = pVM->Stack.PopString();
 
-	printf("[C++]: Calling '%s'\n", __FUNCTION__);
-	printf("%s %I64d\n", Text->Chars, iValue);
+	printf("[C++]: %s(TypeName: %s)\n", __FUNCTION__, pEntityTypeName->Chars);
+	MyStruct* pKlass = MyContextGetStruct(pContext, pEntityTypeName->Chars);
+	if (pKlass)
+	{
+		stbds_shput(s_RegisteredEntityTypes, pKlass->Name, pKlass);
+	}
+
+	pContext->VM->Stack.Push((bool)pKlass);
 }
