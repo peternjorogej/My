@@ -971,7 +971,7 @@ int64_t MyVM::Execute(bool& bRunning)
             {
                 s_RecursionDepth--;
             }
-            if (s_RecursionDepth == 0ul && Mode == ExecutionMode::SingleFunction)
+            if (stbds_arrlenu(CallStack) == 1ull && Mode == ExecutionMode::SingleFunction)
             {
                 bRunning = false;
                 return MY_RC_SUCCESS;
