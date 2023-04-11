@@ -183,8 +183,8 @@ function int Main(string[] Args)
     - [ ] Better error messages
     - [ ] Better error reporting
     - [ ] Error handling in the language (it has nothing)
-- [ ] More functionality (builtin functions etc):
-- [ ] Constant folding
+- [ ] More functionality (builtin functions etc, enough to be usable)
+- [x] Constant folding
 - [ ] Functions:
     - [ ] Default arguments and variadics
     - [ ] Overloading
