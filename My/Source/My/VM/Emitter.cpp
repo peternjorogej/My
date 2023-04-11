@@ -1185,6 +1185,10 @@ void Emitter::EmitConversionExpression(MyBytecodeProcessor& bp, BoundExpression*
         {
             bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvuinttostring"));
         }
+        else if (pType == My_Defaults.BooleanType)
+        {
+            bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvbooltostring"));
+        }
         else
         {
             bp.Emit(MyOpCode::Calli, MyGetCachedString("__cvinttostring"));
@@ -1796,6 +1800,7 @@ void _My_Initialize_BuiltinsMap() noexcept
 
     // Core
     RegisterBuiltin("__equals",          _My_Builtin_Equals);
+    RegisterBuiltin("__cvbooltostring",  _My_Builtin_CvBoolToString);
     RegisterBuiltin("__cvinttostring",   _My_Builtin_CvIntToString);
     RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString);
     RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString);

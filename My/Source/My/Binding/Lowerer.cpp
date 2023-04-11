@@ -41,7 +41,7 @@ static BoundLabel NextLabel() noexcept
 	return BoundLabel{ MyGetCachedStringV("__label_%d", iNextLabel++) };
 }
 
-
+#pragma region Lowering
 /// INTERNAL BOUND TREE REWRITER
 class InternalBoundTreeRewriter
 {
@@ -155,7 +155,9 @@ protected:
 		BoundUnaryExpression& unary = pUnary->unary;
 
 		BoundExpression* pRhs = RewriteExpression(unary.Rhs);
-		return pRhs == unary.Rhs ? pUnary : MakeBoundExpression_Unary(unary.Operator, pRhs);
+		BoundExpression* pResult = pRhs == unary.Rhs ? pUnary : MakeBoundExpression_Unary(unary.Operator, pRhs);
+
+		return ConstantFolding::Evaluate(pResult);
 	}
 
 	virtual BoundExpression* RewriteBinaryExpression(BoundExpression* pBinary) noexcept
@@ -164,7 +166,9 @@ protected:
 
 		BoundExpression* pLhs = RewriteExpression(binary.Lhs);
 		BoundExpression* pRhs = RewriteExpression(binary.Rhs);
-		return pLhs == binary.Lhs && pRhs == binary.Rhs ? pBinary : MakeBoundExpression_Binary(pLhs, binary.Operator, pRhs);
+		BoundExpression* pResult = pLhs == binary.Lhs && pRhs == binary.Rhs ? pBinary : MakeBoundExpression_Binary(pLhs, binary.Operator, pRhs);
+		
+		return ConstantFolding::Evaluate(pResult);
 	}
 
 	virtual BoundExpression* RewriteTernaryExpression(BoundExpression* pTernary) noexcept
@@ -174,13 +178,18 @@ protected:
 		BoundExpression* pCondition = RewriteExpression(ternary.Condition);
 		BoundExpression* pThen = RewriteExpression(ternary.Then);
 		BoundExpression* pElse = RewriteExpression(ternary.Else);
+		BoundExpression* pResult = nullptr;
 
 		if (pCondition == ternary.Condition && pThen == ternary.Then && pElse == ternary.Else)
 		{
-			return pTernary;
+			pResult = pTernary;
+		}
+		else
+		{
+			pResult = MakeBoundExpression_Ternary(pCondition, pThen, pElse);
 		}
 
-		return MakeBoundExpression_Ternary(pCondition, pThen, pElse);
+		return ConstantFolding::Evaluate(pResult);
 	}
 
 	virtual BoundExpression* RewriteIncrementExpression(BoundExpression* pIncrement) noexcept
@@ -1000,3 +1009,207 @@ BoundStatement* Lowerer::Lower(MySymbol* pFunction, BoundStatement* pStatement) 
 {
 	return InternalLowerer::Lower(pFunction, pStatement);
 }
+#pragma endregion
+
+#pragma region Constant Folding
+class SimplifyExpression
+{
+public:
+	static MyValue Simplify(uint32_t kOperatorKind, List<MyValue> Operands) noexcept
+	{
+		const size_t kOperandCount = Operands.size();
+		switch (kOperandCount)
+		{
+			case 1:  return SimplifyUnaryExpression(Operands.begin()[0], (BoundUnaryOperatorKind)kOperatorKind);
+			case 2:  return SimplifyBinaryExpression(Operands.begin()[0], Operands.begin()[1], (BoundBinaryOperatorKind)kOperatorKind);
+			default: break;
+		}
+
+		MY_ASSERT(false, "Invalid operand count (expeced 1 or 2, not %I64u)", kOperandCount);
+		return MyValue{};
+	}
+
+private:
+	static MyValue SimplifyUnaryExpression(const MyValue& mvRhs, BoundUnaryOperatorKind Kind) noexcept
+	{
+		switch (Kind)
+		{
+			case BoundUnaryOperatorKind::Negation:
+				return mvRhs.Kind == MyValueKind::Float64 ? MakeValue_Float64(-mvRhs.F64) : MakeValue_Int64(-mvRhs.I64);
+			case BoundUnaryOperatorKind::Identity:        return mvRhs;
+			case BoundUnaryOperatorKind::LogicalNegation: return MakeValue_Bool((bool)mvRhs);
+			case BoundUnaryOperatorKind::BitwiseNegation: return MakeValue_Int64(~mvRhs.I64);
+			default: break;
+		}
+
+		MY_ASSERT(false, "SeriouslyFatalError: We SHOULD NEVER get here");
+		return MyValue{};
+	}
+
+	static MyValue SimplifyBinaryExpression(const MyValue& mvLhs, const MyValue& mvRhs, BoundBinaryOperatorKind Kind) noexcept
+	{
+#define _T_OP(T, op, func) func((T)mvLhs op (T)mvRhs)  
+#define BOOL_OP(T, op)     _T_OP(T, op, MakeValue_Bool)
+#define INT_OP(op)         _T_OP(int64_t, op, MakeValue_Int64)
+#define FLOAT_OP(op)       _T_OP(double, op, MakeValue_Float64)
+
+		if (mvLhs.Kind == MyValueKind::String && mvRhs.Kind == MyValueKind::String)
+		{
+			switch (Kind)
+			{
+				case BoundBinaryOperatorKind::Addition:
+					return MakeValue_String(
+						MyStringNew(MyContextGet(), MyGetCachedStringV(
+							"%s%s", mvLhs.Str->Chars, mvRhs.Str->Chars
+						))
+					);
+				case BoundBinaryOperatorKind::Equality:    return MakeValue_Bool(mvLhs.Str == mvRhs.Str);
+				case BoundBinaryOperatorKind::NonEquality: return MakeValue_Bool(!(mvLhs.Str == mvRhs.Str));
+				default: break;
+			}
+
+			MY_ASSERT(false, "SeriouslyFatalError: We SHOULD NEVER get here");
+			return MyValue{};
+		}
+
+		const bool bIsFloatOp = mvLhs.Kind == MyValueKind::Float64 || mvRhs.Kind == MyValueKind::Float64;
+
+		switch (Kind)
+		{
+			case BoundBinaryOperatorKind::Addition:       return bIsFloatOp ? FLOAT_OP(+) : INT_OP(+);
+			case BoundBinaryOperatorKind::Subtraction:    return bIsFloatOp ? FLOAT_OP(-) : INT_OP(-);
+			case BoundBinaryOperatorKind::Multiplication: return bIsFloatOp ? FLOAT_OP(*) : INT_OP(*);
+			case BoundBinaryOperatorKind::Division:       return bIsFloatOp ? FLOAT_OP(/) : INT_OP(/);
+			case BoundBinaryOperatorKind::Exponentiation:
+			{
+				const double dResult = pow((double)mvLhs, (double)mvRhs);
+				return bIsFloatOp ? MakeValue_Float64(dResult) : MakeValue_Int64((int64_t)dResult);
+			}
+			case BoundBinaryOperatorKind::Modulo:         return INT_OP(%);
+			case BoundBinaryOperatorKind::LogicalAnd:     return bIsFloatOp ? FLOAT_OP(&&) : INT_OP(&&);
+			case BoundBinaryOperatorKind::LogicalOr:      return bIsFloatOp ? FLOAT_OP(||) : INT_OP(||);
+			case BoundBinaryOperatorKind::BitwiseAnd:     return INT_OP(&);
+			case BoundBinaryOperatorKind::BitwiseOr:      return INT_OP(|);
+			case BoundBinaryOperatorKind::BitwiseXor:     return INT_OP(^);
+			case BoundBinaryOperatorKind::LeftShift:      return INT_OP(<<);
+			case BoundBinaryOperatorKind::RightShift:     return INT_OP(>>);
+			case BoundBinaryOperatorKind::Equality:       return bIsFloatOp ? BOOL_OP(double, ==) : BOOL_OP(int64_t, ==);
+			case BoundBinaryOperatorKind::NonEquality:    return bIsFloatOp ? BOOL_OP(double, !=) : BOOL_OP(int64_t, !=);
+			case BoundBinaryOperatorKind::Less:           return bIsFloatOp ? BOOL_OP(double, < ) : BOOL_OP(int64_t, < );
+			case BoundBinaryOperatorKind::LessOrEqual:    return bIsFloatOp ? BOOL_OP(double, <=) : BOOL_OP(int64_t, <=);
+			case BoundBinaryOperatorKind::Greater:        return bIsFloatOp ? BOOL_OP(double, > ) : BOOL_OP(int64_t, > );
+			case BoundBinaryOperatorKind::GreaterOrEqual: return bIsFloatOp ? BOOL_OP(double, >=) : BOOL_OP(int64_t, >=);
+			default: break;
+		}
+
+		MY_ASSERT(false, "SeriouslyFatalError: We SHOULD NEVER get here");
+		return MyValue{};
+
+#undef _T_OP
+#undef BOOL_OP
+#undef INT_OP
+#undef FLOAT_OP
+	}
+};
+
+class InternalConstantFolding
+{
+public:
+	virtual ~InternalConstantFolding() noexcept = default;
+
+	BoundExpression* Evaluate(BoundExpression* const pExpression) noexcept
+	{
+		switch (pExpression->Kind)
+		{
+			case BoundExpressionKind::Literal: return pExpression;
+			case BoundExpressionKind::Unary:   return EvaluateUnaryExpression(pExpression);
+			case BoundExpressionKind::Binary:  return EvaluateBinaryExpression(pExpression);
+			case BoundExpressionKind::Ternary: return EvaluateTernaryExpression(pExpression);
+			default:                           return pExpression;
+		}
+	}
+
+private:
+	BoundExpression* EvaluateUnaryExpression(BoundExpression* const pUnary) noexcept
+	{
+		const BoundUnaryExpression& bue = pUnary->unary;
+
+		BoundExpression* pRhs = Evaluate(bue.Rhs);
+
+		if (pRhs->Kind != BoundExpressionKind::Literal)
+		{
+			return pUnary;
+		}
+
+		const MyValue mvResult = SimplifyExpression::Simplify((uint32_t)bue.Operator->OperatorKind, { pRhs->literal.Value });
+		return MakeBoundExpression_Literal(GetTypeFromValueKind(mvResult.Kind), mvResult);
+	}
+
+	BoundExpression* EvaluateBinaryExpression(BoundExpression* const pBinary) noexcept
+	{
+		const BoundBinaryExpression& bbe = pBinary->binary;
+
+		BoundExpression* pLhs = Evaluate(bbe.Lhs);
+		BoundExpression* pRhs = Evaluate(bbe.Rhs);
+
+		if (pLhs->Kind != BoundExpressionKind::Literal || pRhs->Kind != BoundExpressionKind::Literal)
+		{
+			return pBinary;
+		}
+
+		const MyValue mvResult = SimplifyExpression::Simplify((uint32_t)bbe.Operator->OperatorKind, { pLhs->literal.Value, pRhs->literal.Value });
+		return MakeBoundExpression_Literal(GetTypeFromValueKind(mvResult.Kind), mvResult);
+	}
+
+	BoundExpression* EvaluateTernaryExpression(BoundExpression* const pTernary) noexcept
+	{
+		const BoundTernaryExpression& bte = pTernary->ternary;
+
+		BoundExpression* pCondition = Evaluate(bte.Condition);
+
+		if (pCondition->Kind != BoundExpressionKind::Literal)
+		{
+			return pTernary;
+		}
+
+		BoundExpression* pThen = Evaluate(bte.Then);
+		if (!pThen)
+		{
+			pThen = bte.Then;
+		}
+
+		BoundExpression* pElse = Evaluate(bte.Else);
+		if (!pElse)
+		{
+			pElse = bte.Else;
+		}
+
+		return (bool)pCondition->literal.Value ? pThen : pElse;
+	}
+
+	static MyType* GetTypeFromValueKind(MyValueKind Kind) noexcept
+	{
+		MyDefaults& md = My_Defaults;
+		switch (Kind)
+		{
+			case MyValueKind::Bool:    return md.BooleanType;
+			case MyValueKind::Int64:   return md.IntType;
+			case MyValueKind::Uint64:  return md.UintType;
+			case MyValueKind::Float64: return md.FloatType;
+			case MyValueKind::String:  return md.StringType;
+			default:                   break;
+		}
+
+		MY_ASSERT(false, "SeriouslyFatalError: We SHOULD NEVER get here (kind '%s' cannot be folded)", ValueKindString(Kind));
+		return nullptr;
+	}
+};
+
+
+/// CONSTANT FOLDING
+BoundExpression* ConstantFolding::Evaluate(BoundExpression* const pExpression) noexcept
+{
+	return InternalConstantFolding{}.Evaluate(pExpression);
+}
+#pragma endregion
+

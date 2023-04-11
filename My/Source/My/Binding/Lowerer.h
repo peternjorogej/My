@@ -10,3 +10,12 @@ public:
 private:
 	Lowerer() = default;
 };
+
+class ConstantFolding
+{
+public:
+	static BoundExpression* Evaluate(BoundExpression* const pExpression) noexcept;
+
+private:
+	ConstantFolding() = default;
+};

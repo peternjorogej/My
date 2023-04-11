@@ -36,6 +36,9 @@ struct MyValue
 	~MyValue() noexcept;
 
 	operator bool() const noexcept;
+	operator int64_t() const noexcept;
+	operator uint64_t() const noexcept;
+	operator double() const noexcept;
 
 	void Print(bool bQuoteString = false) const noexcept;
 

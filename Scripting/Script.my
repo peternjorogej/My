@@ -11,9 +11,9 @@ function static void BeginScripting()
 
 struct Extensions
 {
-	function static float GetValue()
+	function static inline float GetValue()
 	{
-		return 3.0**2.0;
+		return 3.0**2.0 + 1.0 + 4.0**3.0 + 10.0 / 2.0;
 	}
 };
 
@@ -24,8 +24,9 @@ struct PlayerEntity
 	// Called within C++
 	function bool OnCreate()
 	{
-		const int y = (int)(Extensions.GetValue()**2.0);
+		const float y = (Extensions.GetValue()**2.0);
 		Console.Print(string(y));
+		Console.Print(string(2 == 2));
 
 		Console.Print("[My ]: PlayerEntity.OnCreate");
 		return true;

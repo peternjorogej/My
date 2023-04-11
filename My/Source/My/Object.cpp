@@ -29,9 +29,9 @@ MyValue::operator bool() const noexcept
     {
         case MyValueKind::Null:    return false;
         case MyValueKind::Bool:    return B08;
-        case MyValueKind::Int64:   return bool(I64);
-        case MyValueKind::Uint64:  return bool(U64);
-        case MyValueKind::Float64: return bool(F64);
+        case MyValueKind::Int64:   return (bool)I64;
+        case MyValueKind::Uint64:  return (bool)U64;
+        case MyValueKind::Float64: return (bool)F64;
         case MyValueKind::String:  return Str != nullptr;
         case MyValueKind::Array:   return Arr != nullptr;
         case MyValueKind::Object:  return Obj != nullptr;
@@ -40,6 +40,54 @@ MyValue::operator bool() const noexcept
 
     MY_ASSERT(false, "Error: Cannot convert invalid kind to bool");
     return false;
+}
+
+MyValue::operator int64_t() const noexcept
+{
+    switch (Kind)
+    {
+        case MyValueKind::Null:    return 0LL;
+        case MyValueKind::Bool:    return (int64_t)B08;
+        case MyValueKind::Int64:   return I64;
+        case MyValueKind::Uint64:  return (int64_t)U64;
+        case MyValueKind::Float64: return (int64_t)F64;
+        default: break;
+    }
+
+    MY_ASSERT(false, "Error: Cannot convert '%s' kind to int64_t", ValueKindString(Kind));
+    return INT64_MIN;
+}
+
+MyValue::operator uint64_t() const noexcept
+{
+    switch (Kind)
+    {
+        case MyValueKind::Null:    return 0ull;
+        case MyValueKind::Bool:    return (uint64_t)B08;
+        case MyValueKind::Int64:   return (uint64_t)I64;
+        case MyValueKind::Uint64:  return U64;
+        case MyValueKind::Float64: return (uint64_t)F64;
+        default: break;
+    }
+
+    MY_ASSERT(false, "Error: Cannot convert '%s' kind to int64_t", ValueKindString(Kind));
+    return UINT64_MAX;
+}
+
+MyValue::operator double() const noexcept
+{
+    switch (Kind)
+    {
+        case MyValueKind::Null:    return 0.0;
+        case MyValueKind::Bool:    return (double)B08;
+        case MyValueKind::Int64:   return (double)I64;
+        case MyValueKind::Uint64:  return (double)U64;
+        case MyValueKind::Float64: return F64;
+        default: break;
+    }
+
+    MY_ASSERT(false, "Error: Cannot convert '%s' kind to int64_t", ValueKindString(Kind));
+    return DBL_MIN;
 }
 
 void MyValue::Print(bool bQuoteString) const noexcept
