@@ -26,6 +26,7 @@ int main()
 	MyAssembly* pAss = Compiler::Build(pContext, "Script.my", Internals, UserStructs);
 	if (!pAss)
 	{
+		Console::WriteLine(Console::Color::Red, "Build failed");
 		goto Error;
 	}
 	MyDecompile(pAss);
@@ -33,9 +34,12 @@ int main()
 
 	MyVM::Invoke(pContext, "BeginScripting", { });
 
-	MyStruct* pEntity = MyContextGetStruct(pContext, "Entity");
+	static constexpr const char* s_EntityTypeName = "PlayerEntity";
+
+	MyStruct* pEntity = MyContextGetStruct(pContext, s_EntityTypeName);
 	if (!pEntity)
 	{
+		Console::WriteLine(Console::Color::Red, "Entity type '%s' not found", s_EntityTypeName);
 		goto Error;
 	}
 
@@ -43,6 +47,7 @@ int main()
 	MyVM::Invoke(pContext, pObject, "OnCreate", { });
 	if (!pContext->VM->Stack.PopU64())
 	{
+		Console::WriteLine(Console::Color::Red, "%s.OnCreate returned false", s_EntityTypeName);
 		goto Error;
 	}
 

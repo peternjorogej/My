@@ -6,17 +6,28 @@ extern function static bool RegisterEntityType(string TypeName);
 function static void BeginScripting()
 {
 	Console.Print("[My ]: BeginScripting");
-	RegisterEntityType("Entity");
+	RegisterEntityType("PlayerEntity");
 }
 
-struct Entity
+struct Extensions
+{
+	function static float GetValue()
+	{
+		return 3.0**2.0;
+	}
+};
+
+struct PlayerEntity
 {
 	var float Value;
 
 	// Called within C++
 	function bool OnCreate()
 	{
-		Console.Print("[My ]: Entity.OnCreate");
+		const int y = (int)(Extensions.GetValue()**2.0);
+		Console.Print(string(y));
+
+		Console.Print("[My ]: PlayerEntity.OnCreate");
 		return true;
 	}
 
@@ -24,7 +35,7 @@ struct Entity
 	function void OnUpdate(float dt)
 	{
 		this.Value = this.Value + dt;
-		Console.Print("[My ]: Entity.OnUpdate(float dt)");
+		Console.Print("[My ]: PlayerEntity.OnUpdate(float dt)");
 	}
 };
 
