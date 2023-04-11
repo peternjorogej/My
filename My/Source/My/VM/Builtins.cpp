@@ -15,6 +15,13 @@ void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(kLhs == kRhs);
 }
 
+void _My_Builtin_CvBoolToString(MyContext* pContext, MyVM* pVM) noexcept
+{
+    const char* const lpBoolAsString = pVM->Stack.PopU64() ? "true" : "false";
+    MyString* pString = MyStringNew(pContext, lpBoolAsString);
+    pVM->Stack.Push(pString);
+}
+
 void _My_Builtin_CvIntToString(MyContext* pContext, MyVM* pVM) noexcept
 {
     char* const lpIntAsString = MyGetCachedStringV("%I64d", pVM->Stack.PopI64());

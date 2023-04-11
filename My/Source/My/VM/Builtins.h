@@ -4,6 +4,7 @@
 
 // Core Operations
 void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept;
+void _My_Builtin_CvBoolToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvIntToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept;
 void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept;
