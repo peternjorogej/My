@@ -15,45 +15,24 @@ void _My_Builtin_Equals(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(kLhs == kRhs);
 }
 
-void _My_Builtin_CvToInt(MyContext* pContext, MyVM* pVM) noexcept
-{
-    MyString* const& pString = pVM->Stack.PopString();
-    const int64_t iValue = strtoll(pString->Chars, nullptr, 10);
-    pVM->Stack.Push(iValue);
-}
-
-void _My_Builtin_CvToUint(MyContext* pContext, MyVM* pVM) noexcept
-{
-    MyString* const& pString = pVM->Stack.PopString();
-    const uint64_t kValue = strtoull(pString->Chars, nullptr, 10);
-    pVM->Stack.Push(kValue);
-}
-
-void _My_Builtin_CvToFloat(MyContext* pContext, MyVM* pVM) noexcept
-{
-    MyString* const& pString = pVM->Stack.PopString();
-    const double dValue = strtod(pString->Chars, nullptr);
-    pVM->Stack.Push(dValue);
-}
-
 void _My_Builtin_CvIntToString(MyContext* pContext, MyVM* pVM) noexcept
 {
-    const int64_t iValue = pVM->Stack.PopI64();
-    MyString* pString = MyStringNew(pContext, Console::Format("%I64d", iValue));
+    char* const lpIntAsString = MyGetCachedStringV("%I64d", pVM->Stack.PopI64());
+    MyString* pString = MyStringNew(pContext, lpIntAsString);
     pVM->Stack.Push(pString);
 }
 
 void _My_Builtin_CvUintToString(MyContext* pContext, MyVM* pVM) noexcept
 {
-    const uint64_t k = pVM->Stack.PopU64();
-    MyString* pString = MyStringNew(pContext, Console::Format("%I64u", k));
+    char* const lpUintAsString = MyGetCachedStringV("%I64u", pVM->Stack.PopU64());
+    MyString* pString = MyStringNew(pContext, lpUintAsString);
     pVM->Stack.Push(pString);
 }
 
 void _My_Builtin_CvFloatToString(MyContext* pContext, MyVM* pVM) noexcept
 {
-    const std::string FloatAsStr = Console::Format("%1.10g", pVM->Stack.PopF64());
-    MyString* pString = MyStringNew(pContext, FloatAsStr);
+    char* const lpFloatAsString = MyGetCachedStringV("%1.10g", pVM->Stack.PopF64());
+    MyString* pString = MyStringNew(pContext, lpFloatAsString);
     pVM->Stack.Push(pString);
 }
 

@@ -1796,9 +1796,6 @@ void _My_Initialize_BuiltinsMap() noexcept
 
     // Core
     RegisterBuiltin("__equals",          _My_Builtin_Equals);
-    RegisterBuiltin("__cvtoint",         _My_Builtin_CvToInt);
-    RegisterBuiltin("__cvtouint",        _My_Builtin_CvToUint);
-    RegisterBuiltin("__cvtofloat",       _My_Builtin_CvToFloat);
     RegisterBuiltin("__cvinttostring",   _My_Builtin_CvIntToString);
     RegisterBuiltin("__cvuinttostring",  _My_Builtin_CvUintToString);
     RegisterBuiltin("__cvfloattostring", _My_Builtin_CvFloatToString);
