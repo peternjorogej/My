@@ -193,6 +193,7 @@ function int Main(string[] Args)
     - [ ] Operator overloading
     - [ ] Compile-time functions (*sizeof*, *static_assert* etc)
 - [ ] OOP:
+	- [ ] Static fields
 	- [x] Methods
 	- [ ] Constructors
     - [ ] ToString(), Copy(), Write()
