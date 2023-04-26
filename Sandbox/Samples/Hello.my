@@ -13,22 +13,5 @@ function void TestImport_Basic_Player()
 	Console.Print(p.Name);
 }
 
-/* // Already defined in Basic.my
-function int Main(const string[] Argv)
-{
-	Console.Print(s_Message);
-	Console.Print(Console.ReadLine());
-	
-	const int ri = Random.Int(1000);
-	const uint ru = Random.Uint(1000u);
-	const float rf = Random.Float();
-	const string rs0 = Random.String(20u, false); // Uses all printable characters (*)
-	const string rs1 = Random.String(20u, true); // Uses characters generally used for identifiers ([a-zA-Z0-9_])
-	const string ro = string(Random.Choice(Argv));
-	
-	Console.WriteLine("[Randoms]: $d, $u, $f, $s, $s, $s", { (object)ri, ru, rf, rs0, rs1, ro });
-	
-	return 0;
-}
-*/
+// Main is defined in 'Basic.my'
 
