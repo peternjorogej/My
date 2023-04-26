@@ -580,7 +580,7 @@ void Emitter::EmitDecomposeDeclarationStatement(MyBytecodeProcessor& bp, BoundSt
         MySymbol* const& pVariable = dds.Variables[k];
         char* const& lpField = ss.Fields[k].Name;
 
-        // We duplicate since Ldfld, pops the object off the evaluation stack
+        // We duplicate since Ldfld pops the object off the evaluation stack
         bp.Emit(MyOpCode::Dup);
         bp.Emit(MyOpCode::Ldfld, lpField);
         bp.Emit(MyOpCode::Stloc, pVariable);
