@@ -570,8 +570,6 @@ public:
 		{
 			m_Tokens = tokens;
 		}
-
-		InitializeTypeMap();
 	}
 
 	~InternalParser() noexcept = default;
@@ -723,16 +721,6 @@ private:
 			{
 				return nullptr;
 			}
-			//// 1st check: 'Name' is a valid type (allow expressions such as '(x*y)'.
-			//if (!stbds_shget(s_EncounteredTypeMap, Name.Id))
-			//{
-			//	return nullptr;
-			//}
-			//// 2st check: Next token is not a '.' (allow static method call expressions e.g '(T.StaticMethod() + y)'.
-			//if (Peek(1).Kind == TokenKind::Dot)
-			//{
-			//	return nullptr;
-			//}
 			// Type is valid; proceed.
 			NextToken();
 			pTypeSpec = MakeTypeSpec_Name(Name);
@@ -1835,7 +1823,6 @@ private:
 			return nullptr;
 		}
 
-		stbds_shput(s_EncounteredTypeMap, Name.Id, true);
 		return MakeDeclaration_Using(UsingKeyword, Name, EqualsToken, pType);
 	}
 
@@ -2037,7 +2024,6 @@ private:
 		{
 			// This is a forward declaration
 			NextToken();
-			stbds_shput(s_EncounteredTypeMap, Name.Id, true);
 			return MakeDeclaration_Forward(StructKeyword, Name);
 		}
 
@@ -2089,7 +2075,6 @@ private:
 			return nullptr;
 		}
 
-		stbds_shput(s_EncounteredTypeMap, Name.Id, true);
 		return MakeDeclaration_Struct(StructKeyword, pPodKeyword, Name, LbraceToken, ppMembers, ppMethods, RbraceToken, kAttributes);
 	}
 
@@ -2242,67 +2227,13 @@ private:
 		}
 	}
 
-	static void InitializeTypeMap() noexcept
-	{
-		if (s_EncounteredTypeMap != nullptr)
-		{
-			return;
-		}
-
-		static constexpr Pair<char*, bool> tm = { nullptr, false };
-		stbds_shdefault(s_EncounteredTypeMap, false);
-		stbds_shdefaults(s_EncounteredTypeMap, tm);
-
-		stbds_shput(s_EncounteredTypeMap, "void",    true);
-		stbds_shput(s_EncounteredTypeMap, "Void",    true);
-		stbds_shput(s_EncounteredTypeMap, "object",  true);
-		stbds_shput(s_EncounteredTypeMap, "Object",  true);
-		stbds_shput(s_EncounteredTypeMap, "bool",    true);
-		stbds_shput(s_EncounteredTypeMap, "Boolean", true);
-		stbds_shput(s_EncounteredTypeMap, "int",     true);
-		stbds_shput(s_EncounteredTypeMap, "Int",     true);
-		stbds_shput(s_EncounteredTypeMap, "uint",    true);
-		stbds_shput(s_EncounteredTypeMap, "Uint",    true);
-		stbds_shput(s_EncounteredTypeMap, "intptr",  true);
-		stbds_shput(s_EncounteredTypeMap, "IntPtr",  true);
-		stbds_shput(s_EncounteredTypeMap, "float",   true);
-		stbds_shput(s_EncounteredTypeMap, "Float",   true);
-		stbds_shput(s_EncounteredTypeMap, "string",  true);
-		stbds_shput(s_EncounteredTypeMap, "String",  true);
-		stbds_shput(s_EncounteredTypeMap, "Complex", true);
-		stbds_shput(s_EncounteredTypeMap, "File",    true);
-		stbds_shput(s_EncounteredTypeMap, "StringBuilder", true);
-		stbds_shput(s_EncounteredTypeMap, "Bytes",   true);
-		stbds_shput(s_EncounteredTypeMap, "File",    true);
-	}
-
 private:
 	SyntaxTree&       m_Tree;
 	const SourceText& m_Text;
 	Token*            m_Tokens      = nullptr;
 	uint32_t          m_Position    = 0u;
 	DiagnosticBag     m_Diagnostics = { };
-
-private:
-	/**
-	 * We need this to check if a type has already been declared/defined.
-	 * 
-	 * This is required since when parsing parenthesized expressions, anything that is an identifier can
-	 * essentially pass off as a type (since types are also predominantly identifiers).
-	 * This means that expressions such as '(x*y)' or '(obj.Method() * y)' will fail to parse, since
-	 * 'x' or 'obj' are identified as types and we expect a ')' immediately after them.
-	 * 
-	 * We need to cache the types we've already encountered during parsing, so that we can validate 
-	 * them when we parse types.
-	 * We don't care if it is valid to the typechecker or not, the parser needs to have validated
-	 * it as a type (i.e using decl, struct decl, forward decl).
-	 * 
-	 * NB: All the builtin types are setup by calling 'InitializeTypeMap' 
-	**/
-	static Pair<char*, bool>* s_EncounteredTypeMap;
 };
-
-Pair<char*, bool>* InternalParser::s_EncounteredTypeMap = nullptr;
 #pragma endregion
 
 /// Tokens
