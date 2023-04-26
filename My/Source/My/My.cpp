@@ -250,7 +250,7 @@ MyStruct* MyStructCreate(MyContext* pContext, const char* lpName, uint32_t kAttr
 {
     MyStruct* pKlass = new MyStruct{};
     pKlass->Name       = MyGetCachedString(lpName);
-    pKlass->Guid       = MyGuidCreate(pContext);
+    pKlass->Guid       = MyGuidCreate(pContext, pKlass);
     pKlass->Fields     = nullptr;
     pKlass->Methods    = nullptr;
     pKlass->Attributes = kAttribs;
@@ -482,6 +482,13 @@ MyGuid MyGuidCreate(MyContext* pContext, uint64_t kValue0, uint64_t kValue1) noe
 
     (void)MyGuidCreateStringRepr(pContext, guid);
     return guid;
+}
+
+MyGuid MyGuidCreate(MyContext* pContext, MyStruct* pKlass) noexcept
+{
+    const uint64_t kValue0 = MyHashBytes(pKlass->Name, strlen(pKlass->Name));
+    const uint64_t kValue1 = MyHashBytes(&kValue0, sizeof(uint64_t));
+    return MyGuidCreate(pContext, kValue0, kValue1);
 }
 
 char* MyGuidCreateStringRepr(MyContext* pContext, const MyGuid& Guid) noexcept

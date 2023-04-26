@@ -273,6 +273,7 @@ MyStruct*   MyContextGetStruct(MyContext* pContext, const char* lpName) noexcept
 
 MyGuid      MyGuidCreate(MyContext* pContext) noexcept;
 MyGuid      MyGuidCreate(MyContext* pContext, uint64_t kValue0, uint64_t kValue1) noexcept;
+MyGuid      MyGuidCreate(MyContext* pContext, MyStruct* pKlass) noexcept;
 char*       MyGuidCreateStringRepr(MyContext* pContext, const MyGuid& Guid) noexcept;
 
 void        MyDecompile(const MyAssembly* pAssembly) noexcept; // Defined in VM.cpp
