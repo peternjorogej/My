@@ -9,14 +9,6 @@ function static void BeginScripting()
 	RegisterEntityType("PlayerEntity");
 }
 
-struct Extensions
-{
-	function static inline float GetValue()
-	{
-		return 3.0**2.0 + 1.0 + 4.0**3.0 + 10.0 / 2.0;
-	}
-};
-
 struct PlayerEntity
 {
 	var float Value;
@@ -24,10 +16,6 @@ struct PlayerEntity
 	// Called within C++
 	function bool OnCreate()
 	{
-		const float y = (Extensions.GetValue()**2.0);
-		Console.Print(string(y));
-		Console.Print(string(2 == 2));
-
 		Console.Print("[My ]: PlayerEntity.OnCreate");
 		return true;
 	}
@@ -43,5 +31,11 @@ struct PlayerEntity
 // FIXME: Not used since the script is not being executed as a program
 function int Main(const string[] Argv)
 {
+	const intptr pBuf = Buffer.HeapAlloc(1024);
+	Buffer.WriteI64(pBuf, -1234);
+	Buffer.WriteU64(pBuf, 5678u);
+	Buffer.WriteF64(pBuf, Math.Acos(0.0));
+	Buffer.HeapFree(pBuf);
+
 	return 0;
 }

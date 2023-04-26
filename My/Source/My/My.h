@@ -221,6 +221,7 @@ struct MyDefaults
 	MyType* ConsoleType = nullptr;
 	MyType* MathType    = nullptr;
 	MyType* RandomType  = nullptr;
+	MyType* BufferType  = nullptr;
 
 	MyStruct* ErrorStruct   = nullptr;
 	MyStruct* VoidStruct    = nullptr;
@@ -238,6 +239,7 @@ struct MyDefaults
 	MyStruct* ConsoleStruct = nullptr;
 	MyStruct* MathStruct    = nullptr;
 	MyStruct* RandomStruct  = nullptr;
+	MyStruct* BufferStruct  = nullptr;
 };
 
 extern MyDefaults My_Defaults;

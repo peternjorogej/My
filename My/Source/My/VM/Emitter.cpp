@@ -1807,29 +1807,29 @@ void _My_Initialize_BuiltinsMap() noexcept
     // Std
     RegisterBuiltin("Length",      _My_Builtin_Length);
     RegisterBuiltin("Clock",       _My_Builtin_Clock);
-
-    RegisterBuiltin("HeapAlloc",         _My_Builtin_HeapAlloc);
-    RegisterBuiltin("HeapCopy",          _My_Builtin_HeapCopy);
-    RegisterBuiltin("HeapResize",        _My_Builtin_HeapResize);
-    RegisterBuiltin("HeapFree",          _My_Builtin_HeapFree);
-    RegisterBuiltin("BufferLength",      _My_Builtin_Buffer_Length);
-    RegisterBuiltin("BufferCapacity",    _My_Builtin_Buffer_Capacity);
-    RegisterBuiltin("BufferWriteI32",    _My_Builtin_Buffer_WriteI32);
-    RegisterBuiltin("BufferWriteI64",    _My_Builtin_Buffer_WriteI64);
-    RegisterBuiltin("BufferWriteU32",    _My_Builtin_Buffer_WriteU32);
-    RegisterBuiltin("BufferWriteU64",    _My_Builtin_Buffer_WriteU64);
-    RegisterBuiltin("BufferWriteF32",    _My_Builtin_Buffer_WriteF32);
-    RegisterBuiltin("BufferWriteF64",    _My_Builtin_Buffer_WriteF64);
-    RegisterBuiltin("BufferWriteString", _My_Builtin_Buffer_WriteString);
-    RegisterBuiltin("BufferAppend",      _My_Builtin_Buffer_Append);
-    RegisterBuiltin("BufferReadI32",     _My_Builtin_Buffer_ReadI32);
-    RegisterBuiltin("BufferReadI64",     _My_Builtin_Buffer_ReadI64);
-    RegisterBuiltin("BufferReadU32",     _My_Builtin_Buffer_ReadU32);
-    RegisterBuiltin("BufferReadU64",     _My_Builtin_Buffer_ReadU64);
-    RegisterBuiltin("BufferReadF32",     _My_Builtin_Buffer_ReadF32);
-    RegisterBuiltin("BufferReadF64",     _My_Builtin_Buffer_ReadF64);
-    RegisterBuiltin("BufferReadString",  _My_Builtin_Buffer_ReadString);
-    RegisterBuiltin("BufferGet",         _My_Builtin_Buffer_Get);
+    // Buffer
+    RegisterBuiltin("Buffer__HeapAlloc",   _My_Builtin_HeapAlloc);
+    RegisterBuiltin("Buffer__HeapCopy",    _My_Builtin_HeapCopy);
+    RegisterBuiltin("Buffer__HeapResize",  _My_Builtin_HeapResize);
+    RegisterBuiltin("Buffer__HeapFree",    _My_Builtin_HeapFree);
+    RegisterBuiltin("Buffer__Length",      _My_Builtin_Buffer_Length);
+    RegisterBuiltin("Buffer__Capacity",    _My_Builtin_Buffer_Capacity);
+    RegisterBuiltin("Buffer__WriteI32",    _My_Builtin_Buffer_WriteI32);
+    RegisterBuiltin("Buffer__WriteI64",    _My_Builtin_Buffer_WriteI64);
+    RegisterBuiltin("Buffer__WriteU32",    _My_Builtin_Buffer_WriteU32);
+    RegisterBuiltin("Buffer__WriteU64",    _My_Builtin_Buffer_WriteU64);
+    RegisterBuiltin("Buffer__WriteF32",    _My_Builtin_Buffer_WriteF32);
+    RegisterBuiltin("Buffer__WriteF64",    _My_Builtin_Buffer_WriteF64);
+    RegisterBuiltin("Buffer__WriteString", _My_Builtin_Buffer_WriteString);
+    RegisterBuiltin("Buffer__Append",      _My_Builtin_Buffer_Append);
+    RegisterBuiltin("Buffer__ReadI32",     _My_Builtin_Buffer_ReadI32);
+    RegisterBuiltin("Buffer__ReadI64",     _My_Builtin_Buffer_ReadI64);
+    RegisterBuiltin("Buffer__ReadU32",     _My_Builtin_Buffer_ReadU32);
+    RegisterBuiltin("Buffer__ReadU64",     _My_Builtin_Buffer_ReadU64);
+    RegisterBuiltin("Buffer__ReadF32",     _My_Builtin_Buffer_ReadF32);
+    RegisterBuiltin("Buffer__ReadF64",     _My_Builtin_Buffer_ReadF64);
+    RegisterBuiltin("Buffer__ReadString",  _My_Builtin_Buffer_ReadString);
+    RegisterBuiltin("Buffer__GetPointer",  _My_Builtin_Buffer_Get);
     // String
     RegisterBuiltin("__strcat",           _My_Builtin_String_Concat);
     RegisterBuiltin("__strcmp",           _My_Builtin_String_Compare);

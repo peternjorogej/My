@@ -639,6 +639,7 @@ public:
 			SetupStruct(md.ConsoleType);
 			SetupStruct(md.MathType);
 			SetupStruct(md.RandomType);
+			SetupStruct(md.BufferType);
 
 			InitBuiltinMethodSymbols(m_Scope);
 		}
@@ -2565,8 +2566,32 @@ private:
 		SetupMethod(md.RandomType, "Int",    md.IntType,    { { "iMax", md.IntType  } }, true);
 		SetupMethod(md.RandomType, "Uint",   md.UintType,   { { "kMax", md.UintType } }, true);
 		SetupMethod(md.RandomType, "Float",  md.FloatType,  { }, true);
-		SetupMethod(md.RandomType, "String", md.StringType, { {"kLength", md.UintType  }, {"bIsIdentifier", md.BooleanType } }, true);
-		SetupMethod(md.RandomType, "Choice", md.ObjectType, { {"vItems",  pObjectArray } }, true);
+		SetupMethod(md.RandomType, "String", md.StringType, { { "kLength", md.UintType  }, { "bIsIdentifier", md.BooleanType } }, true);
+		SetupMethod(md.RandomType, "Choice", md.ObjectType, { { "vItems",  pObjectArray } }, true);
+
+		// (static) Buffer
+		SetupMethod(md.BufferType, "HeapAlloc",   md.IntPtrType, { { "kSize",   md.UintType   } }, true);
+		SetupMethod(md.BufferType, "HeapCopy",    md.IntPtrType, { { "pDst",    md.IntPtrType }, { "pSrc",   md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "HeapResize",  md.IntPtrType, { { "kSize",   md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "HeapFree",    md.VoidType,   { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "Length",      md.UintType,   { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "Capacity",    md.UintType,   { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "WriteI32",    md.VoidType,   { { "pBuffer", md.IntPtrType }, { "iValue", md.IntType    } }, true);
+		SetupMethod(md.BufferType, "WriteI64",    md.VoidType,   { { "pBuffer", md.IntPtrType }, { "iValue", md.IntType    } }, true);
+		SetupMethod(md.BufferType, "WriteU32",    md.VoidType,   { { "pBuffer", md.IntPtrType }, { "kValue", md.UintType   } }, true);
+		SetupMethod(md.BufferType, "WriteU64",    md.VoidType,   { { "pBuffer", md.IntPtrType }, { "kValue", md.UintType   } }, true);
+		SetupMethod(md.BufferType, "WriteF32",    md.VoidType,   { { "pBuffer", md.IntPtrType }, { "fValue", md.FloatType  } }, true);
+		SetupMethod(md.BufferType, "WriteF64",    md.VoidType,   { { "pBuffer", md.IntPtrType }, { "fValue", md.FloatType  } }, true);
+		SetupMethod(md.BufferType, "WriteString", md.VoidType,   { { "pBuffer", md.IntPtrType }, { "sValue", md.StringType } }, true);
+		SetupMethod(md.BufferType, "Append",      md.VoidType,   { { "pBuffer", md.IntPtrType }, { "pValue", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadI32",     md.IntType,    { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadI64",     md.IntType,    { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadU32",     md.UintType,   { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadU64",     md.UintType,   { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadF32",     md.FloatType,  { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadF64",     md.FloatType,  { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "ReadString",  md.StringType, { { "pBuffer", md.IntPtrType } }, true);
+		SetupMethod(md.BufferType, "GetPointer",  md.IntPtrType, { }, true); // NOTE: <- Will be used if (or when) the Buffer is non-static
 	}
 
 	static void InitModuleStd() noexcept

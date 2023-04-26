@@ -164,6 +164,10 @@ void MyInitializeStructs(MyContext* pContext)
     ud.RandomStruct = MyStructCreate(pContext, "Random", MY_STRUCT_ATTR_STATIC);
     ud.RandomType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.RandomStruct);
     ud.RandomStruct->Size = 0ul;
+    // (static) Buffer
+    ud.BufferStruct = MyStructCreate(pContext, "Buffer", MY_STRUCT_ATTR_STATIC);
+    ud.BufferType = MyTypeCreate(MY_TYPE_KIND_STRUCT, ud.BufferStruct);
+    ud.BufferStruct->Size = 0ul;
 }
 
 void MyUninitializeStructs()
@@ -184,6 +188,8 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.BytesType);
     MY_SAFEDELETE(ud.FileType);
     MY_SAFEDELETE(ud.MathType);
+    MY_SAFEDELETE(ud.RandomType);
+    MY_SAFEDELETE(ud.BufferType);
 
     MY_SAFEDELETE(ud.ErrorStruct);
     MY_SAFEDELETE(ud.VoidStruct);
@@ -199,6 +205,8 @@ void MyUninitializeStructs()
     MY_SAFEDELETE(ud.BytesStruct);
     MY_SAFEDELETE(ud.FileStruct);
     MY_SAFEDELETE(ud.MathStruct);
+    MY_SAFEDELETE(ud.RandomStruct);
+    MY_SAFEDELETE(ud.BufferStruct);
 }
 
 MyFunction* MyFunctionCreate(const MyFunctionSignature& Signature, uint32_t kAttribs, uint32_t kAddress) noexcept
@@ -485,7 +493,7 @@ char* MyGuidCreateStringRepr(MyContext* pContext, const MyGuid& Guid) noexcept
         return lpGuidString;
     }
 
-    // TODO: Consider using a C-Style method instead of relying on std::stringstream?
+    // TODO?: Consider using a C-Style method instead of relying on std::stringstream
     {
         std::stringstream ss = {};
         ss << std::hex;

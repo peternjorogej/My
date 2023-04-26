@@ -56,7 +56,7 @@ void _My_Builtin_Clock(MyContext* pContext, MyVM* pVM) noexcept
     pVM->Stack.Push(dNow);
 }
 
-
+// Buffer
 void _My_Builtin_HeapAlloc(MyContext* pContext, MyVM* pVM) noexcept
 {
     uint64_t kSize = pVM->Stack.PopU64();
