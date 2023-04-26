@@ -177,6 +177,8 @@ function int Main(string[] Args)
     - [x] Casting from `object` type to user defined types
     - [ ] Better type safety
 - [ ] Importing files (compiled or not)
+    - [x] Importing text files
+    - [ ] Importing bytecode files (libraries?)
 - [ ] Const-correctness in the C++ API and in the language itself
 - [ ] Better string management
 - [ ] Error handling:
