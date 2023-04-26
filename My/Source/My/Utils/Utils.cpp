@@ -696,9 +696,30 @@ void DiagnosticBag::ReportAllPathsMustReturn(const TextLocation& Location) noexc
 	Report(Location, Message);
 }
 
+void DiagnosticBag::ReportInvalidImportFilepath(const TextLocation& Location, MyString* pFilepath) noexcept
+{
+	const std::string Message = Console::Format(
+		"Invalid import path '%s'; import path must be a valid filepath (not empty and not a directory)", pFilepath->Chars
+	);
+	Report(Location, Message);
+}
+
 void DiagnosticBag::ReportImportedFileDoesNotExist(const TextLocation& Location, MyString* pFilepath) noexcept
 {
-	const std::string Message = Console::Format("File '%s' does not exist (cannot be imported)", pFilepath->Chars);
+	const std::string Message = Console::Format("File '%s' cannot be imported (does not exist)", pFilepath->Chars);
+	Report(Location, Message);
+}
+
+void DiagnosticBag::ReportCircularImport(const TextLocation& Location, MyString* pFilepath, MyString* pIncludedInFilepath) noexcept
+{
+	ReportCircularImport(Location, pFilepath->Chars, pIncludedInFilepath->Chars);
+}
+
+void DiagnosticBag::ReportCircularImport(const TextLocation& Location, char* const& lpFilepath, char* const& lpIncludedInFilepath) noexcept
+{
+	const std::string Message = Console::Format(
+		"Circular import of file '%s', included in '%s'", lpFilepath, lpIncludedInFilepath ? lpIncludedInFilepath : lpFilepath
+	);
 	Report(Location, Message);
 }
 

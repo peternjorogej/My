@@ -4,8 +4,8 @@
 #include "My/Utils/Utils.h"
 
 // Text Location
-TextLocation::TextLocation(uint32_t kStart, uint32_t kLength, uint32_t kLine, const std::string_view& Filename)
-    : Start(kStart), Length(kLength), Line(kLine), Filename(Filename)
+TextLocation::TextLocation(uint32_t kStart, uint32_t kLength, uint32_t kLine, char* const lpFilename)
+    : Start(kStart), Length(kLength), Line(kLine), Filename(lpFilename)
 { }
 
 uint32_t TextLocation::End() const noexcept
@@ -13,9 +13,9 @@ uint32_t TextLocation::End() const noexcept
     return Start + Length;
 }
 
-TextLocation TextLocation::FromBounds(uint32_t kStart, uint32_t kEnd, uint32_t kLine, const std::string_view& Filename) noexcept
+TextLocation TextLocation::FromBounds(uint32_t kStart, uint32_t kEnd, uint32_t kLine, char* const lpFilename) noexcept
 {
-    return TextLocation(kStart, kEnd - kStart, kLine, Filename);
+    return TextLocation(kStart, kEnd - kStart, kLine, lpFilename);
 }
 
 // Text Line
@@ -87,13 +87,13 @@ const char& SourceText::operator[](size_t Index) const noexcept
     return Text.at(Index);
 }
 
-SourceText SourceText::From(const std::string_view& Text, const std::string_view& Filename) noexcept
+SourceText SourceText::From(const std::string_view& Text, char* const lpFilename) noexcept
 {
-    return SourceText(Text, Filename);
+    return SourceText(Text, lpFilename);
 }
 
-SourceText::SourceText(const std::string_view& svText, const std::string_view& Filename)
-    : Text(svText), Filename(Filename)
+SourceText::SourceText(const std::string_view& svText, char* const lpFilename)
+    : Text(svText), Filename(lpFilename)
 {
     Lines = ParseLines(this, Text);
 }

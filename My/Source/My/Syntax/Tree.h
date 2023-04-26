@@ -117,7 +117,8 @@ struct Token
 	~Token() { }
 	Token& operator=(const Token& Other);
 
-	TextLocation Location(uint32_t kLine, const std::string_view& Filename) const noexcept;
+	bool         IsOperator() const noexcept;
+	TextLocation Location(uint32_t kLine, char* const lpFilename) const noexcept;
 };
 #pragma endregion
 
@@ -533,7 +534,7 @@ struct FunctionSignature
 struct ImportDeclaration
 {
 	Token ImportKeyword = {};
-	Token Name          = {};
+	Token Filepath      = {};
 };
 
 struct UsingDeclaration

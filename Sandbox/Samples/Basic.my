@@ -1,4 +1,6 @@
 
+import "Samples/Hello.my"; // Fail due to circular imports (Hello.my includes this one)
+
 struct /*pod*/ Float3
 {
 	var float X;

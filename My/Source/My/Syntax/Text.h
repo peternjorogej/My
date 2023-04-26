@@ -4,16 +4,16 @@
 
 struct TextLocation
 {
-	uint32_t         Start    = 0u;
-	uint32_t         Length   = 0u;
-	uint32_t         Line     = 0u;
-	std::string_view Filename = {};
+	uint32_t Start    = 0u;
+	uint32_t Length   = 0u;
+	uint32_t Line     = 0u;
+	char*    Filename = nullptr;
 
-	TextLocation(uint32_t kStart, uint32_t kLength, uint32_t kiLine, const std::string_view& Filename);
+	TextLocation(uint32_t kStart, uint32_t kLength, uint32_t kiLine, char* const lpFilename);
 
 	uint32_t End() const noexcept;
 
-	static TextLocation FromBounds(uint32_t kStart, uint32_t kEnd, uint32_t kLine, const std::string_view& Filename) noexcept;
+	static TextLocation FromBounds(uint32_t kStart, uint32_t kEnd, uint32_t kLine, char* const lpFilename) noexcept;
 };
 
 struct TextLine
@@ -34,8 +34,8 @@ struct SourceText
 {
 public:
 	std::string_view Text     = {};
-	std::string_view Filename = {};
-	TextLine*  Lines    = nullptr;
+	char*            Filename = {};
+	TextLine*        Lines    = nullptr;
 
 	~SourceText() noexcept = default;
 
@@ -45,10 +45,10 @@ public:
 	std::string_view ToString(const TextLocation& Location) const noexcept;
 	const char& operator[](size_t Index) const noexcept;
 
-	static SourceText From(const std::string_view& Text, const std::string_view& Filename) noexcept;
+	static SourceText From(const std::string_view& Text, char* const lpFilename) noexcept;
 
 private:
-	SourceText(const std::string_view& Text, const std::string_view& Filename);
+	SourceText(const std::string_view& Text, char* const lpFilename);
 
 	static TextLine* ParseLines(SourceText* const& pText, const std::string_view& Text);
 	static uint32_t  GetLineBreakWidth(const std::string_view& Text, uint32_t kPosition) noexcept;

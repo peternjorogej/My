@@ -476,7 +476,7 @@ struct BoundProgram
 class Binder
 {
 public:
-	static BoundGlobalScope BindGlobalScope(MyContext* pContext, const SyntaxTree* pTree, const List<MyStruct*>& UserStructs) noexcept;
+	static BoundGlobalScope BindGlobalScope(MyContext* pContext, const SyntaxTree* pTree, const List<MyStruct*>& UserStructs = {}) noexcept;
 	static BoundProgram     BindProgram(MyContext* pContext, BoundGlobalScope* pGlobalScope, const SyntaxTree* pTree) noexcept;
 
 	static BoundUnaryOperator* BindUnaryOperator(TokenKind OperatorKind, MyType* pRhsType);

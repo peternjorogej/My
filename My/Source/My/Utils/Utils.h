@@ -187,7 +187,10 @@ public:
 	void ReportInvalidReturnExpression(const TextLocation& Location, char* const& lpName) noexcept;
 	void ReportMissingReturnExpression(const TextLocation& Location, char* const& lpName) noexcept;
 	void ReportAllPathsMustReturn(const TextLocation& Location) noexcept;
+	void ReportInvalidImportFilepath(const TextLocation& Location, MyString* pFilepath) noexcept;
 	void ReportImportedFileDoesNotExist(const TextLocation& Location, MyString* pFilepath) noexcept;
+	void ReportCircularImport(const TextLocation& Location, MyString* pFilepath, MyString* pIncludedInFilepath = nullptr) noexcept;
+	void ReportCircularImport(const TextLocation& Location, char* const& lpFilepath, char* const& lpIncludedInFilepath = nullptr) noexcept;
 	void ReportMainIsUndefined() noexcept;
 	void ReportMainHasInvalidSignature() noexcept;
 	// Emitting

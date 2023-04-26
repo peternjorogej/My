@@ -4,6 +4,7 @@
 #include "My/Base/IO.h"
 #include "stb/stb_ds.h"
 
+#include <filesystem>
 
 static bool _My_ArrayTypesMatch(const MyArrayType& From, const MyArrayType& To) noexcept;
 static bool _My_FunctionTypesMatch(const MyFunctionSignature& From, const MyFunctionSignature& To) noexcept;
@@ -1735,7 +1736,102 @@ private:
 
 	void BindImportDeclaration(Declaration* pImport)
 	{
-		MY_NOT_IMPLEMENTED();
+		ImportDeclaration& importdecl = pImport->importdecl;
+
+		std::filesystem::path current_path = std::filesystem::absolute(m_Tree->GetText().Filename);
+		char* const lpCurrentFilepath = MyGetCachedString(current_path.string());
+		if (!stbds_shget(s_ImportFilepathMap, lpCurrentFilepath))
+		{
+			constexpr Pair<char*, char*> ifm = { nullptr, nullptr };
+			stbds_shdefault(s_ImportFilepathMap, nullptr);
+			stbds_shdefaults(s_ImportFilepathMap, ifm);
+
+			stbds_shput(s_ImportFilepathMap, lpCurrentFilepath, lpCurrentFilepath);
+		}
+
+		MyString* pFilepath = importdecl.Filepath.Str;
+		std::filesystem::path path = std::filesystem::absolute(pFilepath->Chars);
+		char* const lpFilepath = MyGetCachedString(path.string());
+		{
+			// Path Validation
+			// Check if the filepath is valid
+			if (pFilepath->Length == 0ul || std::filesystem::is_directory(path))
+			{
+				m_Diagnostics.ReportInvalidImportFilepath(GetLocation(importdecl.Filepath), pFilepath);
+				return;
+			}
+			// Validate existence
+			if (!std::filesystem::exists(path))
+			{
+				m_Diagnostics.ReportImportedFileDoesNotExist(GetLocation(importdecl.Filepath), pFilepath);
+				return;
+			}
+			// (Try our best, at least for now) to check for circular includes
+			if (char* lpImportFilepath = stbds_shget(s_ImportFilepathMap, lpFilepath))
+			{
+				m_Diagnostics.ReportCircularImport(GetLocation(importdecl.Filepath), pFilepath->Chars, lpCurrentFilepath);
+				return;
+			}
+		}
+
+		SyntaxTree* pImportTree = SyntaxTree::Load(s_Context, pFilepath->Chars);
+		// Quit if we have parsing errors in the imported file
+		if (pImportTree->GetDiagnostics().Any())
+		{
+			m_Diagnostics.Extend(pImportTree->GetDiagnostics());
+			return;
+		}
+
+		stbds_shput(s_ImportFilepathMap, lpFilepath, lpFilepath);
+		BoundGlobalScope ImportGlobalScope = Binder::BindGlobalScope(s_Context, pImportTree);
+		stbds_shdel(s_ImportFilepathMap, lpFilepath);
+		// Quit if we have binding errors
+		if (ImportGlobalScope.Diagnostics.Any())
+		{
+			m_Diagnostics.Extend(ImportGlobalScope.Diagnostics);
+			return;
+		}
+
+		// Add all the symbols (except the ones marked as static) into the
+		// current scope (i.e we'll compile everything into one file, a la C/C++)
+		// 1. Import global variables
+		for (size_t k = 0; k < stbds_hmlenu(ImportGlobalScope.Globals); k++)
+		{
+			const auto&[pVariable, pExpr] = ImportGlobalScope.Globals[k];
+			if (stbds_hmget(m_Globals, pVariable) != nullptr)
+			{
+				m_Diagnostics.ReportSymbolRedeclaration(TextLocation(0ul, 0ul, 1ul, m_Tree->GetText().Filename), pVariable->Name);
+				return;
+			}
+			
+			m_Scope->DeclareVariable(pVariable);
+			stbds_hmput(m_Globals, pVariable, pExpr);
+		}
+		// 2. Import functions
+		for (size_t k = 0; k < stbds_arrlenu(ImportGlobalScope.Functions); k++)
+		{
+			MySymbol* const pFunction = ImportGlobalScope.Functions[k];
+			if (const auto [bFound, pSym] = m_Scope->LookupFunction(pFunction->Name); bFound)
+			{
+				m_Diagnostics.ReportSymbolRedeclaration(TextLocation(0ul, 0ul, 1ul, m_Tree->GetText().Filename), pSym->Name);
+				return;
+			}
+
+			m_Scope->DeclareFunction(pFunction);
+		}
+		// 3. Import structs
+		for (size_t k = 0; k < stbds_arrlenu(ImportGlobalScope.Structs); k++)
+		{
+			MySymbol* const pStruct = ImportGlobalScope.Structs[k];
+			if (const auto [bFound, pSym] = m_Scope->LookupStruct(pStruct->Name); bFound)
+			{
+				m_Diagnostics.ReportSymbolRedeclaration(TextLocation(0ul, 0ul, 1ul, m_Tree->GetText().Filename), pSym->Name);
+				return;
+			}
+
+			m_Scope->DeclareStruct(pStruct);
+		}
+		//MY_NOT_IMPLEMENTED();
 	}
 
 	void BindUsingDeclaration(Declaration* pTypedef)
@@ -2618,16 +2714,17 @@ private:
 	static Pair<char*, MyType*>*   s_TypedefedTypes;
 	static Pair<char*, MyType*>*   s_ForwardedTypes;
 	static Pair<char*, MySymbol*>* s_BuiltinMethods;
+	static Pair<char*, char*>*     s_ImportFilepathMap;
 
 private:
 	// Source code AST
-	const SyntaxTree* m_Tree        = nullptr;
-	// Scope of the body
+	const SyntaxTree* m_Tree        = nullptr;      
+	// Scope of the current body
 	BoundScope*       m_Scope       = nullptr;
 	// Function body being bound
-	MySymbol*        m_Function    = nullptr;
+	MySymbol*         m_Function    = nullptr;
 	// List
-	Pair<BoundLabel, BoundLabel>*       m_LoopStack = nullptr;
+	Pair<BoundLabel, BoundLabel>*      m_LoopStack = nullptr;
 	// Dictionary
 	Pair<MySymbol*, BoundExpression*>* m_Globals   = nullptr;
 
@@ -2635,11 +2732,11 @@ private:
 };
 
 MyContext* InternalBinder::s_Context = nullptr;
-Pair<char*, MyType*>*   InternalBinder::s_UserDefinedTypes = nullptr;
-Pair<char*, MyType*>*   InternalBinder::s_TypedefedTypes   = nullptr;
-Pair<char*, MyType*>*   InternalBinder::s_ForwardedTypes   = nullptr;
-Pair<char*, MySymbol*>* InternalBinder::s_BuiltinMethods   = nullptr;
-
+Pair<char*, MyType*>*   InternalBinder::s_UserDefinedTypes    = nullptr;
+Pair<char*, MyType*>*   InternalBinder::s_TypedefedTypes      = nullptr;
+Pair<char*, MyType*>*   InternalBinder::s_ForwardedTypes      = nullptr;
+Pair<char*, MySymbol*>* InternalBinder::s_BuiltinMethods      = nullptr;
+Pair<char*, char*>*     InternalBinder::s_ImportFilepathMap = nullptr;
 #pragma endregion
 
 BoundGlobalScope Binder::BindGlobalScope(MyContext* pContext, const SyntaxTree* pTree, const List<MyStruct*>& UserStructs) noexcept

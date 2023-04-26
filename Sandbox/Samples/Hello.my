@@ -1,6 +1,19 @@
 
-const string s_Message = "Hello, World from My";
+// Test importing
+// When running .exe files
+// import "Basic.my";
 
+// Used since the during development, Visual Studio sets the
+// CWD to the project directory (i.e '.\Sandbox').
+import "Samples/Basic.my";
+
+function void TestImport_Basic_Player()
+{
+	const Player p = new Player(Name: "Njororge", Position: new Float3(), Velocity: new Float3());
+	Console.Print(p.Name);
+}
+
+/* // Already defined in Basic.my
 function int Main(const string[] Argv)
 {
 	Console.Print(s_Message);
@@ -17,4 +30,5 @@ function int Main(const string[] Argv)
 	
 	return 0;
 }
+*/
 

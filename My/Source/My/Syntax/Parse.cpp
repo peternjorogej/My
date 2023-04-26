@@ -138,7 +138,7 @@ static Statement* MakeStatement_Return(const Token& ReturnKeyword, Expression* p
 /// <summary>
 /// Create Declaration
 /// </summary>
-static Declaration* MakeDeclaration_Import(const Token& ImportKeyword, const Token& Name);
+static Declaration* MakeDeclaration_Import(const Token& ImportKeyword, const Token& Filepath);
 static Declaration* MakeDeclaration_Using(
 	const Token& UsingKeyword,
 	const Token& Name,
@@ -704,7 +704,7 @@ private:
 			return nullptr;
 		}
 
-		// As stated above, first get type T
+		// First get type T
 		if (Current().Kind == TokenKind::CallbackKeyword)
 		{
 			pTypeSpec = ParseFunctionTypeSpec();
@@ -712,19 +712,30 @@ private:
 		else
 		{
 			const Token& Name = Current();
-			// 1st check: 'Name' is a valid type (allow expressions such as '(x*y)'.
-			if (!stbds_shget(s_EncounteredTypeMap, Name.Id))
+			// This is a valid type iff the token after the current one is not an operator. This check is
+			// done since when parsing parenthesized expression we might parse a cast expression which needs
+			// a type in parenthesis. As a result, expressions such as '(x*y)' or '(id.Method() + y)' may 
+			// assume that 'x' or 'id' are types (since types are predominantly identifiers), and this requires
+			// that the next token be a ')'.
+			// To prevent this, we return null if the next token is an operator (the '.' is considered an
+			// operator but is not parsed like one).
+			if (Peek(1).IsOperator())
 			{
 				return nullptr;
 			}
-			// 2st check: Next token is not a '.' (allow static method call expressions e.g '(T.StaticMethod() + y)'.
-			if (Peek(1).Kind == TokenKind::Dot)
-			{
-				return nullptr;
-			}
+			//// 1st check: 'Name' is a valid type (allow expressions such as '(x*y)'.
+			//if (!stbds_shget(s_EncounteredTypeMap, Name.Id))
+			//{
+			//	return nullptr;
+			//}
+			//// 2st check: Next token is not a '.' (allow static method call expressions e.g '(T.StaticMethod() + y)'.
+			//if (Peek(1).Kind == TokenKind::Dot)
+			//{
+			//	return nullptr;
+			//}
 			// Type is valid; proceed.
 			NextToken();
-			pTypeSpec = MakeTypeSpec_Name(Name); // If we got here, the current token is an identifier
+			pTypeSpec = MakeTypeSpec_Name(Name);
 		}
 
 		// If we have a '[', then we parse T[N...] or T[,...]
@@ -1779,8 +1790,7 @@ private:
 
 	Declaration* ParseImportDeclaration() noexcept
 	{
-		MY_NOT_IMPLEMENTED();
-		/*const Token& ImportKeyword = NextToken();
+		const Token& ImportKeyword = NextToken();
 
 		const Token& ModulePath = Current();
 		if (!CheckAndMatchToken(TokenKind::String))
@@ -1793,8 +1803,7 @@ private:
 			return nullptr;
 		}
 
-		return MakeDeclaration_Import(ImportKeyword, ModulePath);*/
-		return nullptr;
+		return MakeDeclaration_Import(ImportKeyword, ModulePath);
 	}
 
 	Declaration* ParseUsingDeclaration() noexcept
@@ -2279,7 +2288,7 @@ private:
 	 * We need this to check if a type has already been declared/defined.
 	 * 
 	 * This is required since when parsing parenthesized expressions, anything that is an identifier can
-	 * essentially pass of as a type (since types are also predominantly identifiers).
+	 * essentially pass off as a type (since types are also predominantly identifiers).
 	 * This means that expressions such as '(x*y)' or '(obj.Method() * y)' will fail to parse, since
 	 * 'x' or 'obj' are identified as types and we expect a ')' immediately after them.
 	 * 
@@ -2287,6 +2296,8 @@ private:
 	 * them when we parse types.
 	 * We don't care if it is valid to the typechecker or not, the parser needs to have validated
 	 * it as a type (i.e using decl, struct decl, forward decl).
+	 * 
+	 * NB: All the builtin types are setup by calling 'InitializeTypeMap' 
 	**/
 	static Pair<char*, bool>* s_EncounteredTypeMap;
 };
@@ -2336,9 +2347,45 @@ Token& Token::operator=(const Token& Rhs)
 	return *this;
 }
 
-TextLocation Token::Location(uint32_t kLine, const std::string_view& Filename) const noexcept
+bool Token::IsOperator() const noexcept
 {
-	return TextLocation(Start, End - Start, kLine, Filename);
+	switch (Kind)
+	{
+		case TokenKind::Plus:
+		case TokenKind::Dash:
+		case TokenKind::Star:
+		case TokenKind::StarStar:
+		case TokenKind::Slash:
+		case TokenKind::Percent:
+		case TokenKind::Caret:
+		case TokenKind::Tilde:
+		case TokenKind::Bang:
+		case TokenKind::And:
+		case TokenKind::Pipe:
+		case TokenKind::AndAnd:
+		case TokenKind::PipePipe:
+		case TokenKind::Equals:
+		case TokenKind::BangEquals:
+		case TokenKind::EqualsEquals:
+		case TokenKind::Less:
+		case TokenKind::LessLess:
+		case TokenKind::LessEquals:
+		case TokenKind::Greater:
+		case TokenKind::GreaterGreater:
+		case TokenKind::GreaterEquals:
+		case TokenKind::Dot:
+		case TokenKind::Question:
+		case TokenKind::Comma:
+		case TokenKind::Colon:
+			return true;
+		default:
+			return false;
+	}
+}
+
+TextLocation Token::Location(uint32_t kLine, char* const lpFilename) const noexcept
+{
+	return TextLocation(Start, End - Start, kLine, lpFilename);
 }
 // Type Specs
 TypeSpec::TypeSpec()
@@ -2406,13 +2453,13 @@ SyntaxTree::SyntaxTree(MyContext* pContext, const SourceText& Text, const ParseH
 SyntaxTree* SyntaxTree::Load(MyContext* pContext, const std::string_view& Filename)
 {
 	const char* const& lpSource = File::ReadAll(Filename);
-	SourceText Text = SourceText::From(lpSource, Filename);
+	SourceText Text = SourceText::From(lpSource, MyGetCachedString(Filename));
 	return Parse(pContext, Text);
 }
 
 SyntaxTree* SyntaxTree::Parse(MyContext* pContext, const std::string_view& Text)
 {
-	const SourceText st = SourceText::From(Text, "<__main__>");
+	const SourceText st = SourceText::From(Text, MyGetCachedString("<__main__>"));
 	return Parse(pContext, st);
 }
 
@@ -2875,10 +2922,10 @@ Statement* MakeStatement_Return(const Token& ReturnKeyword, Expression* pExpr)
 	return pReturn;
 }
 
-Declaration* MakeDeclaration_Import(const Token& ImportKeyword, const Token& Name)
+Declaration* MakeDeclaration_Import(const Token& ImportKeyword, const Token& Filepath)
 {
 	Declaration* pImport = Allocator::Create<Declaration>(Allocator::Stage::Parser, DeclarationKind::Import);
-	new(&pImport->importdecl) ImportDeclaration{ ImportKeyword, Name };
+	new(&pImport->importdecl) ImportDeclaration{ ImportKeyword, Filepath };
 	return pImport;
 }
 
@@ -3385,7 +3432,7 @@ void PrettyPrint(Declaration* pDecl, const std::string& Indent) noexcept
 		case DeclarationKind::Import:
 		{
 			Console::Write("import ");
-			PrettyPrint(pDecl->importdecl.Name);
+			PrettyPrint(pDecl->importdecl.Filepath);
 			Console::WriteLine(";");
 			break;
 		}

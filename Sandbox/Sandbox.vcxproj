@@ -98,6 +98,11 @@
       <Project>{AB745900-9700-880B-00AF-880BEC59880B}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Samples\Basic.my" />
+    <None Include="Samples\Hello.my" />
+    <None Include="Samples\Script.my" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
