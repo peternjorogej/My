@@ -3486,5 +3486,3 @@ void PrettyPrint(Declaration* pDecl, const std::string& Indent) noexcept
 	}
 }
 #endif // MY_DEBUG
-
-

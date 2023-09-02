@@ -71,6 +71,7 @@ int main()
 
 Error:
 	MyUninitialize(pContext);
+	return 0;
 }
 
 void RegisterEntityType_Native(MyContext* pContext, MyVM* pVM) noexcept
